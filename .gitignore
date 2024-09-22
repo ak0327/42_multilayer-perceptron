@@ -1,7 +1,12 @@
 *
 
 !.gitignore
+!.gitkeep
 !README.md
+
+!srcs
+
+!tests
 
 !data
 !data/data.csv
