@@ -5,6 +5,7 @@
 !README.md
 
 !srcs
+!srcs/*.py
 
 !tests
 
