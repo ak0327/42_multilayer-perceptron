@@ -8,6 +8,7 @@
 !srcs/*.py
 
 !tests
+!tests/*.py
 
 !data
 !data/data.csv
