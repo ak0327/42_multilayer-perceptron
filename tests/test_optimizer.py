@@ -1,5 +1,7 @@
 import pytest
 import numpy as np
+from typing import Any
+
 import torch
 import torch.nn as nn
 from torch import optim
@@ -7,34 +9,42 @@ from torch import optim
 from srcs.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
 
 
-class TestSGD:
-    def _assert_update(self, lr, params, grads):
+class TestOptimizers:
+    def _assert_update(
+            self,
+            original_optimizer_class: type,
+            torch_optimizer_class: type,
+            lr: float,
+            params: dict[str, np.ndarray],
+            grads: dict[str, np.ndarray],
+            optimizer_kwargs: dict[str, Any] = {}
+    ):
         original_error = None
         torch_error = None
 
-        # original SGD
+        # Original optimizer
         try:
-            original_sgd = SGD(lr=lr)
+            original_optimizer = original_optimizer_class(lr=lr, **optimizer_kwargs)
             original_params = {k: v.copy() for k, v in params.items()}
             original_grads = {k: v.copy() for k, v in grads.items()}
-            original_sgd.update(original_params, original_grads)
+            original_optimizer.update(original_params, original_grads)
         except Exception as e:
-            original_error = type(e)
+            original_error = e
 
-        # PyTorch SGD
+        # PyTorch optimizer
         try:
             torch_params = {k: torch.tensor(v, requires_grad=True) for k, v in params.items()}
             torch_grads = {k: torch.tensor(v) for k, v in grads.items()}
-            torch_sgd = optim.SGD(torch_params.values(), lr=lr)
-            torch_sgd.zero_grad()
+            torch_optimizer = torch_optimizer_class(torch_params.values(), lr=lr, **optimizer_kwargs)
+            torch_optimizer.zero_grad()
             for key in torch_params:
                 torch_params[key].grad = torch_grads[key]
-            torch_sgd.step()
+            torch_optimizer.step()
         except Exception as e:
-            torch_error = type(e)
+            torch_error = e
 
         if original_error is None and torch_error is None:
-            # compare
+            # Compare results
             for key in params:
                 np.testing.assert_allclose(
                     original_params[key],
@@ -48,19 +58,37 @@ class TestSGD:
             if type(original_error) != type(torch_error):
                 pytest.fail(
                     f"Inconsistent error handling: "
-                    f"Original SGD raised {type(original_error)}, "
-                    f"PyTorch SGD raised {type(torch_error)}"
+                    f"Original optimizer raised {type(original_error)}, "
+                    f"PyTorch optimizer raised {type(torch_error)}"
                 )
             elif original_error is None:
                 pytest.fail(
-                    "Original SGD did not raise an error, but PyTorch SGD did"
+                    "Original optimizer did not raise an error, but PyTorch optimizer did"
                 )
             elif torch_error is None:
                 pytest.fail(
-                    "PyTorch SGD did not raise an error, but Original SGD did"
+                    "PyTorch optimizer did not raise an error, but Original optimizer did"
                 )
             else:
                 raise original_error
+
+
+class TestSGD(TestOptimizers):
+    def _assert_update(
+            self,
+            lr: float,
+            params: dict[str, np.ndarray],
+            grads: dict[str, np.ndarray],
+            optimizer_kwargs: dict[str, Any] = {}
+    ):
+        super()._assert_update(
+            original_optimizer_class=SGD,
+            torch_optimizer_class=optim.SGD,
+            lr=lr,
+            params=params,
+            grads=grads,
+            optimizer_kwargs=optimizer_kwargs
+        )
 
     def test_sgd_single_param(self):
         lr = 0.1
