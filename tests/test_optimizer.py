@@ -92,24 +92,22 @@ class TestSGD(TestOptimizers):
             optimizer_kwargs=optimizer_kwargs
         )
 
-    def test_sgd_single_param(self):
+    def test_single_param(self):
         lr = 0.1
         params = {'w': np.array([1.0, 2.0, 3.0])}
         grads = {'w': np.array([0.1, 0.2, 0.3])}
         self._assert_update(lr, params, grads)
 
     @pytest.mark.parametrize("lr", [
-        1e-10, 0.001, 0.01, 0.1, 1.0, 1e10, np.finfo(np.float32).max
-    ])
-    def test_sgd_invalid_learning_rates(self, lr):
+        1e-10, 0.001, 0.01, 0.1, 1.0, 1e10, np.finfo(np.float32).max])
+    def test_valid_lr(self, lr):
         params = {'w': np.array([1.0, 2.0, 3.0])}
         grads = {'w': np.array([0.1, 0.2, 0.3])}
         self._assert_update(lr, params, grads)
 
     @pytest.mark.parametrize("lr", [
-        0, np.nan, np.inf
-    ])
-    def test_sgd_invalid_learning_rates(self, lr):
+        0, np.nan, np.inf])
+    def test_special_lr(self, lr):
         params = {'w': np.array([1.0, 2.0, 3.0])}
         grads = {'w': np.array([0.1, 0.2, 0.3])}
         self._assert_update(lr, params, grads)
@@ -118,23 +116,24 @@ class TestSGD(TestOptimizers):
         np.finfo(np.float64).min,   # 最小の負の値
         -np.inf,                    # 負の無限大
         -1,                         # 通常の負の値
-        np.nextafter(0, -1),        # ゼロに最も近い負の値
-    ])
-    def test_sgd_invalid_learning_rates(self, lr):
+        np.nextafter(0, -1)])      # ゼロに最も近い負の値
+    def test_invalid_lr(self, lr):
         with pytest.raises(ValueError):
             params = {'w': np.array([1.0, 2.0, 3.0])}
             grads = {'w': np.array([0.1, 0.2, 0.3])}
             self._assert_update(lr, params, grads)
 
-    def test_sgd_multiple_params(self):
+    def test_multiple_params(self):
         lr = 0.01
         params = {
             'w1': np.array([[0.1, 0.2], [0.3, 0.4]]),
-            'w2': np.array([0.5, 0.6])
+            'w2': np.array([0.5, 0.6]),
+            'w3': np.array([-0.2, 1.5])
         }
         grads = {
             'w1': np.array([[0.01, 0.02], [0.03, 0.04]]),
-            'w2': np.array([0.05, 0.06])
+            'w2': np.array([0.05, 0.06]),
+            'w3': np.array([-0.02, 0.09])
         }
         self._assert_update(lr, params, grads)
 
@@ -145,9 +144,8 @@ class TestSGD(TestOptimizers):
         ([1.0, np.inf, -np.inf] , "inf_values"),
         ([1.0, np.nan, 3.0]     , "nan_values"),
         ([1.0, np.nan, 3.0]     , "nan_values"),
-        ([0.0, 0.0, 0.0]        , "zero_params"),
-    ])
-    def test_sgd_params(self, params, case_id):
+        ([0.0, 0.0, 0.0]        , "zero_params")])
+    def test_params(self, params, case_id):
         lr = 0.1
         grads = [1.0, 1.0, 1.0]
         self._assert_update(
@@ -163,9 +161,8 @@ class TestSGD(TestOptimizers):
         ([1.0, np.inf, -np.inf] , "inf_values"),
         ([1.0, np.nan, 3.0]     , "nan_values"),
         ([1.0, np.nan, 3.0]     , "nan_values"),
-        ([0.0, 0.0, 0.0]        , "zero_params"),
-    ])
-    def test_sgd_grads(self, grads, case_id):
+        ([0.0, 0.0, 0.0]        , "zero_params"),])
+    def test_grads(self, grads, case_id):
         lr = 0.1
         params = [1.0, 2.0, 3.0]
         self._assert_update(
