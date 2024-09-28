@@ -29,6 +29,12 @@ class Momentum:
             lr: float = 0.01,
             momentum: float = 0.9
     ):
+        if lr < 0.0:
+            raise ValueError(f"Invalid learning rate: {lr}")
+
+        if momentum < 0.0:
+            raise ValueError(f"Invalid momentum value: {momentum}")
+
         self.lr = lr
         self.momentum = momentum
         self.v = None
@@ -40,12 +46,12 @@ class Momentum:
     ) -> None:
         if self.v is None:
             self.v = {}
-            for key, val in params:
+            for key, val in params.items():
                 self.v[key] = np.zeros_like(val)
 
         for key in params.keys():
             self.v[key] = self.momentum * self.v[key] - self.lr * grads[key]
-            params[key] -= self.v[key]
+            params[key] += self.v[key]
 
 
 class Nesterov:

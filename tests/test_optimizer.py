@@ -30,6 +30,7 @@ class TestOptimizers:
             original_optimizer.update(original_params, original_grads)
         except Exception as e:
             original_error = e
+            print(f"Original optimizer error: {e}")
 
         # PyTorch optimizer
         try:
@@ -42,6 +43,7 @@ class TestOptimizers:
             torch_optimizer.step()
         except Exception as e:
             torch_error = e
+            print(f"PyTorch optimizer error: {e}")
 
         if original_error is None and torch_error is None:
             # Compare results
@@ -171,3 +173,100 @@ class TestSGD(TestOptimizers):
             params={'w': np.array(params)},
             grads={'w': np.array(grads)}
         )
+
+
+class TestMomentum(TestOptimizers):
+    def _assert_update(
+            self,
+            lr: float,
+            params: dict[str, np.ndarray],
+            grads: dict[str, np.ndarray],
+            momentum: float = 0.0,
+    ):
+        super()._assert_update(
+            original_optimizer_class=Momentum,
+            torch_optimizer_class=optim.SGD,
+            lr=lr,
+            params=params,
+            grads=grads,
+            optimizer_kwargs={'momentum': momentum}
+        )
+
+    def test_momentum_single_param(self):
+        lr = 0.1
+        params = {'w': np.array([1.0, 2.0, 3.0])}
+        grads = {'w': np.array([0.1, 0.2, 0.3])}
+        self._assert_update(lr, params, grads)
+
+    @pytest.mark.parametrize("momentum", [
+        1e-10, 0.001, 0.01, 0.1, 1.0, 1e10, np.finfo(np.float32).max
+    ])
+    def test_sgd_invalid_learning_rates(self, momentum):
+        lr = 0.01
+        params = {'w': np.array([1.0, 2.0, 3.0])}
+        grads = {'w': np.array([0.1, 0.2, 0.3])}
+        self._assert_update(lr, params, grads, momentum)
+
+    @pytest.mark.parametrize("momentum", [
+        0, np.nan, np.inf
+    ])
+    def test_sgd_invalid_learning_rates(self, momentum):
+        lr = 0.01
+        params = {'w': np.array([1.0, 2.0, 3.0])}
+        grads = {'w': np.array([0.1, 0.2, 0.3])}
+        self._assert_update(lr, params, grads, momentum)
+
+    @pytest.mark.parametrize("momentum", [
+        np.finfo(np.float64).min,   # 最小の負の値
+        -np.inf,                    # 負の無限大
+        -1,                         # 通常の負の値
+        np.nextafter(0, -1),        # ゼロに最も近い負の値
+    ])
+    def test_sgd_invalid_learning_rates(self, momentum):
+        with pytest.raises(ValueError):
+            lr = 0.01
+            params = {'w': np.array([1.0, 2.0, 3.0])}
+            grads = {'w': np.array([0.1, 0.2, 0.3])}
+            self._assert_update(lr, params, grads, momentum)
+
+    @pytest.mark.parametrize("params, case_id", [
+        ([1e10, 1e15, 1e20]     , "very_large_values"),
+        ([1e-10, 1e-15, 1e-20]  , "very_small_values"),
+        ([1e-10, 1.0, 1e10]     , "mixed_large_and_small_values"),
+        ([1.0, np.inf, -np.inf] , "inf_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([0.0, 0.0, 0.0]        , "zero_params"),
+    ])
+    def test_sgd_params(self, params, case_id):
+        lr = 0.1
+        momentums = [1e-10, 0.01, 1e10]
+        grads = [1.0, 1.0, 1.0]
+        for momentum in momentums:
+            self._assert_update(
+                lr=lr,
+                params={'w': np.array(params)},
+                grads={'w': np.array(grads)},
+                momentum=momentum
+            )
+
+    @pytest.mark.parametrize("grads, case_id", [
+        ([1e10, 1e15, 1e20]     , "very_large_values"),
+        ([1e-10, 1e-15, 1e-20]  , "very_small_values"),
+        ([1e-10, 1.0, 1e10]     , "mixed_large_and_small_values"),
+        ([1.0, np.inf, -np.inf] , "inf_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([0.0, 0.0, 0.0]        , "zero_params"),
+    ])
+    def test_sgd_grads(self, grads, case_id):
+        lr = 0.1
+        momentums = [1e-10, 0.01, 1e10]
+        params = [1.0, 2.0, 3.0]
+        for momentum in momentums:
+            self._assert_update(
+                lr=lr,
+                params={'w': np.array(params)},
+                grads={'w': np.array(grads)},
+                momentum=momentum
+            )
