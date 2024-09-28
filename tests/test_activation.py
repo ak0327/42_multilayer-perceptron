@@ -9,7 +9,7 @@ from srcs.activation import ReLU, Sigmoid
 class TestReLU:
     def _assert_forward(self, x, expected_output):
         _relu = ReLU()
-        _actual_output = _relu.forward(x)
+        _actual_output = _relu(x)
         np.testing.assert_array_equal(_actual_output, expected_output)
 
         _torch_relu = nn.ReLU()
@@ -22,7 +22,7 @@ class TestReLU:
         _expected_grad = np.where(0 < x, _dout, 0)
 
         _relu = ReLU()
-        _relu.forward(x)
+        _relu(x)
         _actual_grad = _relu.backward(_dout)
         np.testing.assert_array_equal(_actual_grad, _expected_grad)
 
@@ -75,7 +75,7 @@ class TestReLU:
 class TestSigmoid:
     def _assert_forward(self, x):
         _relu = Sigmoid()
-        _actual_output = _relu.forward(x)
+        _actual_output = _relu(x)
 
         _torch_sigmoid = nn.Sigmoid()
         _torch_x = torch.tensor(x, dtype=torch.float32)
@@ -86,7 +86,7 @@ class TestSigmoid:
         _dout = np.arange(len(x), dtype=np.float32)
 
         _relu = Sigmoid()
-        _relu.forward(x)
+        _relu(x)
         _actual_grad = _relu.backward(_dout)
 
         _torch_sigmoid = nn.Sigmoid()

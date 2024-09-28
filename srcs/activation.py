@@ -5,7 +5,7 @@ class ReLU():
     def __init__(self):
         self.mask = None
 
-    def forward(self, x: np.ndarray):
+    def __call__(self, x: np.ndarray):
         """
         out = 0 (x <= 0)
         out = x (0 < x)
@@ -29,7 +29,7 @@ class Sigmoid():
     def __init__(self):
         self.out = None
 
-    def forward(self, x: np.ndarray):
+    def __call__(self, x: np.ndarray):
         """
         return 1 / (1 + np.exp(-x))
         x < 0 の時、exp(-x) = inf -> sigmoid(x) = nanになる可能性がある
