@@ -60,7 +60,10 @@ class Momentum:
                     self.v[key] = np.zeros_like(val)
 
             for key in params.keys():
-                self.v[key] = self.momentum * self.v[key] - self.lr * grads[key]
+                if np.isnan(self.momentum) or np.isinf(self.momentum):
+                    self.v[key] = -self.lr * grads[key]
+                else:
+                    self.v[key] = self.momentum * self.v[key] - self.lr * grads[key]
                 params[key] += self.v[key]
 
 

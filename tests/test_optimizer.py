@@ -172,7 +172,7 @@ class TestSGD(TestOptimizers):
         )
 
 
-class TestMomentum(TestOptimizers):
+class TestMomentum(TestSGD):
     def _assert_update(
             self,
             lr: float,
@@ -183,7 +183,8 @@ class TestMomentum(TestOptimizers):
     ):
         if nesterov and momentum == 0.0:
             with pytest.raises(ValueError, match="Nesterov momentum requires a momentum and zero dampening"):
-                super()._assert_update(
+                TestOptimizers._assert_update(
+                    self,
                     original_optimizer_class=Momentum,
                     torch_optimizer_class=optim.SGD,
                     lr=lr,
@@ -192,7 +193,8 @@ class TestMomentum(TestOptimizers):
                     optimizer_kwargs={'momentum': momentum, 'nesterov': nesterov}
                 )
         else:
-            super()._assert_update(
+            TestOptimizers._assert_update(
+                self,
                 original_optimizer_class=Momentum,
                 torch_optimizer_class=optim.SGD,
                 lr=lr,
@@ -201,25 +203,23 @@ class TestMomentum(TestOptimizers):
                 optimizer_kwargs={'momentum': momentum, 'nesterov': nesterov}
             )
 
-    def test_momentum_single_param(self):
+    def test_single_param(self):
         lr = 0.1
         params = {'w': np.array([1.0, 2.0, 3.0])}
         grads = {'w': np.array([0.1, 0.2, 0.3])}
         self._assert_update(lr, params, grads)
 
     @pytest.mark.parametrize("momentum", [
-        1e-10, 0.001, 0.01, 0.1, 1.0, 1e10, np.finfo(np.float32).max
-    ])
-    def test_sgd_invalid_learning_rates(self, momentum):
+        1e-10, 0.001, 0.01, 0.1, 1.0, 1e10, np.finfo(np.float32).max])
+    def test_invalid_momentum(self, momentum):
         lr = 0.01
         params = {'w': np.array([1.0, 2.0, 3.0])}
         grads = {'w': np.array([0.1, 0.2, 0.3])}
         self._assert_update(lr, params, grads, momentum)
 
     @pytest.mark.parametrize("momentum", [
-        0, np.nan, np.inf
-    ])
-    def test_sgd_invalid_learning_rates(self, momentum):
+        0, np.nan, np.inf])
+    def test_special_momentum(self, momentum):
         lr = 0.01
         params = {'w': np.array([1.0, 2.0, 3.0])}
         grads = {'w': np.array([0.1, 0.2, 0.3])}
@@ -229,9 +229,8 @@ class TestMomentum(TestOptimizers):
         np.finfo(np.float64).min,   # 最小の負の値
         -np.inf,                    # 負の無限大
         -1,                         # 通常の負の値
-        np.nextafter(0, -1),        # ゼロに最も近い負の値
-    ])
-    def test_sgd_invalid_learning_rates(self, momentum):
+        np.nextafter(0, -1)])       # ゼロに最も近い負の値
+    def test_momentum_invalid_momentum(self, momentum):
         with pytest.raises(ValueError):
             lr = 0.01
             params = {'w': np.array([1.0, 2.0, 3.0])}
@@ -245,9 +244,8 @@ class TestMomentum(TestOptimizers):
         ([1.0, np.inf, -np.inf] , "inf_values"),
         ([1.0, np.nan, 3.0]     , "nan_values"),
         ([1.0, np.nan, 3.0]     , "nan_values"),
-        ([0.0, 0.0, 0.0]        , "zero_params"),
-    ])
-    def test_sgd_params(self, params, case_id):
+        ([0.0, 0.0, 0.0]        , "zero_params")])
+    def test_params(self, params, case_id):
         lr = 0.1
         momentums = [1e-10, 0.01, 1e10]
         grads = [1.0, 1.0, 1.0]
@@ -266,9 +264,8 @@ class TestMomentum(TestOptimizers):
         ([1.0, np.inf, -np.inf] , "inf_values"),
         ([1.0, np.nan, 3.0]     , "nan_values"),
         ([1.0, np.nan, 3.0]     , "nan_values"),
-        ([0.0, 0.0, 0.0]        , "zero_params"),
-    ])
-    def test_sgd_grads(self, grads, case_id):
+        ([0.0, 0.0, 0.0]        , "zero_params")])
+    def test_grads(self, grads, case_id):
         lr = 0.1
         momentums = [1e-10, 0.01, 1e10]
         params = [1.0, 2.0, 3.0]
