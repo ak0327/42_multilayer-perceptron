@@ -4,6 +4,10 @@
 !.gitkeep
 !README.md
 
+!.github
+!.github/workflows
+!.github/workflows/utest.yml
+
 !srcs
 !srcs/*.py
 
@@ -12,3 +16,5 @@
 
 !data
 !data/data.csv
+
+!requirements.txt
