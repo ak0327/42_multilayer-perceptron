@@ -27,7 +27,8 @@ class Momentum:
     def __init__(
             self,
             lr: float = 0.01,
-            momentum: float = 0.9
+            momentum: float = 0.9,
+            nesterov: bool = False
     ):
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
@@ -37,6 +38,12 @@ class Momentum:
 
         self.lr = lr
         self.momentum = momentum
+
+        if nesterov:
+            self.optimizer = Nesterov(lr=lr, momentum=momentum)
+        else:
+            self.optimizer = self
+
         self.v = None
 
     def update(
@@ -44,14 +51,17 @@ class Momentum:
             params: dict[str, np.ndarray],
             grads: dict[str, np.ndarray]
     ) -> None:
-        if self.v is None:
-            self.v = {}
-            for key, val in params.items():
-                self.v[key] = np.zeros_like(val)
+        if isinstance(self.optimizer, Nesterov):
+            self.optimizer.update(params, grads)
+        else:
+            if self.v is None:
+                self.v = {}
+                for key, val in params.items():
+                    self.v[key] = np.zeros_like(val)
 
-        for key in params.keys():
-            self.v[key] = self.momentum * self.v[key] - self.lr * grads[key]
-            params[key] += self.v[key]
+            for key in params.keys():
+                self.v[key] = self.momentum * self.v[key] - self.lr * grads[key]
+                params[key] += self.v[key]
 
 
 class Nesterov:
@@ -63,6 +73,9 @@ class Nesterov:
             lr: float = 0.01,
             momentum: float = 0.9
     ):
+        if momentum == 0.0:
+            raise ValueError(f"Nesterov momentum requires a momentum and zero dampening")
+
         self.lr = lr
         self.momentum = momentum
         self. v = None

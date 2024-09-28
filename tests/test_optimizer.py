@@ -182,15 +182,27 @@ class TestMomentum(TestOptimizers):
             params: dict[str, np.ndarray],
             grads: dict[str, np.ndarray],
             momentum: float = 0.0,
+            nesterov: bool = False
     ):
-        super()._assert_update(
-            original_optimizer_class=Momentum,
-            torch_optimizer_class=optim.SGD,
-            lr=lr,
-            params=params,
-            grads=grads,
-            optimizer_kwargs={'momentum': momentum}
-        )
+        if nesterov and momentum == 0.0:
+            with pytest.raises(ValueError, match="Nesterov momentum requires a momentum and zero dampening"):
+                super()._assert_update(
+                    original_optimizer_class=Momentum,
+                    torch_optimizer_class=optim.SGD,
+                    lr=lr,
+                    params=params,
+                    grads=grads,
+                    optimizer_kwargs={'momentum': momentum, 'nesterov': nesterov}
+                )
+        else:
+            super()._assert_update(
+                original_optimizer_class=Momentum,
+                torch_optimizer_class=optim.SGD,
+                lr=lr,
+                params=params,
+                grads=grads,
+                optimizer_kwargs={'momentum': momentum, 'nesterov': nesterov}
+            )
 
     def test_momentum_single_param(self):
         lr = 0.1
@@ -270,3 +282,20 @@ class TestMomentum(TestOptimizers):
                 grads={'w': np.array(grads)},
                 momentum=momentum
             )
+
+
+class TestNesterov(TestMomentum):
+    def _assert_update(
+            self,
+            lr: float,
+            params: dict[str, np.ndarray],
+            grads: dict[str, np.ndarray],
+            momentum: float = 0.0
+    ):
+        super()._assert_update(
+            lr=lr,
+            params=params,
+            grads=grads,
+            momentum=momentum,
+            nesterov=True
+        )
