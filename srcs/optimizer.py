@@ -107,6 +107,9 @@ class AdaGrad:
             lr: float = 0.01,
             epsilon: float = 1e-7
     ):
+        if lr < 0.0:
+            raise ValueError(f"Invalid learning rate: {lr}")
+
         self.lr = lr
         self.h = None
         self.epsilon = epsilon
