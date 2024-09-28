@@ -6,6 +6,8 @@ class SGD:
     θ(t+1) = θ(t) - η * ∂L/∂θ(t)
     """
     def __init__(self, lr: float = 0.01):
+        if lr < 0.0:
+            raise ValueError(f"Invalid learning rate: {lr}")
         self.lr = lr
 
     def update(
