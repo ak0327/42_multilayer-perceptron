@@ -29,6 +29,7 @@ class TestSoftmax:
         np.array([-1e10, -1e100, -1e200]),
         np.array([[1, 2], [3, 4]]),
         np.array([[1, 2, 3], [4, 5, 6]]),
+        np.array([[1, 2], [3, 4], [5, 6], [7, 8]]),
         np.array([1e-300, 1e-200, 1e-100]),
     ])
     def test_valid_x(self, x):
