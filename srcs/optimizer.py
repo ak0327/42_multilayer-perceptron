@@ -183,13 +183,21 @@ class Adam:
     def __init__(
             self,
             lr: float = 0.01,
-            beta1: float = 0.9,
-            beta2: float = 0.999,
-            epsilon: float = 1e-7
+            betas: tuple[float, float] = (0.9, 0.999),
+            epsilon: float = 1e-8
     ):
+        if lr < 0.0 or np.isnan(lr):
+            raise ValueError(f"Invalid learning rate: {lr}")
+        if len(betas) != 2:
+            raise ValueError(f"Invalid beta parameter: Must be a two floats")
+        if not (0.0 <= betas[0] < 1.0):
+            raise ValueError(f"Invalid beta parameter at index 0: {betas[0]}")
+        if not (0.0 <= betas[1] < 1.0):
+            raise ValueError(f"Invalid beta parameter at index 1: {betas[1]}")
+
         self.lr = lr
-        self.beta1 = beta1
-        self.beta2 = beta2
+        self.beta1 = betas[0]
+        self.beta2 = betas[1]
         self.iter = 0
         self.m = None
         self.v = None
