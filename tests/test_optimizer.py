@@ -17,6 +17,7 @@ class TestOptimizers:
             lr: float,
             params: dict[str, np.ndarray],
             grads: dict[str, np.ndarray],
+            original_raise: bool = False,
             optimizer_kwargs: dict[str, Any] = {}
     ):
         original_error = None
@@ -44,6 +45,9 @@ class TestOptimizers:
         except Exception as e:
             torch_error = e
             print(f"PyTorch optimizer error: {e}")
+
+        if original_raise and original_error:
+            raise original_error
 
         if original_error is None and torch_error is None:
             # Compare results
@@ -319,3 +323,110 @@ class TestAdaGrad(TestSGD):
             params={'w': np.array(params)},
             grads={'w': np.array(grads)}
         )
+
+
+class TestRMSProp(TestSGD):
+    def _assert_update(
+            self,
+            lr: float,
+            params: dict[str, np.ndarray],
+            grads: dict[str, np.ndarray],
+            original_raise: bool = False,
+            alpha: float = 0.99
+    ):
+        TestOptimizers._assert_update(
+            self,
+            original_optimizer_class=RMSProp,
+            torch_optimizer_class=optim.RMSprop,
+            lr=lr,
+            params=params,
+            grads=grads,
+            original_raise=original_raise,
+            optimizer_kwargs={'alpha': alpha}
+        )
+
+    @pytest.mark.parametrize("grads, case_id", [
+        ([1e10, 1e15, 1e20]     , "very_large_values"),
+        ([1e-10, 1e-15, 1e-20]  , "very_small_values"),
+        ([1e-10, 1.0, 1e10]     , "mixed_large_and_small_values"),
+        # ([1.0, np.inf, -np.inf] , "inf_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([0.0, 0.0, 0.0]        , "zero_params")])
+    def test_grads(self, grads, case_id):
+        lr = 0.1
+        params = [1.0, 2.0, 3.0]
+        self._assert_update(
+            lr=lr,
+            params={'w': np.array(params)},
+            grads={'w': np.array(grads)}
+        )
+
+    @pytest.mark.parametrize("alpha", [
+        0.0, 1e-100, 1e-10, 0.001, 0.01, 0.1, 0.5, 0.9, 0.99999
+    ])
+    def test_rmsprop_alpha_less_than_1(self, alpha):
+        lr = 0.01
+        params = {'w': np.array([1.0, 2.0, 3.0])}
+        grads = {'w': np.array([0.1, 0.2, 0.3])}
+        self._assert_update(lr, params, grads, alpha)
+
+    @pytest.mark.parametrize("alpha", [
+        np.finfo(np.float64).min,   # 最小の負の値
+        -np.inf,                    # 負の無限大
+        -1,                         # 通常の負の値
+        np.nextafter(0, -1),        # ゼロに最も近い負の値
+        1.0,                        # 1.0以上の値
+        10.0,
+        np.inf,
+        np.nan,
+    ])
+    def test_rmsprop_invalid_alpha(self, alpha):
+        with pytest.raises(ValueError):
+            original_raise = True
+            lr = 0.01
+            params = {'w': np.array([1.0, 2.0, 3.0])}
+            grads = {'w': np.array([0.1, 0.2, 0.3])}
+            self._assert_update(lr, params, grads, original_raise, alpha)
+
+    @pytest.mark.parametrize("params, case_id", [
+        ([1e10, 1e15, 1e20]     , "very_large_values"),
+        ([1e-10, 1e-15, 1e-20]  , "very_small_values"),
+        ([1e-10, 1.0, 1e10]     , "mixed_large_and_small_values"),
+        ([1.0, np.inf, -np.inf] , "inf_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([0.0, 0.0, 0.0]        , "zero_params"),
+    ])
+    def test_rmsprop_params(self, params, case_id):
+        lr = 0.1
+        alphas = [0, 1e-100, 1e-10, 0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.99999]
+        grads = [1.0, 1.0, 1.0]
+        for alpha in alphas:
+            self._assert_update(
+                lr=lr,
+                params={'w': np.array(params)},
+                grads={'w': np.array(grads)},
+                alpha=alpha
+            )
+
+    @pytest.mark.parametrize("grads, case_id", [
+        ([1e10, 1e15, 1e20]     , "very_large_values"),
+        ([1e-10, 1e-15, 1e-20]  , "very_small_values"),
+        ([1e-10, 1.0, 1e10]     , "mixed_large_and_small_values"),
+        # ([1.0, np.inf, -np.inf] , "inf_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([0.0, 0.0, 0.0]        , "zero_params"),
+    ])
+    def test_rmsprop_grads(self, grads, case_id):
+        lr = 0.1
+        alphas = [0, 1e-100, 1e-10, 0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.99999]
+        params = [1.0, 2.0, 3.0]
+        for alpha in alphas:
+            self._assert_update(
+                lr=lr,
+                params={'w': np.array(params)},
+                grads={'w': np.array(grads)},
+                alpha=alpha
+            )

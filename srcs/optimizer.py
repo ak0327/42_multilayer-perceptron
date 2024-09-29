@@ -136,16 +136,22 @@ class AdaGrad:
 class RMSProp:
     """
     θ(t+1) = θ(t) - η / sqrt(h(t+1)) * ∂L/∂θ(t)
-    h(t+1) = ρ * h(t) + (1 - ρ) * ∂L/∂θ(t) @ ∂L/∂θ(t)
+    h(t+1) = ρ * h(t) + (1 - ρ) * ( ∂L/∂θ(t) )^2
     """
     def __init__(
             self,
             lr: float = 0.01,
-            decay_rate: float = 0.99,
-            epsilon: float = 1e-7
+            alpha: float = 0.99,
+            epsilon: float = 1e-8
     ):
+        if lr < 0.0 or np.isnan(lr):
+            raise ValueError(f"Invalid learning rate: {lr}")
+
+        if not (0.0 <= alpha < 1.0) or np.isnan(alpha):
+            raise ValueError(f"Invalid alpha value: {alpha}. Must be in [0, 1).")
+
         self.lr = lr
-        self.decay_rate = decay_rate
+        self.alpha = alpha
         self.h = None
         self.epsilon = epsilon
 
@@ -157,13 +163,13 @@ class RMSProp:
         if self.h is None:
             self.h = {}
             for key, val in params.items():
-                self.h[key] = np.zeros_like(val)
+                self.h[key] = np.zeros_like(val, dtype=val.dtype)
 
         for key in params.keys():
-            self.h[key] *= self.decay_rate
-            self.h[key] = (1 - self.decay_rate) * grads[key] * grads[key]
-            sqrt_h = np.sqrt(self.h[key]) + self.epsilon
-            params[key] -= self.lr / sqrt_h * grads[key]
+            self.h[key] *= self.alpha
+            self.h[key] += (1 - self.alpha) * grads[key] ** 2
+            adjusted_lr = self.lr / (np.sqrt(self.h[key]) + self.epsilon)
+            params[key] -= adjusted_lr * grads[key]
 
 
 class Adam:
