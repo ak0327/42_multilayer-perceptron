@@ -452,6 +452,15 @@ class TestAdam(TestSGD):
             optimizer_kwargs={'betas': betas}
         )
 
+    @pytest.mark.parametrize("lr", [
+        1e-10, 0.001, 0.01, 0.1, 1.0, 1e10,
+        # np.finfo(np.float32).max  # 不安定
+    ])
+    def test_valid_lr(self, lr):
+        params = {'w': np.array([1.0, 2.0, 3.0])}
+        grads = {'w': np.array([0.1, 0.2, 0.3])}
+        self._assert_update(lr, params, grads)
+
     @pytest.mark.parametrize("grads, case_id", [
         ([1e10, 1e15, 1e20]     , "very_large_values"),
         ([1e-10, 1e-15, 1e-20]  , "very_small_values"),
