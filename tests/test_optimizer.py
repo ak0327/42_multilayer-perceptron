@@ -56,23 +56,16 @@ class TestOptimizers:
                     err_msg=f"Mismatch in parameter {key}"
                 )
         else:
-            # Exception handling
-            if type(original_error) != type(torch_error):
-                pytest.fail(
-                    f"Inconsistent error handling: "
-                    f"Original optimizer raised {type(original_error)}, "
-                    f"PyTorch optimizer raised {type(torch_error)}"
-                )
-            elif original_error is None:
-                pytest.fail(
-                    "Original optimizer did not raise an error, but PyTorch optimizer did"
-                )
-            elif torch_error is None:
-                pytest.fail(
-                    "PyTorch optimizer did not raise an error, but Original optimizer did"
-                )
-            else:
-                raise original_error
+            # Compare the exception types and messages
+            assert type(original_error) == type(torch_error), \
+                f"Inconsistent error types: " \
+                f"Original optimizer raised {type(original_error)}," \
+                f" PyTorch optimizer raised {type(torch_error)}"
+
+            assert str(original_error) == str(torch_error), \
+                f"Inconsistent error messages: " \
+                f"Original optimizer message: {original_error}, " \
+                f"PyTorch optimizer message: {torch_error}"
 
 
 class TestSGD(TestOptimizers):
@@ -118,10 +111,9 @@ class TestSGD(TestOptimizers):
         -1,                         # 通常の負の値
         np.nextafter(0, -1)])      # ゼロに最も近い負の値
     def test_invalid_lr(self, lr):
-        with pytest.raises(ValueError):
-            params = {'w': np.array([1.0, 2.0, 3.0])}
-            grads = {'w': np.array([0.1, 0.2, 0.3])}
-            self._assert_update(lr, params, grads)
+        params = {'w': np.array([1.0, 2.0, 3.0])}
+        grads = {'w': np.array([0.1, 0.2, 0.3])}
+        self._assert_update(lr, params, grads)
 
     def test_multiple_params(self):
         lr = 0.01
@@ -181,27 +173,15 @@ class TestMomentum(TestSGD):
             momentum: float = 0.0,
             nesterov: bool = False
     ):
-        if nesterov and momentum == 0.0:
-            with pytest.raises(ValueError, match="Nesterov momentum requires a momentum and zero dampening"):
-                TestOptimizers._assert_update(
-                    self,
-                    original_optimizer_class=Momentum,
-                    torch_optimizer_class=optim.SGD,
-                    lr=lr,
-                    params=params,
-                    grads=grads,
-                    optimizer_kwargs={'momentum': momentum, 'nesterov': nesterov}
-                )
-        else:
-            TestOptimizers._assert_update(
-                self,
-                original_optimizer_class=Momentum,
-                torch_optimizer_class=optim.SGD,
-                lr=lr,
-                params=params,
-                grads=grads,
-                optimizer_kwargs={'momentum': momentum, 'nesterov': nesterov}
-            )
+        TestOptimizers._assert_update(
+            self,
+            original_optimizer_class=Momentum,
+            torch_optimizer_class=optim.SGD,
+            lr=lr,
+            params=params,
+            grads=grads,
+            optimizer_kwargs={'momentum': momentum, 'nesterov': nesterov}
+        )
 
     def test_single_param(self):
         lr = 0.1
@@ -231,11 +211,10 @@ class TestMomentum(TestSGD):
         -1,                         # 通常の負の値
         np.nextafter(0, -1)])       # ゼロに最も近い負の値
     def test_momentum_invalid_momentum(self, momentum):
-        with pytest.raises(ValueError):
-            lr = 0.01
-            params = {'w': np.array([1.0, 2.0, 3.0])}
-            grads = {'w': np.array([0.1, 0.2, 0.3])}
-            self._assert_update(lr, params, grads, momentum)
+        lr = 0.01
+        params = {'w': np.array([1.0, 2.0, 3.0])}
+        grads = {'w': np.array([0.1, 0.2, 0.3])}
+        self._assert_update(lr, params, grads, momentum)
 
     @pytest.mark.parametrize("params, case_id", [
         ([1e10, 1e15, 1e20]     , "very_large_values"),
