@@ -5,12 +5,13 @@ import torch
 import torch.nn.functional as F
 from torch import optim
 
-from srcs.functions import softmax
+from srcs.functions import Softmax
 
 
 class TestSoftmax:
     def _assert_softmax(self, x):
         # original
+        softmax = Softmax()
         actual = softmax(x)
 
         # PyTorch
@@ -55,6 +56,7 @@ class TestSoftmax:
 
     def test_empty(self):
         x = np.array([])
+        softmax = Softmax()
         result = softmax(x)
         assert result.size == 0, "Result should be an empty array"
 
