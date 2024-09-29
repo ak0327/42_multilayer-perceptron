@@ -108,9 +108,9 @@ class AdaGrad:
     def __init__(
             self,
             lr: float = 0.01,
-            epsilon: float = 1e-7
+            epsilon: float = 1e-10
     ):
-        if lr < 0.0:
+        if lr < 0.0 or np.isnan(lr):
             raise ValueError(f"Invalid learning rate: {lr}")
 
         self.lr = lr
@@ -128,9 +128,9 @@ class AdaGrad:
                 self.h[key] = np.zeros_like(val)
 
         for key in params.keys():
-            self.h[key] += grads[key] * grads[key]
-            sqrt_h = np.sqrt(self.h[key]) + self.epsilon
-            params[key] -= self.lr / sqrt_h * grads[key]
+            self.h[key] += grads[key] ** 2
+            adjusted_lr = self.lr / (np.sqrt(self.h[key]) + self.epsilon)
+            params[key] -= adjusted_lr * grads[key]
 
 
 class RMSProp:

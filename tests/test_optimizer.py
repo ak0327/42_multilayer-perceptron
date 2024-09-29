@@ -303,9 +303,19 @@ class TestAdaGrad(TestSGD):
             optimizer_kwargs=optimizer_kwargs
         )
 
-    def setup_method(self, method):
-        """
-        数値的に不安定なためスキップ
-        """
-        if method.__name__ in ["test_sgd_grads"]:
-            pytest.skip(f"Skipping {method.__name__} due to known issue")
+    @pytest.mark.parametrize("grads, case_id", [
+        ([1e10, 1e15, 1e20]     , "very_large_values"),
+        ([1e-10, 1e-15, 1e-20]  , "very_small_values"),
+        ([1e-10, 1.0, 1e10]     , "mixed_large_and_small_values"),
+        # ([1.0, np.inf, -np.inf] , "inf_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([1.0, np.nan, 3.0]     , "nan_values"),
+        ([0.0, 0.0, 0.0]        , "zero_params")])
+    def test_grads(self, grads, case_id):
+        lr = 0.1
+        params = [1.0, 2.0, 3.0]
+        self._assert_update(
+            lr=lr,
+            params={'w': np.array(params)},
+            grads={'w': np.array(grads)}
+        )
