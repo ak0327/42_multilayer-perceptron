@@ -273,6 +273,17 @@ class TestNesterov(TestMomentum):
             nesterov=True
         )
 
+    @pytest.mark.parametrize("momentum", [
+        0,
+        np.nan,
+        # np.inf  # skip
+    ])
+    def test_special_momentum(self, momentum):
+        lr = 0.01
+        params = {'w': np.array([1.0, 2.0, 3.0])}
+        grads = {'w': np.array([0.1, 0.2, 0.3])}
+        self._assert_update(lr, params, grads, momentum)
+
 
 class TestAdaGrad(TestSGD):
     def _assert_update(
