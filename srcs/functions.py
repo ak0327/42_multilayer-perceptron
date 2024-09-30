@@ -15,3 +15,7 @@ class Softmax:
 
     def backward(self, x: np.ndarray):
         return self(x) * (1 - self(x))
+
+
+def np_log(x):
+    return np.log(np.clip(x, 1e-10, 1e+10))
