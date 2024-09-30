@@ -163,7 +163,7 @@ class RMSProp:
         if self.h is None:
             self.h = {}
             for key, val in params.items():
-                self.h[key] = np.zeros_like(val, dtype=val.dtype)
+                self.h[key] = np.zeros_like(val)
 
         for key in params.keys():
             self.h[key] *= self.alpha
