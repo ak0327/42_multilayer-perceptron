@@ -13,5 +13,5 @@ class Softmax:
         exp_x = np.exp(x)
         return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
 
-    def derivative(self, x: np.ndarray):
+    def backward(self, x: np.ndarray):
         return self(x) * (1 - self(x))
