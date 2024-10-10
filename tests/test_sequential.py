@@ -80,18 +80,16 @@ def _test_gradient(model, x_train, t_train, batch_size):
 def test_sequential_grad():
     x_train, x_valid, t_train, t_valid = get_mnist()
 
+    optimizers = [SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam]
     lr = 0.01
-    # optimizer = SGD(lr=lr)
-    optimizer = Adam(lr=lr)
 
-    net = Sequential(
-        layers=[
-            Dense(in_features=784, out_features=50, activation=ReLU, init_method=he_normal),
-            # Dense(in_features=50, out_features=50, activation=ReLU, init_method=he_normal),
-            Dense(in_features=50, out_features=10, activation=Softmax, init_method=xavier_normal)
-        ],
-        criteria=CrossEntropyLoss,
-        optimizer=optimizer,
-    )
-
-    _test_gradient(model=net, x_train=x_train, t_train=t_train, batch_size=3)
+    for optimizer in optimizers:
+        net = Sequential(
+            layers=[
+                Dense(in_features=784, out_features=10, activation=ReLU, init_method=he_normal),
+                Dense(in_features=10, out_features=10, activation=Softmax, init_method=xavier_normal)
+            ],
+            criteria=CrossEntropyLoss,
+            optimizer=optimizer(lr=lr),
+        )
+        _test_gradient(model=net, x_train=x_train, t_train=t_train, batch_size=3)
