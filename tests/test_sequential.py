@@ -11,7 +11,6 @@ from srcs.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
 from srcs.layer import Dense
 from srcs.model import Sequential
 
-from tqdm import tqdm
 from sklearn.model_selection import train_test_split
 from keras.datasets import mnist
 
@@ -35,6 +34,7 @@ def get_mnist():
     x_train, x_valid, t_train, t_valid = train_test_split(x_train, t_train, test_size=10000)
 
     print(f"x_train.shape: {x_train.shape}")
+
     print(f"t_train.shape: {t_train.shape}\n")
     return x_train, x_valid, t_train, t_valid
 
