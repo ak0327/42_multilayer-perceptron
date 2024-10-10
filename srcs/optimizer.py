@@ -1,7 +1,18 @@
 import numpy as np
+from abc import ABC, abstractmethod
 
 
-class SGD:
+class Optimizer(ABC):
+    @abstractmethod
+    def update(
+            self,
+            params: dict[str, np.ndarray],
+            grads: dict[str, np.ndarray]
+    ) -> None:
+        pass
+
+
+class SGD(Optimizer):
     """
     θ(t+1) = θ(t) - η * ∂L/∂θ(t)
     """
@@ -19,7 +30,7 @@ class SGD:
             params[key] -= self.lr * grads[key]
 
 
-class Momentum:
+class Momentum(Optimizer):
     """
     θ(t+1) = θ(t) + v(t+1)
     v(t+1) = α * v(t) - η * ∂L/∂θ(t)
@@ -67,7 +78,7 @@ class Momentum:
                 params[key] += self.v[key]
 
 
-class Nesterov:
+class Nesterov(Optimizer):
     """
     http://arxiv.org/abs/1212.0901
     """
@@ -100,7 +111,7 @@ class Nesterov:
             params[key] += (1 + self.momentum) * self.v[key]
 
 
-class AdaGrad:
+class AdaGrad(Optimizer):
     """
     θ(t+1) = θ(t) - η / sqrt(h(t+1)) * ∂L/∂θ(t)
     h(t+1) = h(t) + ∂L/∂θ(t) @ ∂L/∂θ(t)
@@ -133,7 +144,7 @@ class AdaGrad:
             params[key] -= adjusted_lr * grads[key]
 
 
-class RMSProp:
+class RMSProp(Optimizer):
     """
     θ(t+1) = θ(t) - η / sqrt(h(t+1)) * ∂L/∂θ(t)
     h(t+1) = ρ * h(t) + (1 - ρ) * ( ∂L/∂θ(t) )^2
@@ -172,7 +183,7 @@ class RMSProp:
             params[key] -= adjusted_lr * grads[key]
 
 
-class Adam:
+class Adam(Optimizer):
     """
     θ(t+1)     = θ(t) - η / sqrt(v_hat(t+1)) * m_hat(t+1)
     m_hat(t+1) = m(t+1) / (1 - β1 ** t)
