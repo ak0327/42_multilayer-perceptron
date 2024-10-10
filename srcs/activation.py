@@ -6,6 +6,9 @@ class ReLU():
         self.mask = None
 
     def __call__(self, x: np.ndarray):
+        return self.forward(x)
+
+    def forward(self, x: np.ndarray):
         """
         out = 0 (x <= 0)
         out = x (0 < x)
@@ -20,9 +23,13 @@ class ReLU():
         dx = 0    (x <= 0)
         dx = dout (0 < x)
         """
-        dout[self.mask] = 0
-        dx = dout
+        dx = dout.copy()
+        dx[self.mask] = 0
         return dx
+
+    @property
+    def info(self):
+        return f"ReLU()"
 
 
 class Sigmoid():
@@ -30,6 +37,9 @@ class Sigmoid():
         self.out = None
 
     def __call__(self, x: np.ndarray):
+        return self.forward(x)
+
+    def forward(self, x: np.ndarray):
         """
         return 1 / (1 + np.exp(-x))
         x < 0 の時、exp(-x) = inf -> sigmoid(x) = nanになる可能性がある
@@ -43,3 +53,7 @@ class Sigmoid():
     def backward(self, dout: np.ndarray):
         dx = dout * (1.0 - self.out) * self.out
         return dx
+
+    @property
+    def info(self):
+        return f"Sigmoid()"
