@@ -65,3 +65,27 @@ class SoftmaxWithCrossEntropyLoss:
 
 def np_log(x):
     return np.log(np.clip(x, 1e-10, 1e+10))
+
+
+def numerical_gradient(f, x):
+    h = 1e-4
+    grad = np.zeros_like(x)
+
+    it = np.nditer(x, flags=['multi_index'])
+    while not it.finished:
+        idx = it.multi_index
+        tmp_val = x[idx]
+
+        # f(x+h)
+        x[idx] = tmp_val + h
+        fxh1 = f(x)
+
+        # f(x-h)
+        x[idx] = tmp_val - h
+        fxh2 = f(x)
+        grad[idx] = (fxh1 - fxh2) / (2*h)
+
+        x[idx] = tmp_val  # 値を元に戻す
+        it.iternext()
+
+    return grad
