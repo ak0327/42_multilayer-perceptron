@@ -92,6 +92,7 @@ class Sequential:
     ):
         self.layers = layers
         self._set_layer_id()
+        self.optimizer = optimizer
         self._set_sequential_info()
 
         self.criteria = criteria()
@@ -99,8 +100,6 @@ class Sequential:
                 and isinstance(self.criteria, CrossEntropyLoss)):
             self.layers[-1].activation = None
             self.criteria = SoftmaxWithCrossEntropyLoss()
-
-        self.optimizer = optimizer
 
     def _set_layer_id(self):
         for i, layer in enumerate(self.layers):
@@ -120,7 +119,7 @@ class Sequential:
         )
         """
         no = 0
-        info = "Sequential(\n"
+        info = "MODEL: \n Sequential(\n"
         for layer in self.layers:
             linear, activation = layer.info()
             info += f"  ({no}): {linear}\n"
@@ -129,7 +128,8 @@ class Sequential:
                 continue
             info += f"  ({no}): {activation}\n"
             no += 1
-        info += ")"
+        info += " )\n"
+        info += f"OPTIMIZER: {self.optimizer.info}\n"
         self.sequential_info = info
 
     def predict(self, x):

@@ -29,6 +29,10 @@ class SGD(Optimizer):
         for key in params.keys():
             params[key] -= self.lr * grads[key]
 
+    @property
+    def info(self):
+        return f"SGD(lr={self.lr})"
+
 
 class Momentum(Optimizer):
     """
@@ -77,6 +81,10 @@ class Momentum(Optimizer):
                     self.v[key] = self.momentum * self.v[key] - self.lr * grads[key]
                 params[key] += self.v[key]
 
+    @property
+    def info(self):
+        return f"Momentum(lr={self.lr}, momentum={self.momentum})"
+
 
 class Nesterov(Optimizer):
     """
@@ -110,6 +118,10 @@ class Nesterov(Optimizer):
             params[key] -= self.momentum * v_prev
             params[key] += (1 + self.momentum) * self.v[key]
 
+    @property
+    def info(self):
+        return f"Nesterov(lr={self.lr}, momentum={self.momentum})"
+
 
 class AdaGrad(Optimizer):
     """
@@ -142,6 +154,10 @@ class AdaGrad(Optimizer):
             self.h[key] += grads[key] ** 2
             adjusted_lr = self.lr / (np.sqrt(self.h[key]) + self.epsilon)
             params[key] -= adjusted_lr * grads[key]
+
+    @property
+    def info(self):
+        return f"AdaGrad(lr={self.lr})"
 
 
 class RMSProp(Optimizer):
@@ -181,6 +197,10 @@ class RMSProp(Optimizer):
             self.h[key] += (1 - self.alpha) * grads[key] ** 2
             adjusted_lr = self.lr / (np.sqrt(self.h[key]) + self.epsilon)
             params[key] -= adjusted_lr * grads[key]
+
+    @property
+    def info(self):
+        return f"RMSProp(lr={self.lr}, alpha={self.alpha})"
 
 
 class Adam(Optimizer):
@@ -236,3 +256,7 @@ class Adam(Optimizer):
             v_hat = self.v[key] / (1 - self.beta2 ** self.iter)
             sqrt_v_hat = np.sqrt(v_hat) + self.epsilon
             params[key] -= self.lr / sqrt_v_hat * m_hat
+
+    @property
+    def info(self):
+        return f"Adam(lr={self.lr}, beta1={self.beta1}, beta2={self.beta2})"
