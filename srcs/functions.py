@@ -1,4 +1,5 @@
 import numpy as np
+from srcs.loss import cross_entropy
 
 
 class Softmax:
@@ -27,6 +28,40 @@ class Softmax:
     @property
     def info(self):
         return f"Softmax()"
+
+
+class SoftmaxWithCrossEntropyLoss:
+    def __init__(self):
+        self.softmax = Softmax()
+        self.loss = None
+        self.y = None  # softmaxの出力
+        self.t = None  # 教師データ
+
+    def __call__(self, x, t):
+        return self.forward(x, t)
+
+    def forward(self, x, t):
+        self.t = t
+        self.y = self.softmax(x)
+        self.loss = cross_entropy(self.y, self.t)
+
+        return self.loss
+
+    def backward(self, dout=1):
+        batch_size = self.t.shape[0]
+        if self.t.size == self.y.size:  # 教師データがone-hot-vectorの場合
+            dx = (self.y - self.t) / batch_size
+        else:
+            dx = self.y.copy()
+            dx[np.arange(batch_size), self.t] -= 1
+            dx = dx / batch_size
+
+        return dx
+
+    @property
+    def info(self):
+        return f"SoftmaxWithCrossEntropyLoss()"
+
 
 def np_log(x):
     return np.log(np.clip(x, 1e-10, 1e+10))
