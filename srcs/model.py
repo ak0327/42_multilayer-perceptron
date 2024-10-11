@@ -90,18 +90,20 @@ class Sequential:
             optimizer: Optimizer,
             weight_init_std: float = 0.01,
     ):
-        self.layers = layers
-        self._set_layer_id()
+        self._set_layers(layers)
         self.optimizer = optimizer
+        self.criteria = criteria()
         self._set_sequential_info()
 
-        self.criteria = criteria()
+        # 最終層の活性化関数がsoftmax, 損失関数がCrossEntropyLossの場合
+        # 数値的安定化のため、損失関数をSoftmaxWithCrossEntropyLossに差し替える
         if (isinstance(self.layers[-1].activation, Softmax)
                 and isinstance(self.criteria, CrossEntropyLoss)):
             self.layers[-1].activation = None
             self.criteria = SoftmaxWithCrossEntropyLoss()
 
-    def _set_layer_id(self):
+    def _set_layers(self, layers: list[Dense]):
+        self.layers = layers
         for i, layer in enumerate(self.layers):
             layer.set_id(i)
 
@@ -119,17 +121,20 @@ class Sequential:
         )
         """
         no = 0
-        info = "MODEL: \n Sequential(\n"
+        SP = " "
+        info = "MODEL:\n"
+        info += f"{SP * 2}Sequential(\n"
         for layer in self.layers:
             linear, activation = layer.info()
-            info += f"  ({no}): {linear}\n"
+            info += f"{SP * 4}({no}): {linear}\n"
             no += 1
             if activation is None:
                 continue
-            info += f"  ({no}): {activation}\n"
+            info += f"{SP * 4}({no}): {activation}\n"
             no += 1
-        info += " )\n"
+        info += f"{SP * 2})\n"
         info += f"OPTIMIZER: {self.optimizer.info}\n"
+        info += f"CRITERIA : {self.criteria.info}\n"
         self.sequential_info = info
 
     def predict(self, x):

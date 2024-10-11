@@ -54,3 +54,7 @@ class CrossEntropyLoss:
             dx /= batch_size
 
         return dx
+
+    @property
+    def info(self):
+        return f"CrossEntropyLoss()"
