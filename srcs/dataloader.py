@@ -7,9 +7,16 @@ import pandas as pd
 from itertools import product
 
 
+print(os.getcwd())
+
+
 def load_wdbc_data():
-    csv_path = "data/data.csv"
-    df = pd.read_csv(csv_path, header=None)  # todo: error
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    csv_path = os.path.join(base_dir, "data", "data.csv")
+
+    if not os.path.exists(csv_path):
+        raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
+    df = pd.read_csv(csv_path, header=None)
 
     columns = ['id', 'diagnosis']
     # 特徴量の名前リスト
@@ -32,8 +39,12 @@ def load_wdbc_data():
         columns.append(f"{feature}_{stat}")
 
     df.columns = columns
+    df = df.drop('id', axis=1)
+    # ラベルを数値に変換（M -> 1, B -> 0）
 
     y = df['diagnosis']
+    y = y.replace({'M': 1, 'B': 0}).astype(int)
+
     X = df.drop('diagnosis', axis=1)
     return X, y
 
@@ -113,7 +124,7 @@ def get_wdbc(
         shuffle: bool = False,
         random_state: int = None
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    X, y = load_wdbc_data()  # todo: error
+    X, y = load_wdbc_data()
     X_train, X_valid, y_train, y_valid = train_test_split(
         X=X,
         y=y,
