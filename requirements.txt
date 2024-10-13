@@ -1,6 +1,7 @@
 jupyterlab
 matplotlib
 numpy
+pandas
 tqdm
 
 
