@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append(os.pardir)
+
 import numpy as np
 import pandas as pd
 from itertools import product
@@ -105,10 +109,10 @@ def train_test_split(
 
 
 def get_wdbc(
-        train_size: float,
+        train_size: float = 0.8,
         shuffle: bool = False,
         random_state: int = None
-):
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     X, y = load_wdbc_data()  # todo: error
     X_train, X_valid, y_train, y_valid = train_test_split(
         X=X,
@@ -117,4 +121,10 @@ def get_wdbc(
         shuffle=shuffle,
         stratify=y
     )
+    # pd.DataFrame, pd.Seriesをnumpy配列に変換
+    X_train = X_train.values
+    X_valid = X_valid.values
+    y_train = y_train.values
+    y_valid = y_valid.values
+
     return X_train, X_valid, y_train, y_valid
