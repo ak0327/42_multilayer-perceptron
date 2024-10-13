@@ -1,7 +1,18 @@
 import numpy as np
+from abc import ABC, abstractmethod
 
 
-class SGD:
+class Optimizer(ABC):
+    @abstractmethod
+    def update(
+            self,
+            params: dict[str, np.ndarray],
+            grads: dict[str, np.ndarray]
+    ) -> None:
+        pass
+
+
+class SGD(Optimizer):
     """
     θ(t+1) = θ(t) - η * ∂L/∂θ(t)
     """
@@ -18,8 +29,12 @@ class SGD:
         for key in params.keys():
             params[key] -= self.lr * grads[key]
 
+    @property
+    def info(self):
+        return f"SGD(lr={self.lr})"
 
-class Momentum:
+
+class Momentum(Optimizer):
     """
     θ(t+1) = θ(t) + v(t+1)
     v(t+1) = α * v(t) - η * ∂L/∂θ(t)
@@ -66,8 +81,12 @@ class Momentum:
                     self.v[key] = self.momentum * self.v[key] - self.lr * grads[key]
                 params[key] += self.v[key]
 
+    @property
+    def info(self):
+        return f"Momentum(lr={self.lr}, momentum={self.momentum})"
 
-class Nesterov:
+
+class Nesterov(Optimizer):
     """
     http://arxiv.org/abs/1212.0901
     """
@@ -99,8 +118,12 @@ class Nesterov:
             params[key] -= self.momentum * v_prev
             params[key] += (1 + self.momentum) * self.v[key]
 
+    @property
+    def info(self):
+        return f"Nesterov(lr={self.lr}, momentum={self.momentum})"
 
-class AdaGrad:
+
+class AdaGrad(Optimizer):
     """
     θ(t+1) = θ(t) - η / sqrt(h(t+1)) * ∂L/∂θ(t)
     h(t+1) = h(t) + ∂L/∂θ(t) @ ∂L/∂θ(t)
@@ -132,8 +155,12 @@ class AdaGrad:
             adjusted_lr = self.lr / (np.sqrt(self.h[key]) + self.epsilon)
             params[key] -= adjusted_lr * grads[key]
 
+    @property
+    def info(self):
+        return f"AdaGrad(lr={self.lr})"
 
-class RMSProp:
+
+class RMSProp(Optimizer):
     """
     θ(t+1) = θ(t) - η / sqrt(h(t+1)) * ∂L/∂θ(t)
     h(t+1) = ρ * h(t) + (1 - ρ) * ( ∂L/∂θ(t) )^2
@@ -171,8 +198,12 @@ class RMSProp:
             adjusted_lr = self.lr / (np.sqrt(self.h[key]) + self.epsilon)
             params[key] -= adjusted_lr * grads[key]
 
+    @property
+    def info(self):
+        return f"RMSProp(lr={self.lr}, alpha={self.alpha})"
 
-class Adam:
+
+class Adam(Optimizer):
     """
     θ(t+1)     = θ(t) - η / sqrt(v_hat(t+1)) * m_hat(t+1)
     m_hat(t+1) = m(t+1) / (1 - β1 ** t)
@@ -225,3 +256,7 @@ class Adam:
             v_hat = self.v[key] / (1 - self.beta2 ** self.iter)
             sqrt_v_hat = np.sqrt(v_hat) + self.epsilon
             params[key] -= self.lr / sqrt_v_hat * m_hat
+
+    @property
+    def info(self):
+        return f"Adam(lr={self.lr}, beta1={self.beta1}, beta2={self.beta2})"
