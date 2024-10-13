@@ -7,10 +7,10 @@ from srcs.dataloader import get_wdbc, load_wdbc_data
 def evaluate_split(
         X: pd.DataFrame,
         y: pd.DataFrame,
-        X_train: pd.DataFrame,
-        X_valid: pd.DataFrame,
-        y_train: pd.Series,
-        y_valid: pd.Series,
+        X_train: np.ndarray,
+        X_valid: np.ndarray,
+        y_train: np.ndarray,
+        y_valid: np.ndarray,
         train_size: float,
         shuffle: bool = False,
         random_state: int = None
@@ -36,22 +36,22 @@ def evaluate_split(
 
     # shuffleのチェック
     if not shuffle:
-        assert (X_train.index == X.index[:len(X_train)]).all(), "X_train is not in original order when shuffle=False"
-        assert (X_valid.index == X.index[len(X_train):]).all(), "X_valid is not in original order when shuffle=False"
+        assert (X_train == X.iloc[:len(X_train)].values).all(), "X_train is not in original order when shuffle=False"
+        assert (X_valid == X.iloc[len(X_train):].values).all(), "X_valid is not in original order when shuffle=False"
         print("Shuffle=False: Order is preserved correctly.")
     else:
-        assert not (X_train.index == X.index[:len(X_train)]).all(), "X_train is in original order when shuffle=True"
-        assert not (X_valid.index == X.index[len(X_train):]).all(), "X_valid is in original order when shuffle=True"
+        assert not (X_train == X.iloc[:len(X_train)].values).all(), "X_train is in original order when shuffle=True"
+        assert not (X_valid == X.iloc[len(X_train):].values).all(), "X_valid is in original order when shuffle=True"
         print("Shuffle=True: Data has been shuffled correctly.")
 
-    # stratifyのチェック
-    train_dist = y_train.value_counts(normalize=True)
-    test_dist = y_valid.value_counts(normalize=True)
+    # stratifyのチェック (クラス分布の確認)
+    train_dist = pd.Series(y_train).value_counts(normalize=True)
+    valid_dist = pd.Series(y_valid).value_counts(normalize=True)
     full_dist = y.value_counts(normalize=True)
 
     for cls in full_dist.index:
         assert abs(train_dist.get(cls, 0) - full_dist[cls]) < 0.05, f"Stratification issue in train for class {cls}"
-        assert abs(test_dist.get(cls, 0) - full_dist[cls]) < 0.05, f"Stratification issue in test for class {cls}"
+        assert abs(valid_dist.get(cls, 0) - full_dist[cls]) < 0.05, f"Stratification issue in test for class {cls}"
     print("Stratification: Class distributions are correctly maintained in train and test splits.")
 
     print("All checks passed. Split performed correctly.\n\n")
