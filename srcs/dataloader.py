@@ -7,9 +7,6 @@ import pandas as pd
 from itertools import product
 
 
-print(os.getcwd())
-
-
 def load_wdbc_data():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     csv_path = os.path.join(base_dir, "data", "data.csv")
