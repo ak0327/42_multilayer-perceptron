@@ -6,48 +6,9 @@ sys.path.append(os.pardir)
 import argparse
 import numpy as np
 import pandas as pd
-from itertools import product
 from typing import Union, overload
 
-
-def load_wdbc_data(csv_path):
-    if not os.path.exists(csv_path):
-        raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
-    df = pd.read_csv(csv_path, header=None)
-
-    expected_shape = (569, 32)
-    if df.shape != expected_shape:
-        raise ValueError(f"Invalid data shape. "
-                         f"Expected {expected_shape}, but got {df.shape}")
-
-    columns = ['id', 'diagnosis']
-    # 特徴量の名前リスト
-    features = [
-        'radius',
-        'texture',
-        'perimeter',
-        'area',
-        'smoothness',
-        'compactness',
-        'concavity',
-        'concavePoints',
-        'symmetry',
-        'fractal_dimension'
-    ]
-    # 統計量の名前リスト
-    stats = ['mean', 'stderr', 'worst']
-
-    for feature, stat in product(features, stats):
-        columns.append(f"{feature}_{stat}")
-
-    df.columns = columns
-    df = df.drop('id', axis=1)
-
-    # ラベルを数値に変換（M -> 1, B -> 0）
-    y = pd.to_numeric(df['diagnosis'].map({'M': 1, 'B': 0}), downcast='integer')
-
-    X = df.drop('diagnosis', axis=1)
-    return X, y
+from srcs.io import save_to_npz, save_to_csv, load_wdbc_data
 
 
 def _stratified_split(
@@ -169,7 +130,6 @@ def get_wdbc(
     X_test = X_test.values
     y_train = y_train.values
     y_test = y_test.values
-
     return X_train, X_test, y_train, y_test
 
 
@@ -194,16 +154,14 @@ def _float_0_to_1(s):
     return float_num
 
 
-def _save_to_npz(X: np.ndarray, y: np.ndarray, name: str):
-    try:
-        path = f"data/{name}.npz"
-        np.savez(path, X=X, y=y)
-        print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
-    except IOError as e:
-        raise IOError(f"fail to saving {name} data: {e}")
-
-
-def main(csv_path: str, train_size: float, shuffle: bool, random_state: int):
+def main(
+        csv_path: str,
+        train_size: float,
+        shuffle: bool,
+        save_npz: bool,
+        random_state: int
+):
+    print(f"\n[Loading]")
     X_train, X_test, y_train, y_test = get_wdbc(
         csv_path=csv_path,
         train_size=train_size,
@@ -211,8 +169,13 @@ def main(csv_path: str, train_size: float, shuffle: bool, random_state: int):
         random_state=random_state
     )
     try:
-        _save_to_npz(X=X_train, y=y_train, name="train")
-        _save_to_npz(X=X_test, y=y_test, name="test")
+        if save_npz:
+            save_to_npz(X=X_train, y=y_train, name="data_train")
+            save_to_npz(X=X_test, y=y_test, name="data_test")
+        else:
+            save_to_csv(X=X_train, y=y_train, name="data_train")
+            save_to_csv(X=X_test, y=y_test, name="data_test")
+
     except IOError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
@@ -241,6 +204,12 @@ def parse_arguments():
         default=True,
         help="Whether to shuffle the data before splitting (true/false, t/f)"
     )
+    parser.add_argument(
+        "--save_npz",
+        type=_str2bool,
+        default=True,
+        help="Save to train.npz and test.npz, othewise csv (true/false, t/f)"
+    )
     return parser.parse_args()
 
 
@@ -250,5 +219,6 @@ if __name__ == "__main__":
         csv_path=args.dataset,
         train_size=args.train_size,
         shuffle=args.shuffle,
+        save_npz=args.save_npz,
         random_state=42
     )
