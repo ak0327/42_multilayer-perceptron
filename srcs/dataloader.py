@@ -100,20 +100,20 @@ def train_test_split(
         raise ValueError(
             f"ValueError: "
             f"The train_size={train_size}, should be 0.0 < valid_size < 1.0")
-    valid_size = 1.0 - train_size
+    test_size = 1.0 - train_size
 
     n_total = len(X)
-    n_valid = int(n_total * valid_size)
+    n_test = int(n_total * test_size)
     rng = np.random.RandomState(random_state)
 
     if stratify is not None:
-        train_indices, valid_indices = _stratified_split(y, valid_size, stratify, shuffle, rng)
+        train_indices, test_indices = _stratified_split(y, test_size, stratify, shuffle, rng)
     else:
-        train_indices, valid_indices = _random_split(n_total, n_valid, shuffle, rng)
+        train_indices, test_indices = _random_split(n_total, n_test, shuffle, rng)
 
-    X_train, X_valid = X.iloc[train_indices], X.iloc[valid_indices]
-    y_train, y_valid  = y.iloc[train_indices], y.iloc[valid_indices]
-    return X_train, X_valid, y_train, y_valid
+    X_train, X_test = X.iloc[train_indices], X.iloc[test_indices]
+    y_train, y_test  = y.iloc[train_indices], y.iloc[test_indices]
+    return X_train, X_test, y_train, y_test
 
 
 def get_wdbc(
@@ -122,7 +122,7 @@ def get_wdbc(
         random_state: int = None
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     X, y = load_wdbc_data()
-    X_train, X_valid, y_train, y_valid = train_test_split(
+    X_train, X_test, y_train, y_test = train_test_split(
         X=X,
         y=y,
         train_size=train_size,
@@ -131,8 +131,8 @@ def get_wdbc(
     )
     # pd.DataFrame, pd.Seriesをnumpy配列に変換
     X_train = X_train.values
-    X_valid = X_valid.values
+    X_test = X_test.values
     y_train = y_train.values
-    y_valid = y_valid.values
+    y_test = y_test.values
 
-    return X_train, X_valid, y_train, y_valid
+    return X_train, X_test, y_train, y_test
