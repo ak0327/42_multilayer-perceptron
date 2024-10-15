@@ -1,5 +1,5 @@
 import sys
-from srcs import dataloader, train
+from srcs import dataloader, train, predict
 
 
 def run_dataloader():
@@ -7,13 +7,16 @@ def run_dataloader():
         'dataloader.py',
         '--dataset', 'data/data.csv',
         '--train_size', '0.8',
-        '--shuffle', 'true'
+        '--shuffle', 'true',
+        # '--save_npz', 'false',
+        '--save_npz', 'true',
     ]
     args = dataloader.parse_arguments()
     _, _, _, _ = dataloader.main(
         csv_path=args.dataset,
         train_size=args.train_size,
         shuffle=args.shuffle,
+        save_npz=args.save_npz,
         random_state=42
     )
 
@@ -21,6 +24,7 @@ def run_dataloader():
 def run_train():
     sys.argv = [
         'train.py',
+        # '--dataset_csv_path', 'data/data_train.csv',
         '--hidden_features', '50',
         '--epochs', '5000',
         '--batch_size', '100',
@@ -28,6 +32,7 @@ def run_train():
     ]
     args = train.parse_arguments()
     train.main(
+        dataset_csv_path=args.dataset_csv_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         batch_size=args.batch_size,
@@ -36,8 +41,16 @@ def run_train():
 
 
 def run_predict():
-    # todo
-    pass
+    sys.argv = [
+        'predict.py',
+        '--model_path', 'data/model.pkl',
+        # '--dataset_csv_path', 'data/data_test.csv',
+    ]
+    args = predict.parse_arguments()
+    predict.main(
+        model_path=args.model_path,
+        dataset_csv_path=args.dataset_csv_path,
+    )
 
 
 def main():
