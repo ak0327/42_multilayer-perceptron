@@ -3,11 +3,10 @@ import sys
 sys.path.append(os.pardir)
 
 import argparse
-import matplotlib.pylab as plt
-from matplotlib.animation import FuncAnimation
 import numpy as np
 
-from srcs.dataloader import train_test_split
+
+from srcs.dataloader import train_test_split, get_wdbc
 from srcs.functions import Softmax
 from srcs.activation import ReLU, Sigmoid
 from srcs.loss import CrossEntropyLoss
@@ -16,6 +15,7 @@ from srcs.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
 from srcs.layer import Dense
 from srcs.model import Sequential
 from srcs.plot import RealtimePlot
+from srcs.io import save_training_result, save_model, load_npz, load_csv
 
 
 def train_model(
@@ -37,7 +37,7 @@ def train_model(
                          f"({X_train.shape[0]})")
 
     if verbose:
-        print(f"Testing {name}...")
+        print(f" Training {name}...")
 
     # 結果の記録リスト
     iterations = []
@@ -80,7 +80,7 @@ def train_model(
             valid_accs.append(valid_acc)
 
             if verbose:
-                print(f'Epoch:{epoch:>4}/{iters_num}, '
+                print(f' Epoch:{epoch:>4}/{iters_num}, '
                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
                       f'Valid [Loss:{valid_loss:.4f}, Acc:{valid_acc:.4f}]')
             if plot:
@@ -90,33 +90,6 @@ def train_model(
         plotter.plot()
 
     return iterations, train_losses, train_accs, valid_losses, valid_accs
-
-
-def _load_data(file_path):
-    try:
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Data file not found: {file_path}")
-
-        with np.load(file_path) as data:
-            if 'X' not in data or 'y' not in data:
-                raise ValueError("The data file does not contain "
-                                 "'X' and 'y' arrays")
-
-            X = data['X']
-            y = data['y']
-
-            if X.shape[0] != y.shape[0]:
-                raise ValueError(f"Mismatch in number of samples: "
-                                 f"X has {X.shape[0]}, "
-                                 f"y has {y.shape[0]}")
-
-            if X.shape[0] == 0:
-                raise ValueError("The data is empty")
-
-            return X, y
-    except Exception as e:
-        print(f"Error loading data: {str(e)}", file=sys.stderr)
-        raise
 
 
 def _create_model(hidden_features: list[int], learning_rate: float):
@@ -152,17 +125,30 @@ def _create_model(hidden_features: list[int], learning_rate: float):
 
 
 def main(
+        dataset_csv_path: str | None,
         hidden_features: list[int],
         epochs: int,
         batch_size: int,
         learning_rate: float
 ):
+    print(f"\n[Training]")
     try:
-        X_train, y_train = _load_data("data/train.npz")
-        X_valid, y_valid = _load_data("data/test.npz")
+        if dataset_csv_path is None:
+            X, y = load_npz("data/data_train.npz")
+            # X_valid, y_valid = load_npz("data/data_test.npz")
+        else:
+            X, y = load_csv(dataset_csv_path)
+        X_train, X_valid, y_train, y_valid = train_test_split(
+            X=X,
+            y=y,
+            train_size=0.8,
+            shuffle=False,
+            random_state=42,
+            stratify=y
+        )
 
         model = _create_model(hidden_features, learning_rate)
-        print(model.info)
+        print(f"\n{model.info}")
         iters, train_losses, train_accs, valid_losses, valid_accs = train_model(
             model=model,
             X_train=X_train,
@@ -176,6 +162,16 @@ def main(
             plot=True,
             name="WDBC"
         )
+
+        save_training_result(
+            model=model,
+            iterations=iters,
+            train_losses=train_losses,
+            train_accs=train_accs,
+            valid_losses=valid_losses,
+            valid_accs=valid_accs
+        )
+        return model, iters, train_losses, train_accs, valid_losses, valid_accs
 
     except Exception as e:
         print(f"An error occurred during execution: {str(e)}", file=sys.stderr)
@@ -222,6 +218,12 @@ def parse_arguments():
         description="Process WDBC dataset for machine learning tasks"
     )
     parser.add_argument(
+        "--dataset_csv_path",
+        type=str,
+        default=None,
+        help="train csv path, if omitted load train.npz"
+    )
+    parser.add_argument(
         "--hidden_features",
         type=int,
         nargs='*',
@@ -256,6 +258,7 @@ def parse_arguments():
 if __name__ == "__main__":
     args = parse_arguments()
     main(
+        dataset_csv_path=args.dataset_csv_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         batch_size=args.batch_size,
