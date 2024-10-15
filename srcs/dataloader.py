@@ -7,9 +7,10 @@ import argparse
 import numpy as np
 import pandas as pd
 from itertools import product
+from typing import Union, overload
 
 
-def _load_wdbc_data(csv_path):
+def load_wdbc_data(csv_path):
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
     df = pd.read_csv(csv_path, header=None)
@@ -91,7 +92,8 @@ def _random_split(
     return train_indices, test_indices
 
 
-def _train_test_split(
+@overload
+def train_test_split(
         X: pd.DataFrame,
         y: pd.Series,
         train_size: float,
@@ -99,6 +101,28 @@ def _train_test_split(
         random_state: int = None,
         stratify: pd.Series = None
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+    ...
+
+@overload
+def train_test_split(
+        X: np.ndarray,
+        y: np.ndarray,
+        train_size: float,
+        shuffle: bool = False,
+        random_state: int = None,
+        stratify: np.ndarray = None
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    ...
+
+def train_test_split(
+        X: Union[pd.DataFrame, np.ndarray],
+        y: Union[pd.Series, np.ndarray],
+        train_size: float,
+        shuffle: bool = False,
+        random_state: int = None,
+        stratify: Union[pd.Series, np.ndarray] = None
+) -> Union[tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series],
+           tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     if not (0.0 < train_size and train_size < 1.0):
         raise ValueError(
             f"ValueError: "
@@ -114,8 +138,15 @@ def _train_test_split(
     else:
         train_indices, test_indices = _random_split(n_total, n_test, shuffle, rng)
 
-    X_train, X_test = X.iloc[train_indices], X.iloc[test_indices]
-    y_train, y_test  = y.iloc[train_indices], y.iloc[test_indices]
+    if isinstance(X, pd.DataFrame) and isinstance(y, pd.Series):
+        X_train, X_test = X.iloc[train_indices], X.iloc[test_indices]
+        y_train, y_test = y.iloc[train_indices], y.iloc[test_indices]
+    elif isinstance(X, np.ndarray) and isinstance(y, np.ndarray):
+        X_train, X_test = X[train_indices], X[test_indices]
+        y_train, y_test = y[train_indices], y[test_indices]
+    else:
+        raise TypeError("X and y must be either "
+                        "both pandas objects or both numpy arrays")
     return X_train, X_test, y_train, y_test
 
 
@@ -125,8 +156,8 @@ def get_wdbc(
         shuffle: bool = False,
         random_state: int = None
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    X, y = _load_wdbc_data(csv_path=csv_path)
-    X_train, X_test, y_train, y_test = _train_test_split(
+    X, y = load_wdbc_data(csv_path=csv_path)
+    X_train, X_test, y_train, y_test = train_test_split(
         X=X,
         y=y,
         train_size=train_size,
@@ -165,8 +196,9 @@ def _float_0_to_1(s):
 
 def _save_to_npz(X: np.ndarray, y: np.ndarray, name: str):
     try:
-        np.savez(f"{name}.npz", X=X, y=y)
-        print(f"Train data saved to {os.path.abspath(f'{name}.npz')}")
+        path = f"data/{name}.npz"
+        np.savez(path, X=X, y=y)
+        print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
         raise IOError(f"fail to saving {name} data: {e}")
 
