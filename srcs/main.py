@@ -18,8 +18,20 @@ def run_dataloader():
     )
 
 
+def run_train():
+    # todo
+    pass
+
+
+def run_predict():
+    # todo
+    pass
+
+
 def main():
     run_dataloader()
+    run_train()
+    run_predict()
 
 
 if __name__ == '__main__':
