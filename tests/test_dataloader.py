@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from srcs.dataloader import get_wdbc, load_wdbc_data
+from srcs.dataloader import get_wdbc
+from srcs.io import load_wdbc_data
 
 
 def evaluate_split(
@@ -17,7 +18,6 @@ def evaluate_split(
 ):
     total_samples = len(X_train) + len(X_valid)
     actual_train_size = len(X_train) / total_samples
-
 
     print(f"total size   : {total_samples}")
     print(f"X_train size : {len(X_train)}")
