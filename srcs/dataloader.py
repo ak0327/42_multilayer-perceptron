@@ -2,18 +2,22 @@ import os
 import sys
 sys.path.append(os.pardir)
 
+
+import argparse
 import numpy as np
 import pandas as pd
 from itertools import product
 
 
-def load_wdbc_data():
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    csv_path = os.path.join(base_dir, "data", "data.csv")
-
+def _load_wdbc_data(csv_path):
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
     df = pd.read_csv(csv_path, header=None)
+
+    expected_shape = (569, 32)
+    if df.shape != expected_shape:
+        raise ValueError(f"Invalid data shape. "
+                         f"Expected {expected_shape}, but got {df.shape}")
 
     columns = ['id', 'diagnosis']
     # 特徴量の名前リスト
@@ -37,10 +41,9 @@ def load_wdbc_data():
 
     df.columns = columns
     df = df.drop('id', axis=1)
-    # ラベルを数値に変換（M -> 1, B -> 0）
 
-    y = df['diagnosis']
-    y = y.replace({'M': 1, 'B': 0}).astype(int)
+    # ラベルを数値に変換（M -> 1, B -> 0）
+    y = pd.to_numeric(df['diagnosis'].map({'M': 1, 'B': 0}), downcast='integer')
 
     X = df.drop('diagnosis', axis=1)
     return X, y
@@ -88,7 +91,7 @@ def _random_split(
     return train_indices, test_indices
 
 
-def train_test_split(
+def _train_test_split(
         X: pd.DataFrame,
         y: pd.Series,
         train_size: float,
@@ -99,7 +102,7 @@ def train_test_split(
     if not (0.0 < train_size and train_size < 1.0):
         raise ValueError(
             f"ValueError: "
-            f"The train_size={train_size}, should be 0.0 < valid_size < 1.0")
+            f"The train_size={train_size}, should be 0.0 < train_size < 1.0")
     test_size = 1.0 - train_size
 
     n_total = len(X)
@@ -117,12 +120,13 @@ def train_test_split(
 
 
 def get_wdbc(
+        csv_path: str,
         train_size: float = 0.8,
         shuffle: bool = False,
         random_state: int = None
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    X, y = load_wdbc_data()
-    X_train, X_test, y_train, y_test = train_test_split(
+    X, y = _load_wdbc_data(csv_path=csv_path)
+    X_train, X_test, y_train, y_test = _train_test_split(
         X=X,
         y=y,
         train_size=train_size,
@@ -136,3 +140,83 @@ def get_wdbc(
     y_test = y_test.values
 
     return X_train, X_test, y_train, y_test
+
+
+def _str2bool(s):
+    if isinstance(s, bool):
+        return s
+    if s.lower() in ('true', 't'):
+        return True
+    elif s.lower() in ('false', 'f'):
+        return False
+    raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+def _float_0_to_1(s):
+    try:
+        float_num = float(s)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{s} not a floating-point literal")
+
+    if float_num <= 0.0 or 1.0 <= float_num:
+        raise argparse.ArgumentTypeError(f"{float_num} not in range (0.0, 1.0)")
+    return float_num
+
+
+def _save_to_npz(X: np.ndarray, y: np.ndarray, name: str):
+    try:
+        np.savez(f"{name}.npz", X=X, y=y)
+        print(f"Train data saved to {os.path.abspath(f'{name}.npz')}")
+    except IOError as e:
+        raise IOError(f"fail to saving {name} data: {e}")
+
+
+def main(csv_path: str, train_size: float, shuffle: bool, random_state: int):
+    X_train, X_test, y_train, y_test = get_wdbc(
+        csv_path=csv_path,
+        train_size=train_size,
+        shuffle=shuffle,
+        random_state=random_state
+    )
+    try:
+        _save_to_npz(X=X_train, y=y_train, name="train")
+        _save_to_npz(X=X_test, y=y_test, name="test")
+    except IOError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+    return X_train, X_test, y_train, y_test
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Process WDBC dataset for machine learning tasks"
+    )
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        required=True,
+        help="Path to the WBDC CSV dataset"
+    )
+    parser.add_argument(
+        "--train_size",
+        type=_float_0_to_1,
+        default=0.8,
+        help="Percentage of training division (float in (0.0, 1.0))"
+    )
+    parser.add_argument(
+        "--shuffle",
+        type=_str2bool,
+        default=True,
+        help="Whether to shuffle the data before splitting (true/false, t/f)"
+    )
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    main(
+        csv_path=args.dataset,
+        train_size=args.train_size,
+        shuffle=args.shuffle,
+        random_state=42
+    )
