@@ -47,7 +47,7 @@ def _get_mnist():
 
 
 def test_wdbc():
-    x_train, x_valid, t_train, t_valid = get_wdbc()
+    X_train, X_valid, t_train, t_valid = get_wdbc(csv_path="data/data.csv")
 
     lr = 0.01
     optimizer = Adam(lr=lr)
@@ -63,9 +63,9 @@ def test_wdbc():
 
     _, _, train_accs, _, valid_accs = train_model(
         model=net,
-        x_train=x_train,
+        X_train=X_train,
         t_train=t_train,
-        x_valid=x_valid,
+        X_valid=X_valid,
         t_valid=t_valid,
         iters_num=3000,
         batch_size=100,
@@ -77,7 +77,7 @@ def test_wdbc():
 
 
 def test_mnist():
-    x_train, x_valid, t_train, t_valid = _get_mnist()
+    X_train, X_valid, t_train, t_valid = _get_mnist()
 
     lr = 0.01
     optimizer = Adam(lr=lr)
@@ -93,9 +93,9 @@ def test_mnist():
 
     _, _, train_accs, _, valid_accs = train_model(
         model=net,
-        x_train=x_train,
+        X_train=X_train,
         t_train=t_train,
-        x_valid=x_valid,
+        X_valid=X_valid,
         t_valid=t_valid,
         iters_num=3000,
         batch_size=100,
