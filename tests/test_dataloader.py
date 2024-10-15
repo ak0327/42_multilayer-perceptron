@@ -67,11 +67,12 @@ def evaluate_split(
 
 
 def test_dataloader_shuffle():
-    X, y = load_wdbc_data()
+    X, y = load_wdbc_data("data/data.csv")
 
     random_state = 42
     for train_size in [0.1, 0.8, 0.9]:
         X_train, X_valid, y_train, y_valid = get_wdbc(
+            csv_path="data/data.csv",
             train_size=train_size,
             shuffle=True,
             random_state=random_state
