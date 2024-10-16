@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from typing import Union, overload
 
-from srcs.io import save_to_npz, save_to_csv, load_wdbc_data
+from srcs.io import save_to_npz, save_to_csv, load_wdbc_data, load_csv
 
 
 def _stratified_split(
@@ -117,7 +117,8 @@ def get_wdbc(
         shuffle: bool = False,
         random_state: int = None
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    X, y = load_wdbc_data(csv_path=csv_path)
+    # X, y = load_wdbc_data(csv_path=csv_path)
+    X, y = load_csv(csv_path=csv_path)
     X_train, X_test, y_train, y_test = train_test_split(
         X=X,
         y=y,

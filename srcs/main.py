@@ -8,8 +8,8 @@ def run_dataloader():
         '--dataset', 'data/data.csv',
         '--train_size', '0.8',
         '--shuffle', 'true',
-        # '--save_npz', 'false',
-        '--save_npz', 'true',
+        '--save_npz', 'false',
+        # '--save_npz', 'true',
     ]
     args = dataloader.parse_arguments()
     _, _, _, _ = dataloader.main(
@@ -24,7 +24,8 @@ def run_dataloader():
 def run_train():
     sys.argv = [
         'train.py',
-        # '--dataset_csv_path', 'data/data_train.csv',
+        '--dataset_csv_path', 'data/data_train.csv',
+        # '--dataset_csv_path', 'data/data.csv',
         '--hidden_features', '50',
         '--epochs', '5000',
         '--batch_size', '100',
@@ -44,7 +45,7 @@ def run_predict():
     sys.argv = [
         'predict.py',
         '--model_path', 'data/model.pkl',
-        # '--dataset_csv_path', 'data/data_test.csv',
+        '--dataset_csv_path', 'data/data_test.csv',
     ]
     args = predict.parse_arguments()
     predict.main(
