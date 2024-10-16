@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from srcs.dataloader import get_wdbc
-from srcs.io import load_wdbc_data
+from srcs.modules.io import load_wdbc_data
 
 
 def evaluate_split(

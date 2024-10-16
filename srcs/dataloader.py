@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 from typing import Union, overload
 
-from srcs.io import save_to_npz, save_to_csv, load_wdbc_data, load_csv
-from srcs.parser import str2bool, float_range_exclusive
+from srcs.modules.io import save_to_npz, save_to_csv, load_wdbc_data, load_csv
+from srcs.modules.parser import str2bool, float_range_exclusive
 
 
 def _stratified_split(

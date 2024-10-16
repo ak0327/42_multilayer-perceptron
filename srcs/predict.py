@@ -6,15 +6,15 @@ import argparse
 import numpy as np
 
 from srcs.dataloader import train_test_split
-from srcs.functions import Softmax
-from srcs.activation import ReLU, Sigmoid
-from srcs.loss import CrossEntropyLoss
-from srcs.init import he_normal, xavier_normal, normal
-from srcs.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
-from srcs.layer import Dense
-from srcs.model import Sequential
-from srcs.plot import RealtimePlot
-from srcs.io import load_model, load_wdbc_data, load_npz, load_csv
+from srcs.modules.functions import Softmax
+from srcs.modules.activation import ReLU, Sigmoid
+from srcs.modules.loss import CrossEntropyLoss
+from srcs.modules.init import he_normal, xavier_normal, normal
+from srcs.modules.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
+from srcs.modules.layer import Dense
+from srcs.modules.model import Sequential
+from srcs.modules.plot import RealtimePlot
+from srcs.modules.io import load_model, load_wdbc_data, load_npz, load_csv
 
 
 def predict(
