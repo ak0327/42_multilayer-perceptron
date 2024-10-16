@@ -26,10 +26,10 @@ def run_train():
         'train.py',
         '--dataset_csv_path', 'data/data_train.csv',
         # '--dataset_csv_path', 'data/data.csv',
-        '--hidden_features', '50',
-        '--epochs', '3000',
+        '--hidden_features', '50', '30',
+        '--epochs', '5000',
         '--batch_size', '100',
-        '--learning_rate', '0.001',
+        '--learning_rate', '0.0001',
         '--verbose', 'true',
         '--plot', 'true',
     ]

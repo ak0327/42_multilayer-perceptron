@@ -24,10 +24,10 @@ def _run_train():
     sys.argv = [
         'train.py',
         '--dataset_csv_path', 'data/data_train.csv',
-        '--hidden_features', '50',
-        '--epochs', '3000',
+        '--hidden_features', '50', '30',
+        '--epochs', '5000',
         '--batch_size', '100',
-        '--learning_rate', '0.001',
+        '--learning_rate', '0.0001',
         '--verbose', 'false',
         '--plot', 'false',
     ]
@@ -61,4 +61,4 @@ def test_csv():
     _run_dataloader()
     _run_train()
     accuracy = _run_predict()
-    assert 0.9 <= accuracy
+    assert 0.93 <= accuracy
