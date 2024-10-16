@@ -7,7 +7,8 @@ from srcs.modules.functions import Softmax
 from srcs.modules.activation import ReLU, Sigmoid
 from srcs.modules.loss import CrossEntropyLoss
 from srcs.modules.init import he_normal, xavier_normal, normal
-from srcs.modules.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
+from srcs.modules.optimizer import (
+    SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam)
 from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 
