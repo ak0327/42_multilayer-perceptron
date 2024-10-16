@@ -16,6 +16,7 @@ from srcs.layer import Dense
 from srcs.model import Sequential
 from srcs.plot import RealtimePlot
 from srcs.io import save_training_result, save_model, load_npz, load_csv
+from srcs.parser import int_range, float_range
 
 
 def train_model(
@@ -198,32 +199,6 @@ def main(
         sys.exit(1)
 
 
-def _int_range(min_val, max_val):
-    def __checker(arg):
-        try:
-            value = int(arg)
-        except ValueError:
-            raise argparse.ArgumentTypeError(f"{arg} is not a valid integer")
-        if value < min_val or value > max_val:
-            raise argparse.ArgumentTypeError(f"{value} is not in range"
-                                             f" [{min_val}, {max_val}]")
-        return value
-    return __checker
-
-
-def _float_range(min_val, max_val):
-    def __checker(arg):
-        try:
-            value = float(arg)
-        except ValueError:
-            raise argparse.ArgumentTypeError(f"{arg} is not a valid float")
-        if value < min_val or value > max_val:
-            raise argparse.ArgumentTypeError(f"{value} is not in range"
-                                             f" [{min_val}, {max_val}]")
-        return value
-    return __checker
-
-
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Process WDBC dataset for machine learning tasks"
@@ -245,20 +220,27 @@ def parse_arguments():
     )
     parser.add_argument(
         "--epochs",
-        type=_int_range(100, 10000),
+        type=int_range(100, 10000),
         default=5000,
         help="Number of training epochs "
              "(integer in range [1, 10000], default: 5000)"
     )
     parser.add_argument(
         "--batch_size",
-        type=_int_range(1, 100),
+        type=int_range(1, 100),
         default=100,
         help="Batch size for training (integer in range [1, 100], default: 100)"
     )
     parser.add_argument(
         "--learning_rate",
-        type=_float_range(0.0001, 1.0),
+        type=float_range(0.0001, 1.0),
+        default=0.01,
+        help="Learning rate for training "
+             "(float in range [0.0001, 1.0], default: 0.01)"
+    )
+    parser.add_argument(
+        "--verbose",
+        type=float_range(0.0001, 1.0),
         default=0.01,
         help="Learning rate for training "
              "(float in range [0.0001, 1.0], default: 0.01)"
