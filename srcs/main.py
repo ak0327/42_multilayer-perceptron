@@ -39,7 +39,9 @@ def run_train():
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         batch_size=args.batch_size,
-        learning_rate=args.learning_rate
+        learning_rate=args.learning_rate,
+        verbose=args.verbose,
+        plot=args.plot
     )
 
 
@@ -72,7 +74,7 @@ def main():
             print(f"File '{_filename}', line {_line_number}")
             _tb = _tb.tb_next
         print(f"Error: {str(e)}")
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

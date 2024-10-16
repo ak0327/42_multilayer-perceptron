@@ -160,7 +160,9 @@ def main(
         hidden_features: list[int],
         epochs: int,
         batch_size: int,
-        learning_rate: float
+        learning_rate: float,
+        verbose: bool,
+        plot: bool
 ):
     print(f"\n[Training]")
     try:
@@ -176,8 +178,8 @@ def main(
             iters_num=epochs,
             batch_size=batch_size,
             plot_interval=epochs / 100,
-            verbose=True,
-            plot=True,
+            verbose=verbose,
+            plot=plot,
             name="WDBC"
         )
 
@@ -246,10 +248,15 @@ def parse_arguments():
     )
     parser.add_argument(
         "--verbose",
-        type=float_range(0.0001, 1.0),
-        default=0.01,
-        help="Learning rate for training "
-             "(float in range [0.0001, 1.0], default: 0.01)"
+        type=str2bool,
+        default=True,
+        help="verbose (true/false, t/f)"
+    )
+    parser.add_argument(
+        "--plot",
+        type=str2bool,
+        default=True,
+        help="plot (true/false, t/f)"
     )
     return parser.parse_args()
 
@@ -261,5 +268,7 @@ if __name__ == "__main__":
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         batch_size=args.batch_size,
-        learning_rate=args.learning_rate
+        learning_rate=args.learning_rate,
+        verbose=args.verbose,
+        plot=args.plot
     )
