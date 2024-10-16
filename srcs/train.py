@@ -133,19 +133,30 @@ def main(
 ):
     print(f"\n[Training]")
     try:
+        train_size = 0.8
+        shuffle = False
+        random_state = 42
         if dataset_csv_path is None:
             X, y = load_npz("data/data_train.npz")
             # X_valid, y_valid = load_npz("data/data_test.npz")
+            X_train, X_valid, y_train, y_valid = train_test_split(
+                X=X,
+                y=y,
+                train_size=train_size,
+                shuffle=shuffle,
+                random_state=random_state,
+                stratify=y
+            )
         else:
-            X, y = load_csv(dataset_csv_path)
-        X_train, X_valid, y_train, y_valid = train_test_split(
-            X=X,
-            y=y,
-            train_size=0.8,
-            shuffle=False,
-            random_state=42,
-            stratify=y
-        )
+            # todo splitted or pure data
+            # X, y = load_csv(dataset_csv_path)
+            X_train, X_valid, y_train, y_valid = get_wdbc(
+                csv_path=dataset_csv_path,
+                train_size=train_size,
+                shuffle=shuffle,
+                random_state=random_state,
+            )
+
 
         model = _create_model(hidden_features, learning_rate)
         print(f"\n{model.info}")

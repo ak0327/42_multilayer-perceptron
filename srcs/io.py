@@ -70,15 +70,21 @@ def load_csv(
 ) -> Union[tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series],
            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     try:
-        df = pd.read_csv(csv_path, index_col=None)
-        print(f"Load successd: {csv_path}")
+        df = pd.read_csv(csv_path, header=0)
+        # print(f"Load successd: {csv_path}")
+        # print(f" data shape: {df.shape}")
+        # print(f" data columns: {df.columns}")
+        # print(f" data info: {df.info}")
+
         if 'id' in df.columns or df.shape[1] == 32:
+            # print(f"load_wdbc_data")
             # 元のデータ形式の場合
             X, y = load_wdbc_data(csv_path)
         else:
+            # print(f"load saved data")
             # 保存したデータの場合
-            y = df['diagnosis'].values
-            X = df.drop('diagnosis', axis=1).values
+            y = df['diagnosis']
+            X = df.drop('diagnosis', axis=1)
 
         if np and isinstance(X, pd.DataFrame):
             X = X.values
@@ -93,7 +99,6 @@ def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
     df = pd.read_csv(csv_path, header=None)
-
     # expected_shape = (569, 32)
     # if df.shape[1] != expected_shape[1]:
     #     raise ValueError(f"Invalid data shape. "
@@ -121,6 +126,11 @@ def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
 
     df.columns = columns
     df = df.drop('id', axis=1)
+
+    # print(f"load_wdbc_data after rename columns and drop id")
+    # print(f" data shape: {df.shape}")
+    # print(f" data columns: {df.columns}")
+    # print(f" data info: {df.info}")
 
     # ラベルを数値に変換（M -> 1, B -> 0）
     y = pd.to_numeric(df['diagnosis'].map({'M': 1, 'B': 0}), downcast='integer')
