@@ -13,7 +13,8 @@
 !srcs/**/**.py
 
 !tests
-!tests/*.py
+!tests/unit
+!tests/**/**.py
 
 !data
 !data/data.csv
