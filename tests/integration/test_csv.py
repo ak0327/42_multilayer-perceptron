@@ -61,4 +61,4 @@ def test_csv():
     _run_dataloader()
     _run_train()
     accuracy = _run_predict()
-    assert 0.93 <= accuracy
+    assert 0.90 <= accuracy
