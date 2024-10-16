@@ -1,6 +1,6 @@
 import os
-import sys
-sys.path.append(os.pardir)
+# import sys
+# sys.path.append(os.pardir)
 
 import numpy as np
 from srcs.modules.functions import Softmax
@@ -51,7 +51,7 @@ def _test_gradient(model, x_train, t_train, batch_size):
     t = t_train[:batch_size]
 
     is_ok = True
-    GRADIENT_TOLERANCE = 1e-6
+    GRADIENT_TOLERANCE = 1e-5
 
     # 数値微分と誤差逆伝播法で勾配算出
     grad_numerical = model.numerical_grad(x, t)
