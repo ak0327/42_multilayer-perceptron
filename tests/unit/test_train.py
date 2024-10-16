@@ -7,14 +7,16 @@ from sklearn.model_selection import train_test_split
 from keras.datasets import mnist
 from tqdm import tqdm
 
-from srcs.functions import Softmax, np_log, numerical_gradient
-from srcs.activation import ReLU, Sigmoid
-from srcs.loss import cross_entropy, CrossEntropyLoss
-from srcs.init import he_normal, xavier_normal, normal
-from srcs.optimizer import Optimizer
-from srcs.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
-from srcs.layer import Dense
-from srcs.model import Sequential
+from srcs.modules.functions import Softmax, np_log, numerical_gradient
+from srcs.modules.activation import ReLU, Sigmoid
+from srcs.modules.loss import cross_entropy, CrossEntropyLoss
+from srcs.modules.init import he_normal, xavier_normal, normal
+from srcs.modules.optimizer import Optimizer
+from srcs.modules.optimizer import (
+    SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
+)
+from srcs.modules.layer import Dense
+from srcs.modules.model import Sequential
 from srcs.dataloader import get_wdbc
 from srcs.train import train_model
 
@@ -47,7 +49,7 @@ def _get_mnist():
 
 
 def test_wdbc():
-    x_train, x_valid, t_train, t_valid = get_wdbc()
+    X_train, X_valid, t_train, t_valid = get_wdbc(csv_path="data/data.csv")
 
     lr = 0.01
     optimizer = Adam(lr=lr)
@@ -63,9 +65,9 @@ def test_wdbc():
 
     _, _, train_accs, _, valid_accs = train_model(
         model=net,
-        x_train=x_train,
+        X_train=X_train,
         t_train=t_train,
-        x_valid=x_valid,
+        X_valid=X_valid,
         t_valid=t_valid,
         iters_num=3000,
         batch_size=100,
@@ -77,7 +79,7 @@ def test_wdbc():
 
 
 def test_mnist():
-    x_train, x_valid, t_train, t_valid = _get_mnist()
+    X_train, X_valid, t_train, t_valid = _get_mnist()
 
     lr = 0.01
     optimizer = Adam(lr=lr)
@@ -93,9 +95,9 @@ def test_mnist():
 
     _, _, train_accs, _, valid_accs = train_model(
         model=net,
-        x_train=x_train,
+        X_train=X_train,
         t_train=t_train,
-        x_valid=x_valid,
+        X_valid=X_valid,
         t_valid=t_valid,
         iters_num=3000,
         batch_size=100,

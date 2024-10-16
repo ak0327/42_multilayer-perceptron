@@ -1,5 +1,5 @@
 import numpy as np
-from srcs.loss import cross_entropy
+from srcs.modules.loss import cross_entropy
 
 
 class Softmax:

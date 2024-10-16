@@ -6,7 +6,9 @@ import torch
 import torch.nn as nn
 from torch import optim
 
-from srcs.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
+from srcs.modules.optimizer import (
+    SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
+)
 
 
 class TestOptimizers:

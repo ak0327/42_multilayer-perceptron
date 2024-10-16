@@ -9,10 +9,13 @@
 !.github/workflows/utest.yml
 
 !srcs
-!srcs/*.py
+!srcs/modules
+!srcs/**/**.py
 
 !tests
-!tests/*.py
+!tests/unit
+!tests/integration
+!tests/**/**.py
 
 !data
 !data/data.csv

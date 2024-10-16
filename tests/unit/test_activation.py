@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from srcs.activation import ReLU, Sigmoid
+from srcs.modules.activation import ReLU, Sigmoid
 
 
 class TestReLU:

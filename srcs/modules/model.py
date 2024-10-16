@@ -1,10 +1,12 @@
 import numpy as np
-from srcs.functions import Softmax, SoftmaxWithCrossEntropyLoss, numerical_gradient
-from srcs.activation import ReLU
-from srcs.loss import CrossEntropyLoss
-from srcs.optimizer import Optimizer
-from srcs.init import he_normal
-from srcs.layer import Affine, Dense, Linear
+from srcs.modules.functions import (
+    Softmax, SoftmaxWithCrossEntropyLoss, numerical_gradient
+)
+from srcs.modules.activation import ReLU
+from srcs.modules.loss import CrossEntropyLoss
+from srcs.modules.optimizer import Optimizer
+from srcs.modules.init import he_normal
+from srcs.modules.layer import Affine, Dense, Linear
 
 
 class TwoLayerNet:

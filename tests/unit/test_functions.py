@@ -5,7 +5,7 @@ import torch
 import torch.nn.functional as F
 from torch import optim
 
-from srcs.functions import Softmax
+from srcs.modules.functions import Softmax
 
 
 class TestSoftmax:

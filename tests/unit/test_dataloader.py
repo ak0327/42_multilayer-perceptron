@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from srcs.dataloader import get_wdbc, load_wdbc_data
+from srcs.dataloader import get_wdbc
+from srcs.modules.io import load_wdbc_data
 
 
 def evaluate_split(
@@ -17,7 +18,6 @@ def evaluate_split(
 ):
     total_samples = len(X_train) + len(X_valid)
     actual_train_size = len(X_train) / total_samples
-
 
     print(f"total size   : {total_samples}")
     print(f"X_train size : {len(X_train)}")
@@ -67,11 +67,12 @@ def evaluate_split(
 
 
 def test_dataloader_shuffle():
-    X, y = load_wdbc_data()
+    X, y = load_wdbc_data("data/data.csv")
 
     random_state = 42
     for train_size in [0.1, 0.8, 0.9]:
         X_train, X_valid, y_train, y_valid = get_wdbc(
+            csv_path="data/data.csv",
             train_size=train_size,
             shuffle=True,
             random_state=random_state

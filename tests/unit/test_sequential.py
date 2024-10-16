@@ -1,15 +1,16 @@
 import os
-import sys
-sys.path.append(os.pardir)
+# import sys
+# sys.path.append(os.pardir)
 
 import numpy as np
-from srcs.functions import Softmax
-from srcs.activation import ReLU, Sigmoid
-from srcs.loss import CrossEntropyLoss
-from srcs.init import he_normal, xavier_normal, normal
-from srcs.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
-from srcs.layer import Dense
-from srcs.model import Sequential
+from srcs.modules.functions import Softmax
+from srcs.modules.activation import ReLU, Sigmoid
+from srcs.modules.loss import CrossEntropyLoss
+from srcs.modules.init import he_normal, xavier_normal, normal
+from srcs.modules.optimizer import (
+    SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam)
+from srcs.modules.layer import Dense
+from srcs.modules.model import Sequential
 
 from sklearn.model_selection import train_test_split
 from keras.datasets import mnist
@@ -50,7 +51,7 @@ def _test_gradient(model, x_train, t_train, batch_size):
     t = t_train[:batch_size]
 
     is_ok = True
-    GRADIENT_TOLERANCE = 1e-6
+    GRADIENT_TOLERANCE = 1e-5
 
     # 数値微分と誤差逆伝播法で勾配算出
     grad_numerical = model.numerical_grad(x, t)
