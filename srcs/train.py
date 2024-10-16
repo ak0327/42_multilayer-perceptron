@@ -30,7 +30,7 @@ def train_model(
         plot_interval: int = 100,
         verbose: bool = True,
         plot: bool = True,
-        name: str ="MNIST"
+        name: str = "MNIST"
 ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
     if X_train.shape[0] < batch_size:
         raise ValueError(f"Batch size {batch_size} is "
@@ -85,7 +85,9 @@ def train_model(
                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
                       f'Valid [Loss:{valid_loss:.4f}, Acc:{valid_acc:.4f}]')
             if plot:
-                plotter.update(epoch, train_loss, train_acc, valid_loss, valid_acc)
+                plotter.update(
+                    epoch, train_loss, train_acc, valid_loss, valid_acc
+                )
 
     if plot:
         plotter.plot()
@@ -125,6 +127,34 @@ def _create_model(hidden_features: list[int], learning_rate: float):
     return _model
 
 
+def _get_train_data(
+        dataset_csv_path: str | None
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    train_size = 0.8
+    shuffle = False
+    random_state = 42
+
+    if dataset_csv_path is None:
+        X, y = load_npz("data/data_train.npz")
+        # X_valid, y_valid = load_npz("data/data_test.npz")
+        X_train, X_valid, y_train, y_valid = train_test_split(
+            X=X,
+            y=y,
+            train_size=train_size,
+            shuffle=shuffle,
+            random_state=random_state,
+            stratify=y
+        )
+    else:
+        X_train, X_valid, y_train, y_valid = get_wdbc(
+            csv_path=dataset_csv_path,
+            train_size=train_size,
+            shuffle=shuffle,
+            random_state=random_state,
+        )
+    return X_train, X_valid, y_train, y_valid
+
+
 def main(
         dataset_csv_path: str | None,
         hidden_features: list[int],
@@ -134,31 +164,7 @@ def main(
 ):
     print(f"\n[Training]")
     try:
-        train_size = 0.8
-        shuffle = False
-        random_state = 42
-        if dataset_csv_path is None:
-            X, y = load_npz("data/data_train.npz")
-            # X_valid, y_valid = load_npz("data/data_test.npz")
-            X_train, X_valid, y_train, y_valid = train_test_split(
-                X=X,
-                y=y,
-                train_size=train_size,
-                shuffle=shuffle,
-                random_state=random_state,
-                stratify=y
-            )
-        else:
-            # todo splitted or pure data
-            # X, y = load_csv(dataset_csv_path)
-            X_train, X_valid, y_train, y_valid = get_wdbc(
-                csv_path=dataset_csv_path,
-                train_size=train_size,
-                shuffle=shuffle,
-                random_state=random_state,
-            )
-
-
+        X_train, X_valid, y_train, y_valid = _get_train_data(dataset_csv_path)
         model = _create_model(hidden_features, learning_rate)
         print(f"\n{model.info}")
         iters, train_losses, train_accs, valid_losses, valid_accs = train_model(
