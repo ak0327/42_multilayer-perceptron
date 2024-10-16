@@ -1,9 +1,9 @@
 import numpy as np
-from srcs.functions import Softmax, numerical_gradient
-from srcs.activation import ReLU
-from srcs.loss import cross_entropy
-from srcs.optimizer import Optimizer
-from srcs.init import he_normal
+from srcs.modules.functions import Softmax, numerical_gradient
+from srcs.modules.activation import ReLU
+from srcs.modules.loss import cross_entropy
+from srcs.modules.optimizer import Optimizer
+from srcs.modules.init import he_normal
 
 
 class Affine:

@@ -7,14 +7,16 @@ from sklearn.model_selection import train_test_split
 from keras.datasets import mnist
 from tqdm import tqdm
 
-from srcs.functions import Softmax, np_log, numerical_gradient
-from srcs.activation import ReLU, Sigmoid
-from srcs.loss import cross_entropy, CrossEntropyLoss
-from srcs.init import he_normal, xavier_normal, normal
-from srcs.optimizer import Optimizer
-from srcs.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
-from srcs.layer import Dense
-from srcs.model import Sequential
+from srcs.modules.functions import Softmax, np_log, numerical_gradient
+from srcs.modules.activation import ReLU, Sigmoid
+from srcs.modules.loss import cross_entropy, CrossEntropyLoss
+from srcs.modules.init import he_normal, xavier_normal, normal
+from srcs.modules.optimizer import Optimizer
+from srcs.modules.optimizer import (
+    SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
+)
+from srcs.modules.layer import Dense
+from srcs.modules.model import Sequential
 from srcs.dataloader import get_wdbc
 from srcs.train import train_model
 

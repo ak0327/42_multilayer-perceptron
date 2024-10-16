@@ -8,7 +8,7 @@ import pickle
 from itertools import product
 from typing import Union
 
-from srcs.model import Sequential
+from srcs.modules.model import Sequential
 
 
 TRAIN_RESULT_PATH = "data/training_results.npz"
