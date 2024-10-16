@@ -27,9 +27,11 @@ def run_train():
         '--dataset_csv_path', 'data/data_train.csv',
         # '--dataset_csv_path', 'data/data.csv',
         '--hidden_features', '50',
-        '--epochs', '5000',
+        '--epochs', '3000',
         '--batch_size', '100',
         '--learning_rate', '0.001',
+        '--verbose', 'true',
+        '--plot', 'true',
     ]
     args = train.parse_arguments()
     train.main(

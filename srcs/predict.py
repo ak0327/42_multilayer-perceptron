@@ -22,7 +22,7 @@ def predict(
         X_test: np.ndarray,
         t_test: np.ndarray,
         name: str ="MNIST"
-):
+) -> float:
     print(f" Predicting {name}...")
     accuracy = model.accuracy(x=X_test, t=t_test)
     print(f" Accuracy: {accuracy: .4f}")
@@ -32,21 +32,35 @@ def predict(
 def main(
         dataset_csv_path: str | None,
         model_path: str
-):
+) -> float:
     print(f"\n[Prediction]")
-    if dataset_csv_path is None:
-        X_test, y_test = load_npz("data/data_test.npz")
-    else:
-        X_test, y_test = load_csv(dataset_csv_path, np=True)
+    try:
+        if dataset_csv_path is None:
+            X_test, y_test = load_npz("data/data_test.npz")
+        else:
+            X_test, y_test = load_csv(dataset_csv_path, np=True)
 
-    model: Sequential = load_model(model_path)
-    accuracy = predict(
-        model=model,
-        X_test=X_test,
-        t_test=y_test,
-        name="WDBC"
-    )
-    return accuracy
+        model: Sequential = load_model(model_path)
+        accuracy = predict(
+            model=model,
+            X_test=X_test,
+            t_test=y_test,
+            name="WDBC"
+        )
+        return accuracy
+
+    except Exception as e:
+        print(f"An error occurred during execution: {str(e)}", file=sys.stderr)
+
+        print("traceback")
+        _tb = e.__traceback__
+        while _tb is not None:
+            _filename = _tb.tb_frame.f_code.co_filename
+            _line_number = _tb.tb_lineno
+            print(f"File '{_filename}', line {_line_number}")
+            _tb = _tb.tb_next
+        print(f"Error: {str(e)}")
+        sys.exit(1)
 
 
 def parse_arguments():

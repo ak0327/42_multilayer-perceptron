@@ -143,24 +143,33 @@ def main(
         random_state: int
 ):
     print(f"\n[Loading]")
-    X_train, X_test, y_train, y_test = get_wdbc(
-        csv_path=csv_path,
-        train_size=train_size,
-        shuffle=shuffle,
-        random_state=random_state
-    )
     try:
+        X_train, X_test, y_train, y_test = get_wdbc(
+            csv_path=csv_path,
+            train_size=train_size,
+            shuffle=shuffle,
+            random_state=random_state
+        )
         if save_npz:
             save_to_npz(X=X_train, y=y_train, name="data_train")
             save_to_npz(X=X_test, y=y_test, name="data_test")
         else:
             save_to_csv(X=X_train, y=y_train, name="data_train")
             save_to_csv(X=X_test, y=y_test, name="data_test")
+        return X_train, X_test, y_train, y_test
 
-    except IOError as e:
-        print(f"Error: {e}", file=sys.stderr)
+    except Exception as e:
+        print(f"An error occurred during execution: {str(e)}", file=sys.stderr)
+
+        print("traceback")
+        _tb = e.__traceback__
+        while _tb is not None:
+            _filename = _tb.tb_frame.f_code.co_filename
+            _line_number = _tb.tb_lineno
+            print(f"File '{_filename}', line {_line_number}")
+            _tb = _tb.tb_next
+        print(f"Error: {str(e)}")
         sys.exit(1)
-    return X_train, X_test, y_train, y_test
 
 
 def parse_arguments():
