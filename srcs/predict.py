@@ -26,6 +26,7 @@ def predict(
     print(f" Predicting {name}...")
     accuracy = model.accuracy(x=X_test, t=t_test)
     print(f" Accuracy: {accuracy: .4f}")
+    return accuracy
 
 
 def main(
@@ -39,12 +40,13 @@ def main(
         X_test, y_test = load_csv(dataset_csv_path, np=True)
 
     model: Sequential = load_model(model_path)
-    predict(
+    accuracy = predict(
         model=model,
         X_test=X_test,
         t_test=y_test,
         name="WDBC"
     )
+    return accuracy
 
 
 def parse_arguments():

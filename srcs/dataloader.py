@@ -9,6 +9,7 @@ import pandas as pd
 from typing import Union, overload
 
 from srcs.io import save_to_npz, save_to_csv, load_wdbc_data, load_csv
+from srcs.parser import str2bool, float_range_exclusive
 
 
 def _stratified_split(
@@ -134,27 +135,6 @@ def get_wdbc(
     return X_train, X_test, y_train, y_test
 
 
-def _str2bool(s):
-    if isinstance(s, bool):
-        return s
-    if s.lower() in ('true', 't'):
-        return True
-    elif s.lower() in ('false', 'f'):
-        return False
-    raise argparse.ArgumentTypeError('Boolean value expected.')
-
-
-def _float_0_to_1(s):
-    try:
-        float_num = float(s)
-    except ValueError:
-        raise argparse.ArgumentTypeError(f"{s} not a floating-point literal")
-
-    if float_num <= 0.0 or 1.0 <= float_num:
-        raise argparse.ArgumentTypeError(f"{float_num} not in range (0.0, 1.0)")
-    return float_num
-
-
 def main(
         csv_path: str,
         train_size: float,
@@ -195,19 +175,19 @@ def parse_arguments():
     )
     parser.add_argument(
         "--train_size",
-        type=_float_0_to_1,
+        type=float_range_exclusive(0.0, 1.0),
         default=0.8,
         help="Percentage of training division (float in (0.0, 1.0))"
     )
     parser.add_argument(
         "--shuffle",
-        type=_str2bool,
+        type=str2bool,
         default=True,
         help="Whether to shuffle the data before splitting (true/false, t/f)"
     )
     parser.add_argument(
         "--save_npz",
-        type=_str2bool,
+        type=str2bool,
         default=True,
         help="Save to train.npz and test.npz, othewise csv (true/false, t/f)"
     )
