@@ -14,6 +14,7 @@
 
 !tests
 !tests/unit
+!tests/integration
 !tests/**/**.py
 
 !data
