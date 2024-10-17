@@ -12,6 +12,9 @@
 !srcs/modules
 !srcs/**/**.py
 
+!notebook
+!notebook/**.ipynb
+
 !tests
 !tests/unit
 !tests/integration
