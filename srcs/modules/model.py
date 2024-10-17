@@ -91,13 +91,14 @@ class Sequential:
             layers: list[Dense],
             criteria: callable,
             optimizer: Optimizer,
+            weight_decay: float = 0.0,
             weight_init_std: float = 0.01,
     ):
         self._set_layers(layers)
         self.optimizer = optimizer
         self.criteria = criteria()
         self._set_sequential_info()
-
+        self.weight_decay = weight_decay
         # 最終層の活性化関数がsoftmax, 損失関数がCrossEntropyLossの場合
         # 数値的安定化のため、損失関数をSoftmaxWithCrossEntropyLossに差し替える
         if (isinstance(self.layers[-1].activation, Softmax)
@@ -150,6 +151,11 @@ class Sequential:
 
     def loss(self, y, t):
         loss = self.criteria(y, t)
+
+        l2_reg = 0
+        for layer in self.layers:
+            l2_reg += (layer.W ** 2).sum()
+        loss += 0.5 * self.weight_decay * l2_reg
         return loss
 
     def accuracy(self, y, t):

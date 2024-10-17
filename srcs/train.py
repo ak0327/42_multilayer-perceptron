@@ -148,6 +148,7 @@ def _create_model(
         layers=_layers,
         criteria=CrossEntropyLoss,
         optimizer=_optimizer,
+        weight_decay=weight_decay,
     )
     return _model
 
@@ -186,13 +187,18 @@ def main(
         epochs: int,
         batch_size: int,
         learning_rate: float,
+        weight_decay: float,
         verbose: bool,
         plot: bool
 ):
     print(f"\n[Training]")
     try:
         X_train, X_valid, y_train, y_valid = _get_train_data(dataset_csv_path)
-        model = _create_model(hidden_features, learning_rate)
+        model = _create_model(
+            hidden_features=hidden_features,
+            learning_rate=learning_rate,
+            weight_decay=weight_decay,
+        )
         print(f"\n{model.info}")
         iters, train_losses, train_accs, valid_losses, valid_accs = train_model(
             model=model,
@@ -272,6 +278,12 @@ def parse_arguments():
              "(float in range [0.0001, 1.0], default: 0.01)"
     )
     parser.add_argument(
+        "--weight_decay",
+        type=float_range(0.0, 1.0),
+        default=0.0,
+        help="Weight decay (float in range [0.0, 1.0], default: 0.0)"
+    )
+    parser.add_argument(
         "--verbose",
         type=str2bool,
         default=True,
@@ -294,6 +306,7 @@ if __name__ == "__main__":
         epochs=args.epochs,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
+        weight_decay=args.weight_decay,
         verbose=args.verbose,
         plot=args.plot
     )

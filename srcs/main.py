@@ -27,6 +27,7 @@ def run_train():
         '--dataset_csv_path', 'data/data_train.csv',
         # '--dataset_csv_path', 'data/data.csv',
         '--hidden_features', '50', '30',
+        '--weight_decay', '0.1',
         '--epochs', '5000',
         '--batch_size', '100',
         '--learning_rate', '0.0001',
@@ -40,6 +41,7 @@ def run_train():
         epochs=args.epochs,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
+        weight_decay=args.weight_decay,
         verbose=args.verbose,
         plot=args.plot
     )
