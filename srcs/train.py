@@ -119,7 +119,6 @@ def _create_model(
         hidden_features: list[int],
         learning_rate: float,
         weight_decay: float,
-        dropout_rate: float
 ):
     _features = [30] + hidden_features + [2]
     _last_layer_idx = len(_features) - 2
