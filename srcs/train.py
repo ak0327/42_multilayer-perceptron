@@ -266,9 +266,9 @@ def parse_arguments():
     )
     parser.add_argument(
         "--batch_size",
-        type=int_range(1, 100),
+        type=int_range(1, 200),
         default=100,
-        help="Batch size for training (integer in range [1, 100], default: 100)"
+        help="Batch size for training (integer in range [1, 200], default: 100)"
     )
     parser.add_argument(
         "--learning_rate",

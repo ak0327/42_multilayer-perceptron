@@ -29,7 +29,7 @@ def run_train():
         '--hidden_features', '50', '30',
         '--weight_decay', '0.1',
         '--epochs', '5000',
-        '--batch_size', '100',
+        '--batch_size', '200',
         '--learning_rate', '0.0001',
         '--verbose', 'true',
         '--plot', 'true',
