@@ -170,3 +170,23 @@ class Dense:
         linear = self.linear.info
         activation = None if self.activation is None else self.activation.info
         return linear, activation
+
+
+class Dropout:
+    def __init__(self, dropout_ratio: float = 0.5):
+        if not (0.0 <= dropout_ratio < 1.0) or np.isnan(dropout_ratio):
+            raise ValueError(f"Invalid dropout_ratio value: {dropout_ratio}. "
+                             f"Must be in [0, 1).")
+
+        self.dropout_ratio = dropout_ratio
+        self.mask = None
+
+    def forward(self, x: np.ndarray, train_flg: bool = True):
+        if train_flg:
+            self.mask = np.random.rand(*x.shape) > self.dropout_ratio
+            return x * self.mask
+        else:
+            return x * (1.0 - self.dropout_ratio)
+
+    def backward(self, dout: np.ndarray):
+        return dout * self.mask
