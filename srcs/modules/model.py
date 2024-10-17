@@ -7,6 +7,7 @@ from srcs.modules.loss import CrossEntropyLoss
 from srcs.modules.optimizer import Optimizer
 from srcs.modules.init import he_normal
 from srcs.modules.layer import Affine, Dense, Linear
+from srcs.modules.metrics import accuracy_score
 
 
 class TwoLayerNet:
@@ -139,29 +140,22 @@ class Sequential:
         info += f"CRITERIA : {self.criteria.info}\n"
         self.sequential_info = info
 
-    def predict(self, x):
+    def __call__(self, x):
+        return self.forward(x)
+
+    def forward(self, x):
         for layer in self.layers:
             x = layer(x)
         return x
 
-    def loss(self, x, t):
-        y = self.predict(x)
+    def loss(self, y, t):
         loss = self.criteria(y, t)
         return loss
 
-    def accuracy(self, x, t):
-        y = self.predict(x)
-        y = np.argmax(y, axis=1)
+    def accuracy(self, y, t):
+        return accuracy_score(y_true=t, y_pred=y)
 
-        if t.ndim != 1:
-            t = np.argmax(t, axis=1)
-
-        accuracy = np.sum(y == t) / float(x.shape[0])
-        return accuracy
-
-    def backward(self, x, t):
-        self.loss(x, t)
-
+    def backward(self):
         dout = self.criteria.backward()
         for layer in reversed(self.layers):
             dout = layer.backward(dout)

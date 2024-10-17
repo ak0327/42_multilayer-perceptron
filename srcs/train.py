@@ -17,6 +17,10 @@ from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import save_training_result, save_model, load_npz, load_csv
 from srcs.modules.parser import int_range, float_range, str2bool
+from srcs.modules.metrics import get_metrics
+
+
+np.random.seed(42)
 
 
 def train_model(
@@ -60,19 +64,26 @@ def train_model(
         X_batch = X_train[batch_mask]
         t_batch = t_train[batch_mask]
 
-        # 勾配の計算
-        model.backward(X_batch, t_batch)
+        # 順伝播
+        y_batch = model.forward(X_batch)
+
+        # 損失関数の値算出
+        train_loss = model.loss(y_batch, t_batch)
+
+        # 逆伝播 勾配の計算
+        model.backward()
 
         # 重みパラメーター更新
         model.update_params()
 
-        # 損失関数の値算出
-        train_loss = model.loss(X_batch, t_batch)
-
         if epoch % plot_interval == 0:
-            train_acc = model.accuracy(X_train, t_train)
-            valid_acc = model.accuracy(X_valid, t_valid)
-            valid_loss = model.loss(X_valid, t_valid)
+            y_train = model.forward(X_train)
+            train_loss = model.loss(y_train, t_train)
+            train_acc = model.accuracy(y_train, t_train)
+
+            y_valid = model.forward(X_valid)
+            valid_loss = model.loss(y_valid, t_valid)
+            valid_acc = model.accuracy(y_valid, t_valid)
 
             iterations.append(epoch)
             train_losses.append(train_loss)
@@ -92,10 +103,24 @@ def train_model(
     if plot:
         plotter.plot()
 
+    y_train = model.forward(X_train)
+    train_acc, train_prec, train_recall, train_f1 = get_metrics(y_train, t_train)
+    y_valid = model.forward(X_valid)
+    valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
+
+    print(f"\nMetrics: \n"
+          f" Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+          f" Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]")
+
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
 
-def _create_model(hidden_features: list[int], learning_rate: float):
+def _create_model(
+        hidden_features: list[int],
+        learning_rate: float,
+        weight_decay: float,
+        dropout_rate: float
+):
     _features = [30] + hidden_features + [2]
     _last_layer_idx = len(_features) - 2
 
