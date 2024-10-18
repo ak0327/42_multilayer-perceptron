@@ -1,4 +1,8 @@
 import sys
+from pathlib import Path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 from srcs import dataloader, train, predict
 
 
@@ -32,7 +36,7 @@ def run_train():
         '--verbose', 'true',
         '--plot', 'true',
         '--metrics_interval', '100',
-        '--patience', '500',
+        # '--patience', '500',
     ]
     args = train.parse_arguments()
     train.main(
