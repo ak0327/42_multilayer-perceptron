@@ -32,6 +32,8 @@ def run_train():
         '--learning_rate', '0.0001',
         '--verbose', 'true',
         '--plot', 'true',
+        '--metrics_interval', '100',
+        '--patience', '500',
     ]
     args = train.parse_arguments()
     train.main(
@@ -41,7 +43,9 @@ def run_train():
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
         verbose=args.verbose,
-        plot=args.plot
+        plot=args.plot,
+        metrics_interval=args.metrics_interval,
+        patience=args.patience,
     )
 
 

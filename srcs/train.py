@@ -18,6 +18,7 @@ from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import save_training_result, save_model, load_npz, load_csv
 from srcs.modules.parser import int_range, float_range, str2bool
 from srcs.modules.metrics import get_metrics, accuracy_score
+from srcs.modules.tools import EarlyStopping
 
 
 np.random.seed(42)
@@ -30,9 +31,10 @@ def train_model(
         X_valid: np.ndarray,
         t_valid: np.ndarray,
         iters_num: int = 5000,
-        plot_interval: int = 100,
+        metrics_interval: int = 100,
         verbose: bool = True,
         plot: bool = True,
+        patience: int | None = None,
         name: str = "MNIST"
 ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
     if verbose:
@@ -50,6 +52,9 @@ def train_model(
     if plot:
         plotter = RealtimePlot(iters_num)
 
+    if patience is not None:
+        early_stopping = EarlyStopping(patience=patience, verbose=False)
+
     # 学習開始
     for epoch in range(iters_num):
         # 順伝播
@@ -64,19 +69,19 @@ def train_model(
         # 重みパラメーター更新
         model.update_params()
 
-        # メトリクスを計算　格納
-        train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
-        y_valid = model.forward(X_valid)
-        valid_loss = model.loss(y_valid, t_valid)
-        valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
+        if epoch % metrics_interval == 0:
+            # メトリクスを計算　格納
+            train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
+            y_valid = model.forward(X_valid)
+            valid_loss = model.loss(y_valid, t_valid)
+            valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
 
-        iterations.append(epoch)
-        train_losses.append(train_loss)
-        train_accs.append(train_acc)
-        valid_losses.append(valid_loss)
-        valid_accs.append(valid_acc)
+            iterations.append(epoch)
+            train_losses.append(train_loss)
+            train_accs.append(train_acc)
+            valid_losses.append(valid_loss)
+            valid_accs.append(valid_acc)
 
-        if epoch % plot_interval == 0:
             if verbose:
                 print(f' Epoch:{epoch:>4}/{iters_num}, '
                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
@@ -85,6 +90,12 @@ def train_model(
                 plotter.update(
                     epoch, train_loss, train_acc, valid_loss, valid_acc
                 )
+
+        if patience is not None:
+            early_stopping(valid_loss, model)
+            if early_stopping.early_stop:
+                model = early_stopping.best_model
+                break
 
     if plot:
         plotter.plot()
@@ -173,17 +184,23 @@ def main(
         learning_rate: float,
         weight_decay: float,
         verbose: bool,
-        plot: bool
+        plot: bool,
+        metrics_interval: int,
+        patience: int | None,
+        save: bool = True,
 ):
     print(f"\n[Training]")
     try:
         X_train, X_valid, y_train, y_valid = _get_train_data(dataset_csv_path)
+
         model = _create_model(
             hidden_features=hidden_features,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
         )
-        print(f"\n{model.info}")
+        if verbose:
+            print(f"\n{model.info}")
+
         iters, train_losses, train_accs, valid_losses, valid_accs = train_model(
             model=model,
             X_train=X_train,
@@ -191,20 +208,22 @@ def main(
             X_valid=X_valid,
             t_valid=y_valid,
             iters_num=epochs,
-            plot_interval=epochs / 100,
+            metrics_interval=metrics_interval,
             verbose=verbose,
             plot=plot,
+            patience=patience,
             name="WDBC"
         )
 
-        save_training_result(
-            model=model,
-            iterations=iters,
-            train_losses=train_losses,
-            train_accs=train_accs,
-            valid_losses=valid_losses,
-            valid_accs=valid_accs
-        )
+        if save:
+            save_training_result(
+                model=model,
+                iterations=iters,
+                train_losses=train_losses,
+                train_accs=train_accs,
+                valid_losses=valid_losses,
+                valid_accs=valid_accs
+            )
         return model, iters, train_losses, train_accs, valid_losses, valid_accs
 
     except Exception as e:
@@ -242,10 +261,10 @@ def parse_arguments():
     )
     parser.add_argument(
         "--epochs",
-        type=int_range(100, 10000),
+        type=int_range(100, 100000),
         default=5000,
         help="Number of training epochs "
-             "(integer in range [1, 10000], default: 5000)"
+             "(integer in range [1, 100000], default: 5000)"
     )
     parser.add_argument(
         "--learning_rate",
@@ -272,6 +291,16 @@ def parse_arguments():
         default=True,
         help="plot (true/false, t/f)"
     )
+    parser.add_argument(
+        "--metrics_interval",
+        type=int_range(1, 1000),
+        help="metrics interval in range[1, 1000]"
+    )
+    parser.add_argument(
+        "--patience",
+        type=int_range(1, 10000),
+        help="Ealry stopping patience in range[1, 10000]"
+    )
     return parser.parse_args()
 
 
@@ -284,5 +313,7 @@ if __name__ == "__main__":
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
         verbose=args.verbose,
-        plot=args.plot
+        plot=args.plot,
+        metrics_interval=args.metrics_interval,
+        patience=args.patience,
     )
