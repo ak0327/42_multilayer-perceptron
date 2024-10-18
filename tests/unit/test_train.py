@@ -49,18 +49,22 @@ def _get_mnist():
 
 
 def test_wdbc():
+    seed = 42
+
     X_train, X_valid, t_train, t_valid = get_wdbc(csv_path="data/data.csv")
 
-    lr = 0.01
+    lr = 0.0005
     optimizer = Adam(lr=lr)
 
     net = Sequential(
         layers=[
-            Dense(in_features=30, out_features=50, activation=ReLU, init_method=he_normal),
-            Dense(in_features=50, out_features=10, activation=Softmax, init_method=xavier_normal)
+            Dense(in_features=30, out_features=50, activation=ReLU, init_method=he_normal, seed=seed),
+            Dense(in_features=50, out_features=50, activation=ReLU, init_method=he_normal, seed=seed),
+            Dense(in_features=50, out_features=10, activation=Softmax, init_method=xavier_normal, seed=seed)
         ],
         criteria=CrossEntropyLoss,
         optimizer=optimizer,
+        weight_decay=0.001,
     )
 
     _, _, train_accs, _, valid_accs = train_model(
@@ -69,25 +73,28 @@ def test_wdbc():
         t_train=t_train,
         X_valid=X_valid,
         t_valid=t_valid,
-        iters_num=1000,
+        iters_num=2500,
         verbose=False,
         plot=False,
+        metrics_interval=100,
         name="WDBC"
     )
-    assert 0.9 <= train_accs[-1]
-    assert 0.9 <= valid_accs[-1]
+    assert 0.93 <= train_accs[-1]
+    assert 0.93 <= valid_accs[-1]
 
 
 def test_mnist():
+    seed = 42
+
     X_train, X_valid, t_train, t_valid = _get_mnist()
 
-    lr = 0.01
-    optimizer = SGD(lr=lr)
+    lr = 0.001
+    optimizer = Adam(lr=lr)
 
     net = Sequential(
         layers=[
-            Dense(in_features=784, out_features=50, activation=ReLU, init_method=he_normal),
-            Dense(in_features=50, out_features=10, activation=Softmax, init_method=xavier_normal)
+            Dense(in_features=784, out_features=50, activation=ReLU, init_method=he_normal, seed=seed),
+            Dense(in_features=50, out_features=10, activation=Softmax, init_method=xavier_normal, seed=seed)
         ],
         criteria=CrossEntropyLoss,
         optimizer=optimizer,
@@ -104,5 +111,5 @@ def test_mnist():
         plot=False,
         name="MNIST"
     )
-    assert 0.9 <= train_accs[-1]
-    assert 0.9 <= valid_accs[-1]
+    assert 0.93 <= train_accs[-1]
+    assert 0.93 <= valid_accs[-1]

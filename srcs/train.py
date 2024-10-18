@@ -31,7 +31,7 @@ def train_model(
         X_valid: np.ndarray,
         t_valid: np.ndarray,
         iters_num: int = 5000,
-        metrics_interval: int = 100,
+        metrics_interval: int = 1,
         verbose: bool = True,
         plot: bool = True,
         patience: int | None = None,
@@ -69,7 +69,7 @@ def train_model(
         # 重みパラメーター更新
         model.update_params()
 
-        if epoch % metrics_interval == 0:
+        if epoch % metrics_interval == 0 or epoch + 1 == iters_num:
             # メトリクスを計算　格納
             train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
             y_valid = model.forward(X_valid)
@@ -294,6 +294,7 @@ def parse_arguments():
     parser.add_argument(
         "--metrics_interval",
         type=int_range(1, 1000),
+        required=True,
         help="metrics interval in range[1, 1000]"
     )
     parser.add_argument(

@@ -31,9 +31,9 @@ def _assert_sample_size(y_true: np.ndarray, y_pred: np.ndarray):
                          f"of samples: [{t_size}, {y_size}]")
 
 
-def accuracy_score(y_true: np.ndarray, y_pred: np.ndarray):
+def accuracy_score(y_true: np.ndarray, y_pred: np.ndarray, zero_division=0.0):
     tp, fp, fn, tn = _get_confusion_matrix(y_true, y_pred)
-    accuracy = (tp + tn) / (tp + tn + fp + fn)
+    accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0.0 else zero_division
     return accuracy
 
 
