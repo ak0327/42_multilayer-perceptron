@@ -44,12 +44,13 @@ class Linear:
             self,
             in_features: int,
             out_features: int,
-            init_method: callable = he_normal
+            init_method: callable = he_normal,
+            seed: int = 42,
     ):
         self.in_features = in_features
         self.out_features = out_features
 
-        self.W: np.ndarray = init_method(in_features=in_features, out_features=out_features)
+        self.W: np.ndarray = init_method(in_features=in_features, out_features=out_features, seed=seed)
         self.b: np.ndarray = np.zeros(out_features)
 
         self.x: Optional[np.ndarray] = None
@@ -110,12 +111,14 @@ class Dense:
             in_features: int,
             out_features: int,
             activation: callable,
-            init_method: callable = he_normal
+            init_method: callable = he_normal,
+            seed: int = 42,
     ):
         self.linear = Linear(
             in_features=in_features,
             out_features=out_features,
-            init_method=init_method
+            init_method=init_method,
+            seed=seed
         )
 
         self.activation: Optional[callable] = activation()

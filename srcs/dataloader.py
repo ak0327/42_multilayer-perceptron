@@ -116,7 +116,7 @@ def get_wdbc(
         csv_path: str,
         train_size: float = 0.8,
         shuffle: bool = False,
-        random_state: int = None
+        random_state: int = 42
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     # X, y = load_wdbc_data(csv_path=csv_path)
     X, y = load_csv(csv_path=csv_path)
