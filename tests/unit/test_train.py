@@ -69,20 +69,20 @@ def test_wdbc():
         t_train=t_train,
         X_valid=X_valid,
         t_valid=t_valid,
-        iters_num=3000,
-        batch_size=100,
+        iters_num=1000,
         verbose=False,
         plot=False,
         name="WDBC"
     )
-    assert 0.9 <= train_accs[-1] and 0.9 <= valid_accs[-1]
+    assert 0.9 <= train_accs[-1]
+    assert 0.9 <= valid_accs[-1]
 
 
 def test_mnist():
     X_train, X_valid, t_train, t_valid = _get_mnist()
 
     lr = 0.01
-    optimizer = Adam(lr=lr)
+    optimizer = SGD(lr=lr)
 
     net = Sequential(
         layers=[
@@ -99,10 +99,10 @@ def test_mnist():
         t_train=t_train,
         X_valid=X_valid,
         t_valid=t_valid,
-        iters_num=3000,
-        batch_size=100,
-        verbose=False,
+        iters_num=10,
+        verbose=True,
         plot=False,
         name="MNIST"
     )
-    assert 0.9 <= train_accs[-1] and 0.9 <= valid_accs[-1]
+    assert 0.9 <= train_accs[-1]
+    assert 0.9 <= valid_accs[-1]

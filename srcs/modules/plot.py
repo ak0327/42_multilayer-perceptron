@@ -2,7 +2,7 @@ import os
 import sys
 sys.path.append(os.pardir)
 
-
+import numpy as np
 import matplotlib.pylab as plt
 from matplotlib.animation import FuncAnimation
 

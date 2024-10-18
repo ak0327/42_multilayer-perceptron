@@ -17,7 +17,7 @@ from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import save_training_result, save_model, load_npz, load_csv
 from srcs.modules.parser import int_range, float_range, str2bool
-from srcs.modules.metrics import get_metrics
+from srcs.modules.metrics import get_metrics, accuracy_score
 
 
 np.random.seed(42)
@@ -30,17 +30,11 @@ def train_model(
         X_valid: np.ndarray,
         t_valid: np.ndarray,
         iters_num: int = 5000,
-        batch_size: int = 100,
         plot_interval: int = 100,
         verbose: bool = True,
         plot: bool = True,
         name: str = "MNIST"
 ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
-    if X_train.shape[0] < batch_size:
-        raise ValueError(f"Batch size {batch_size} is "
-                         f"larger than the number of training samples "
-                         f"({X_train.shape[0]})")
-
     if verbose:
         print(f" Training {name}...")
 
@@ -58,17 +52,11 @@ def train_model(
 
     # 学習開始
     for epoch in range(iters_num):
-
-        # ミニバッチ生成
-        batch_mask = np.random.choice(train_size, batch_size, replace=False)
-        X_batch = X_train[batch_mask]
-        t_batch = t_train[batch_mask]
-
         # 順伝播
-        y_batch = model.forward(X_batch)
+        y_train = model.forward(X_train)
 
         # 損失関数の値算出
-        train_loss = model.loss(y_batch, t_batch)
+        train_loss = model.loss(y_train, t_train)
 
         # 逆伝播 勾配の計算
         model.backward()
@@ -76,21 +64,19 @@ def train_model(
         # 重みパラメーター更新
         model.update_params()
 
+        # メトリクスを計算　格納
+        train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
+        y_valid = model.forward(X_valid)
+        valid_loss = model.loss(y_valid, t_valid)
+        valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
+
+        iterations.append(epoch)
+        train_losses.append(train_loss)
+        train_accs.append(train_acc)
+        valid_losses.append(valid_loss)
+        valid_accs.append(valid_acc)
+
         if epoch % plot_interval == 0:
-            y_train = model.forward(X_train)
-            train_loss = model.loss(y_train, t_train)
-            train_acc = model.accuracy(y_train, t_train)
-
-            y_valid = model.forward(X_valid)
-            valid_loss = model.loss(y_valid, t_valid)
-            valid_acc = model.accuracy(y_valid, t_valid)
-
-            iterations.append(epoch)
-            train_losses.append(train_loss)
-            train_accs.append(train_acc)
-            valid_losses.append(valid_loss)
-            valid_accs.append(valid_acc)
-
             if verbose:
                 print(f' Epoch:{epoch:>4}/{iters_num}, '
                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
@@ -184,7 +170,6 @@ def main(
         dataset_csv_path: str | None,
         hidden_features: list[int],
         epochs: int,
-        batch_size: int,
         learning_rate: float,
         weight_decay: float,
         verbose: bool,
@@ -206,7 +191,6 @@ def main(
             X_valid=X_valid,
             t_valid=y_valid,
             iters_num=epochs,
-            batch_size=batch_size,
             plot_interval=epochs / 100,
             verbose=verbose,
             plot=plot,
@@ -264,12 +248,6 @@ def parse_arguments():
              "(integer in range [1, 10000], default: 5000)"
     )
     parser.add_argument(
-        "--batch_size",
-        type=int_range(1, 200),
-        default=100,
-        help="Batch size for training (integer in range [1, 200], default: 100)"
-    )
-    parser.add_argument(
         "--learning_rate",
         type=float_range(0.0001, 1.0),
         default=0.01,
@@ -303,7 +281,6 @@ if __name__ == "__main__":
         dataset_csv_path=args.dataset_csv_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
-        batch_size=args.batch_size,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
         verbose=args.verbose,
