@@ -1,5 +1,5 @@
 import numpy as np
-from srcs.modules.loss import cross_entropy
+from srcs.modules.loss import CrossEntropyLoss
 
 
 class Softmax:
@@ -33,6 +33,7 @@ class Softmax:
 class SoftmaxWithCrossEntropyLoss:
     def __init__(self):
         self.softmax = Softmax()
+        self.cross_entropy = CrossEntropyLoss()
         self.loss = None
         self.y = None  # softmaxの出力
         self.t = None  # 教師データ
@@ -43,7 +44,7 @@ class SoftmaxWithCrossEntropyLoss:
     def forward(self, x, t):
         self.t = t
         self.y = self.softmax(x)
-        self.loss = cross_entropy(self.y, self.t)
+        self.loss = self.cross_entropy(self.y, self.t)
 
         return self.loss
 

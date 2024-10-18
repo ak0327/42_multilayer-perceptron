@@ -1,7 +1,6 @@
 import numpy as np
 from srcs.modules.functions import Softmax, numerical_gradient
 from srcs.modules.activation import ReLU
-from srcs.modules.loss import cross_entropy
 from srcs.modules.optimizer import Optimizer
 from srcs.modules.init import he_normal
 

@@ -176,7 +176,7 @@ class Sequential:
         return grads
 
     def numerical_grad(self, x, t):
-        loss_W = lambda W: self.loss(x, t)
+        loss_W = lambda W: self.loss(self.forward(x), t)
 
         numerical_grads = {}
         for i, layer in enumerate(self.layers):

@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from srcs.modules.functions import Softmax, np_log, numerical_gradient
 from srcs.modules.activation import ReLU, Sigmoid
-from srcs.modules.loss import cross_entropy, CrossEntropyLoss
+from srcs.modules.loss import CrossEntropyLoss
 from srcs.modules.init import he_normal, xavier_normal, normal
 from srcs.modules.optimizer import Optimizer
 from srcs.modules.optimizer import (

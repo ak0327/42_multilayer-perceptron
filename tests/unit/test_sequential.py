@@ -44,7 +44,12 @@ def normed_relative_diff(a: np.ndarray, b: np.ndarray) -> float:
     return np.linalg.norm(a - b) / (np.linalg.norm(a) + np.linalg.norm(b))
 
 
-def _test_gradient(model, x_train, t_train, batch_size):
+def _test_gradient(
+        model: Sequential,
+        x_train: np.ndarray,
+        t_train: np.ndarray,
+        batch_size: int
+):
     print(f"Testing Gradient...")
 
     x = x_train[:batch_size]
@@ -56,7 +61,10 @@ def _test_gradient(model, x_train, t_train, batch_size):
     # 数値微分と誤差逆伝播法で勾配算出
     grad_numerical = model.numerical_grad(x, t)
     # print(f"grad_numerical: {grad_numerical}")
-    grad_backprop = model.backward(x, t)
+
+    y = model.forward(x)
+    _ = model.loss(y, t)
+    grad_backprop = model.backward()
     # print(f"grad_backprop: {grad_backprop}")
 
     # 各重みの差を確認
