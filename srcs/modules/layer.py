@@ -153,6 +153,9 @@ class Dense:
     def set_id(self, id):
         self.layer_id = id
 
+    def set_dW(self, dW):
+        self.linear.dW = dW
+
     @property
     def W(self) -> np.ndarray:
         return self.linear.W

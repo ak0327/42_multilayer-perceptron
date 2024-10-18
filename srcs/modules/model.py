@@ -166,6 +166,12 @@ class Sequential:
         for layer in reversed(self.layers):
             dout = layer.backward(dout)
 
+        # L2正則化に基づく勾配を追加で計算して、パラメータに反映
+        for layer in self.layers:
+            if self.weight_decay > 0:
+                dW = layer.dW + self.weight_decay * layer.W  # L2正則化の勾配を追加
+                layer.set_dW(dW)
+
         grads = self.grads
         return grads
 
