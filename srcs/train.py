@@ -17,6 +17,11 @@ from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import save_training_result, save_model, load_npz, load_csv
 from srcs.modules.parser import int_range, float_range, str2bool
+from srcs.modules.metrics import get_metrics, accuracy_score
+from srcs.modules.tools import EarlyStopping
+
+
+np.random.seed(42)
 
 
 def train_model(
@@ -26,17 +31,12 @@ def train_model(
         X_valid: np.ndarray,
         t_valid: np.ndarray,
         iters_num: int = 5000,
-        batch_size: int = 100,
-        plot_interval: int = 100,
+        metrics_interval: int = 1,
         verbose: bool = True,
         plot: bool = True,
+        patience: int | None = None,
         name: str = "MNIST"
 ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
-    if X_train.shape[0] < batch_size:
-        raise ValueError(f"Batch size {batch_size} is "
-                         f"larger than the number of training samples "
-                         f"({X_train.shape[0]})")
-
     if verbose:
         print(f" Training {name}...")
 
@@ -52,27 +52,29 @@ def train_model(
     if plot:
         plotter = RealtimePlot(iters_num)
 
+    if patience is not None:
+        early_stopping = EarlyStopping(patience=patience, verbose=False)
+
     # 学習開始
     for epoch in range(iters_num):
+        # 順伝播
+        y_train = model.forward(X_train)
 
-        # ミニバッチ生成
-        batch_mask = np.random.choice(train_size, batch_size, replace=False)
-        X_batch = X_train[batch_mask]
-        t_batch = t_train[batch_mask]
+        # 損失関数の値算出
+        train_loss = model.loss(y_train, t_train)
 
-        # 勾配の計算
-        model.backward(X_batch, t_batch)
+        # 逆伝播 勾配の計算
+        model.backward()
 
         # 重みパラメーター更新
         model.update_params()
 
-        # 損失関数の値算出
-        train_loss = model.loss(X_batch, t_batch)
-
-        if epoch % plot_interval == 0:
-            train_acc = model.accuracy(X_train, t_train)
-            valid_acc = model.accuracy(X_valid, t_valid)
-            valid_loss = model.loss(X_valid, t_valid)
+        if epoch % metrics_interval == 0 or epoch + 1 == iters_num:
+            # メトリクスを計算　格納
+            train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
+            y_valid = model.forward(X_valid)
+            valid_loss = model.loss(y_valid, t_valid)
+            valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
 
             iterations.append(epoch)
             train_losses.append(train_loss)
@@ -89,13 +91,32 @@ def train_model(
                     epoch, train_loss, train_acc, valid_loss, valid_acc
                 )
 
+        if patience is not None:
+            early_stopping(valid_loss, model)
+            if early_stopping.early_stop:
+                model = early_stopping.best_model
+                break
+
     if plot:
         plotter.plot()
+
+    y_train = model.forward(X_train)
+    train_acc, train_prec, train_recall, train_f1 = get_metrics(y_train, t_train)
+    y_valid = model.forward(X_valid)
+    valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
+
+    print(f"\nMetrics: \n"
+          f" Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+          f" Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]")
 
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
 
-def _create_model(hidden_features: list[int], learning_rate: float):
+def _create_model(
+        hidden_features: list[int],
+        learning_rate: float,
+        weight_decay: float,
+):
     _features = [30] + hidden_features + [2]
     _last_layer_idx = len(_features) - 2
 
@@ -123,6 +144,7 @@ def _create_model(hidden_features: list[int], learning_rate: float):
         layers=_layers,
         criteria=CrossEntropyLoss,
         optimizer=_optimizer,
+        weight_decay=weight_decay,
     )
     return _model
 
@@ -159,16 +181,26 @@ def main(
         dataset_csv_path: str | None,
         hidden_features: list[int],
         epochs: int,
-        batch_size: int,
         learning_rate: float,
+        weight_decay: float,
         verbose: bool,
-        plot: bool
+        plot: bool,
+        metrics_interval: int,
+        patience: int | None,
+        save: bool = True,
 ):
     print(f"\n[Training]")
     try:
         X_train, X_valid, y_train, y_valid = _get_train_data(dataset_csv_path)
-        model = _create_model(hidden_features, learning_rate)
-        print(f"\n{model.info}")
+
+        model = _create_model(
+            hidden_features=hidden_features,
+            learning_rate=learning_rate,
+            weight_decay=weight_decay,
+        )
+        if verbose:
+            print(f"\n{model.info}")
+
         iters, train_losses, train_accs, valid_losses, valid_accs = train_model(
             model=model,
             X_train=X_train,
@@ -176,21 +208,22 @@ def main(
             X_valid=X_valid,
             t_valid=y_valid,
             iters_num=epochs,
-            batch_size=batch_size,
-            plot_interval=epochs / 100,
+            metrics_interval=metrics_interval,
             verbose=verbose,
             plot=plot,
+            patience=patience,
             name="WDBC"
         )
 
-        save_training_result(
-            model=model,
-            iterations=iters,
-            train_losses=train_losses,
-            train_accs=train_accs,
-            valid_losses=valid_losses,
-            valid_accs=valid_accs
-        )
+        if save:
+            save_training_result(
+                model=model,
+                iterations=iters,
+                train_losses=train_losses,
+                train_accs=train_accs,
+                valid_losses=valid_losses,
+                valid_accs=valid_accs
+            )
         return model, iters, train_losses, train_accs, valid_losses, valid_accs
 
     except Exception as e:
@@ -228,16 +261,10 @@ def parse_arguments():
     )
     parser.add_argument(
         "--epochs",
-        type=int_range(100, 10000),
+        type=int_range(100, 100000),
         default=5000,
         help="Number of training epochs "
-             "(integer in range [1, 10000], default: 5000)"
-    )
-    parser.add_argument(
-        "--batch_size",
-        type=int_range(1, 100),
-        default=100,
-        help="Batch size for training (integer in range [1, 100], default: 100)"
+             "(integer in range [1, 100000], default: 5000)"
     )
     parser.add_argument(
         "--learning_rate",
@@ -245,6 +272,12 @@ def parse_arguments():
         default=0.01,
         help="Learning rate for training "
              "(float in range [0.0001, 1.0], default: 0.01)"
+    )
+    parser.add_argument(
+        "--weight_decay",
+        type=float_range(0.0, 1.0),
+        default=0.0,
+        help="Weight decay (float in range [0.0, 1.0], default: 0.0)"
     )
     parser.add_argument(
         "--verbose",
@@ -258,6 +291,17 @@ def parse_arguments():
         default=True,
         help="plot (true/false, t/f)"
     )
+    parser.add_argument(
+        "--metrics_interval",
+        type=int_range(1, 1000),
+        required=True,
+        help="metrics interval in range[1, 1000]"
+    )
+    parser.add_argument(
+        "--patience",
+        type=int_range(1, 10000),
+        help="Ealry stopping patience in range[1, 10000]"
+    )
     return parser.parse_args()
 
 
@@ -267,8 +311,10 @@ if __name__ == "__main__":
         dataset_csv_path=args.dataset_csv_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
-        batch_size=args.batch_size,
         learning_rate=args.learning_rate,
+        weight_decay=args.weight_decay,
         verbose=args.verbose,
-        plot=args.plot
+        plot=args.plot,
+        metrics_interval=args.metrics_interval,
+        patience=args.patience,
     )

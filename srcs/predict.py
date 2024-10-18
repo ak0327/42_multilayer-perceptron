@@ -15,6 +15,7 @@ from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import load_model, load_wdbc_data, load_npz, load_csv
+from srcs.modules.metrics import get_metrics
 
 
 def predict(
@@ -24,8 +25,10 @@ def predict(
         name: str ="MNIST"
 ) -> float:
     print(f" Predicting {name}...")
-    accuracy = model.accuracy(x=X_test, t=t_test)
-    print(f" Accuracy: {accuracy: .4f}")
+    y_pred = model.forward(X_test)
+
+    accuracy, precision, recall, f1_score = get_metrics(y=y_pred, t=t_test)
+    print(f" Pred  [Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}]")
     return accuracy
 
 

@@ -1,7 +1,6 @@
 import numpy as np
 from srcs.modules.functions import Softmax, numerical_gradient
 from srcs.modules.activation import ReLU
-from srcs.modules.loss import cross_entropy
 from srcs.modules.optimizer import Optimizer
 from srcs.modules.init import he_normal
 
@@ -44,12 +43,13 @@ class Linear:
             self,
             in_features: int,
             out_features: int,
-            init_method: callable = he_normal
+            init_method: callable = he_normal,
+            seed: int = 42,
     ):
         self.in_features = in_features
         self.out_features = out_features
 
-        self.W: np.ndarray = init_method(in_features=in_features, out_features=out_features)
+        self.W: np.ndarray = init_method(in_features=in_features, out_features=out_features, seed=seed)
         self.b: np.ndarray = np.zeros(out_features)
 
         self.x: Optional[np.ndarray] = None
@@ -110,12 +110,14 @@ class Dense:
             in_features: int,
             out_features: int,
             activation: callable,
-            init_method: callable = he_normal
+            init_method: callable = he_normal,
+            seed: int = 42,
     ):
         self.linear = Linear(
             in_features=in_features,
             out_features=out_features,
-            init_method=init_method
+            init_method=init_method,
+            seed=seed
         )
 
         self.activation: Optional[callable] = activation()
@@ -150,6 +152,9 @@ class Dense:
     def set_id(self, id):
         self.layer_id = id
 
+    def set_dW(self, dW):
+        self.linear.dW = dW
+
     @property
     def W(self) -> np.ndarray:
         return self.linear.W
@@ -170,3 +175,23 @@ class Dense:
         linear = self.linear.info
         activation = None if self.activation is None else self.activation.info
         return linear, activation
+
+
+class Dropout:
+    def __init__(self, dropout_ratio: float = 0.5):
+        if not (0.0 <= dropout_ratio < 1.0) or np.isnan(dropout_ratio):
+            raise ValueError(f"Invalid dropout_ratio value: {dropout_ratio}. "
+                             f"Must be in [0, 1).")
+
+        self.dropout_ratio = dropout_ratio
+        self.mask = None
+
+    def forward(self, x: np.ndarray, train_flg: bool = True):
+        if train_flg:
+            self.mask = np.random.rand(*x.shape) > self.dropout_ratio
+            return x * self.mask
+        else:
+            return x * (1.0 - self.dropout_ratio)
+
+    def backward(self, dout: np.ndarray):
+        return dout * self.mask

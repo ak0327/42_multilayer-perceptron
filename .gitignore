@@ -12,6 +12,9 @@
 !srcs/modules
 !srcs/**/**.py
 
+!notebook
+!notebook/**.ipynb
+
 !tests
 !tests/unit
 !tests/integration
@@ -22,3 +25,4 @@
 
 !requirements.txt
 !pytest.ini
+!Makefile

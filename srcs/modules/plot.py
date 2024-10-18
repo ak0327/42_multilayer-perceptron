@@ -2,7 +2,7 @@ import os
 import sys
 sys.path.append(os.pardir)
 
-
+import numpy as np
 import matplotlib.pylab as plt
 from matplotlib.animation import FuncAnimation
 
@@ -52,3 +52,35 @@ class RealtimePlot:
     def plot(self):
         plt.ioff()
         plt.show()
+
+
+def plot_multiple_models(max_itr, models_results, figsize=(10, 10)):
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize)
+    colors = plt.cm.rainbow(np.linspace(0, 1, len(models_results)))
+
+    for i, result in enumerate(models_results):
+        color = colors[i]
+        name = result['name']
+
+        # Loss plot
+        ax1.plot(result['iterations'], result['train_losses'], color=color, linestyle='-', label=f'{name} Train Loss')
+        ax1.plot(result['iterations'], result['valid_losses'], color=color, linestyle='--', label=f'{name} Valid Loss')
+
+        # Accuracy plot
+        ax2.plot(result['iterations'], result['train_accs'], color=color, linestyle='-', label=f'{name} Train Acc')
+        ax2.plot(result['iterations'], result['valid_accs'], color=color, linestyle='--', label=f'{name} Valid Acc')
+
+    ax1.set_xlabel('Iterations')
+    ax1.set_ylabel('Loss')
+    ax1.legend()
+    ax1.set_title('Loss Curves')
+    ax1.set_xlim(0, max_itr)
+
+    ax2.set_xlabel('Iterations')
+    ax2.set_ylabel('Accuracy')
+    ax2.legend()
+    ax2.set_title('Accuracy Curves')
+    ax2.set_xlim(0, max_itr)
+
+    plt.tight_layout()
+    plt.show()

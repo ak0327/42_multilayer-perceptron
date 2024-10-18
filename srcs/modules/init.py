@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def he_normal(in_features: int, out_features: int) -> np.ndarray:
+def he_normal(in_features: int, out_features: int, seed: int = None) -> np.ndarray:
     """
     He initialization for neural network weights.
     This method is designed for layers with ReLU activation.
@@ -12,10 +12,14 @@ def he_normal(in_features: int, out_features: int) -> np.ndarray:
     """
     if in_features == 0:
         raise ValueError("Input dimension cannot be zero.")
+
+    if seed is not None:
+        np.random.seed(seed)
+
     return np.random.randn(in_features, out_features) * np.sqrt(2.0 / in_features)
 
 
-def xavier_normal(in_features: int, out_features: int) -> np.ndarray:
+def xavier_normal(in_features: int, out_features: int, seed: int = None) -> np.ndarray:
     """
     Xavier (Glorot) initialization for neural network weights.
     This method is designed for layers with tanh or sigmoid activation.
@@ -26,10 +30,14 @@ def xavier_normal(in_features: int, out_features: int) -> np.ndarray:
     """
     if in_features == 0:
         raise ValueError("Input dimension cannot be zero.")
+
+    if seed is not None:
+        np.random.seed(seed)
+
     return np.random.randn(in_features, out_features) * np.sqrt(1.0 / in_features)
 
 
-def normal(in_features: int, out_features: int, std: float = 0.01) -> np.ndarray:
+def normal(in_features: int, out_features: int, std: float = 0.01, seed: int = None) -> np.ndarray:
     """
     Normal (Gaussian) initialization for neural network weights.
 
@@ -42,4 +50,8 @@ def normal(in_features: int, out_features: int, std: float = 0.01) -> np.ndarray
         raise ValueError("Input dimension cannot be zero.")
     if std < 0:
         raise ValueError("Standard deviation must be non-negative.")
+
+    if seed is not None:
+        np.random.seed(seed)
+
     return np.random.randn(in_features, out_features) * std

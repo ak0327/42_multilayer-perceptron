@@ -26,20 +26,22 @@ def _run_train():
         # '--dataset_csv_path', 'data/data_train.csv',
         '--hidden_features', '50', '30',
         '--epochs', '5000',
-        '--batch_size', '100',
         '--learning_rate', '0.0001',
         '--verbose', 'false',
         '--plot', 'false',
+        '--metrics_interval', '100',
     ]
     args = train.parse_arguments()
     train.main(
         dataset_csv_path=args.dataset_csv_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
-        batch_size=args.batch_size,
         learning_rate=args.learning_rate,
+        weight_decay=args.weight_decay,
         verbose=args.verbose,
-        plot=args.plot
+        plot=args.plot,
+        metrics_interval=args.metrics_interval,
+        patience=args.patience,
     )
 
 
