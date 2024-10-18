@@ -18,6 +18,7 @@ jobs:
           make info
       - name: Run make t
         run: |
+          source ft_mlp_venv/bin/activate
           make t
       - name: Run make fclean
         run: make fclean
@@ -45,6 +46,7 @@ jobs:
           make info
       - name: Run make t
         run: |
+          source ft_mlp_venv/bin/activate
           make t
       - name: Run make fclean
         run: make fclean
