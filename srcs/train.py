@@ -119,7 +119,7 @@ def create_model(
         optimp_str: str = "SGD",
 ):
     if len(features) < 3:
-        ValueError(f"features must larger than 3")
+        raise ValueError(f"features must larger than 3")
     _last_layer_idx = len(features) - 2
 
     _layers = []
