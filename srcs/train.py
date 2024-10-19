@@ -272,10 +272,10 @@ def parse_arguments():
         "--hidden_features",
         type=int,
         nargs='*',
-        default=[24, 24, 24],
+        default=[24, 24],
         help="Number of neurons in each hidden layer "
-             "(1 to 3 values, e.g., "
-             "--hidden_features 24 or --hidden_features 24 24 24)"
+             "(2 to 5 values, e.g., "
+             "--hidden_features 24 42 or --hidden_features 24 42 24 42 24)"
     )
     parser.add_argument(
         "--epochs",
