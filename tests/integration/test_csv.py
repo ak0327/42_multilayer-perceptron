@@ -28,7 +28,7 @@ def _run_train():
         '--dataset_csv_path', 'data/data_train.csv',
         '--hidden_features', '50', '30',
         '--epochs', '5000',
-        '--learning_rate', '0.0001',
+        '--learning_rate', '0.001',
         '--verbose', 'false',
         '--plot', 'false',
         '--metrics_interval', '100',
