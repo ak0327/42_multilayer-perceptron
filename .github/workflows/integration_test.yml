@@ -103,7 +103,7 @@ jobs:
           source ft_mlp_venv/bin/activate
 
           python3 srcs/dataloader.py \
-          --dataset data/data.csv \
+          --dataset_path data/data.csv \
           --train_size 0.8 \
           --shuffle true \
           --save_npz false \
@@ -121,7 +121,7 @@ jobs:
           source ft_mlp_venv/bin/activate
 
           python3 srcs/train.py \
-          --dataset_csv_path data/data_train.csv \
+          --dataset_path data/data_train.csv \
           --hidden_features 50 30 \
           --epochs 1000 \
           --learning_rate 0.0001 \
@@ -132,7 +132,7 @@ jobs:
           --save_dir data
           
           python3 srcs/train.py \
-          --dataset_csv_path data/data_train.csv \
+          --dataset_path data/data_train.csv \
           --hidden_features 50 30 \
           --epochs 1000 \
           --learning_rate 0.0001 \
@@ -148,11 +148,11 @@ jobs:
 
           python3 srcs/predict.py \
           --model_path ../data/model.pkl \
-          --dataset_csv_path ../data/data_test.csv
+          --dataset_path ../data/data_test.csv
 
           python3 srcs/predict.py \
           --model_path ../data/model.pkl \
-          --dataset_csv_path ../data/data_test.npz
+          --dataset_path ../data/data_test.npz
 
       - name: Run make fclean
         run: make fclean

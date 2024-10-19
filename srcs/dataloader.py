@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from typing import Union, overload
 
-from srcs.modules.io import save_to_npz, save_to_csv, load_wdbc_data, load_csv
+from srcs.modules.io import save_to_npz, save_to_csv, load_wdbc_data, load_csv, validate_extention
 from srcs.modules.parser import str2bool, float_range_exclusive
 
 
@@ -181,8 +181,8 @@ def parse_arguments():
         description="Process WDBC dataset for machine learning tasks"
     )
     parser.add_argument(
-        "--dataset",
-        type=str,
+        "--dataset_path",
+        type=validate_extention(["csv"]),
         required=True,
         help="Path to the WBDC CSV dataset"
     )
@@ -217,7 +217,7 @@ def parse_arguments():
 if __name__ == "__main__":
     args = parse_arguments()
     main(
-        csv_path=args.dataset,
+        csv_path=args.dataset_path,
         train_size=args.train_size,
         shuffle=args.shuffle,
         save_npz=args.save_npz,

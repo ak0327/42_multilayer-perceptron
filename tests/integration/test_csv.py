@@ -5,7 +5,7 @@ from srcs import dataloader, train, predict
 def _run_dataloader():
     sys.argv = [
         'dataloader.py',
-        '--dataset', 'data/data.csv',
+        '--dataset_path', 'data/data.csv',
         '--train_size', '0.8',
         '--shuffle', 'true',
         '--save_npz', 'false',
@@ -13,7 +13,7 @@ def _run_dataloader():
     ]
     args = dataloader.parse_arguments()
     _, _, _, _ = dataloader.main(
-        csv_path=args.dataset,
+        csv_path=args.dataset_path,
         train_size=args.train_size,
         shuffle=args.shuffle,
         save_npz=args.save_npz,
