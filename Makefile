@@ -1,6 +1,7 @@
-PYTHON_VERSION 	:= 3.10.1
-VENV_DIR 		:= ft_mlp_venv
-PYENV 			:= $(shell command -v pyenv 2> /dev/null)
+PYTHON_VERSION := 3.10.1
+VENV_DIR := ft_mlp_venv
+PYENV := $(shell command -v pyenv 2> /dev/null)
+PYTHON := python3
 
 .PHONY: all
 all: init
@@ -10,7 +11,7 @@ all: init
 	@echo "make run"
 
 .PHONY: init
-init: create-venv install-python install-requirements
+init: create-venv install-requirements
 	@echo "\nChecking virtual environment and Python version:"
 	@if [ -d "$(VENV_DIR)" ]; then \
 		echo "Virtual environment exists at $(VENV_DIR)"; \
@@ -28,21 +29,18 @@ init: create-venv install-python install-requirements
 create-venv:
 	@if [ ! -d "$(VENV_DIR)" ]; then \
 		echo "Creating new virtual environment..."; \
-		python3 -m venv $(VENV_DIR); \
+		if [ -n "$(PYENV)" ] && $(PYENV) versions | grep -q $(PYTHON_VERSION); then \
+			echo "Using pyenv Python $(PYTHON_VERSION)"; \
+			$(PYENV) local $(PYTHON_VERSION); \
+			$(PYENV) exec python -m venv $(VENV_DIR); \
+		else \
+			echo "Using system Python for virtual environment."; \
+			$(PYTHON) -m venv $(VENV_DIR) || { echo "Failed to create venv. Please ensure python3-venv is installed."; exit 1; }; \
+		fi; \
+		$(VENV_DIR)/bin/pip install --upgrade pip; \
 	else \
 		echo "Using existing virtual environment."; \
 	fi
-
-.PHONY: install-python
-install-python:
-	@if [ -n "$(PYENV)" ]; then \
-		echo "Using pyenv to install Python $(PYTHON_VERSION)"; \
-		$(PYENV) install -s $(PYTHON_VERSION) || true; \
-		$(PYENV) local $(PYTHON_VERSION) || true; \
-	else \
-		echo "pyenv not found. Using system Python for virtual environment."; \
-	fi
-	@$(VENV_DIR)/bin/pip install --upgrade pip
 
 .PHONY: install-requirements
 install-requirements:
@@ -67,8 +65,16 @@ run:
 		exit 1; \
 	fi
 
+.PHONY: notebook
+notebook:
+	@echo "Starting Jupyter Notebook in the virtual environment..."
+	@. $(VENV_DIR)/bin/activate && \
+	python -m ipykernel install --user --name=$(VENV_DIR) --display-name "Python ($(VENV_DIR))" && \
+	PYTHONPATH=$(VENV_DIR)/bin/python jupyter notebook
+
 .PHONY: fclean
 fclean:
+	deactivate
 	rm -rf $(VENV_DIR)
 
 .PHONY: t
