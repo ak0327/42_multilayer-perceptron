@@ -323,7 +323,7 @@ def parse_arguments():
     parser.add_argument(
         "--metrics_interval",
         type=int_range(1, 1000),
-        required=True,
+        default=1,
         help="metrics interval in range[1, 1000]"
     )
     parser.add_argument(
