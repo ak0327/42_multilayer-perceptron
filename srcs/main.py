@@ -37,7 +37,7 @@ def run_train():
         '--learning_rate', '0.0001',
         '--optimizer', 'Adam',
         '--verbose', 'true',
-        '--plot', 'true',
+        '--plot', 'false',
         '--metrics_interval', '100',
         '--save_dir', 'data',
         # '--patience', '500',
