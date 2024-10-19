@@ -1,0 +1,164 @@
+name: INTEGRATION_TEST
+on: [push]
+jobs:
+  run-utest-on-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Run make init
+        run: make init
+      - name: Activate venv and run make info
+        run: |
+          source ft_mlp_venv/bin/activate
+          make info
+
+      - name: Run Split
+        run: |
+          source ft_mlp_venv/bin/activate
+
+          python3 dataloader.py \
+          --dataset data/data.csv \
+          --train_size 0.8 \
+          --shuffle true \
+          --save_npz false \
+          --save_dir data
+
+          python3 dataloader.py \
+          --dataset data/data.csv \
+          --train_size 0.8 \
+          --shuffle true \
+          --save_npz true \
+          --save_dir data
+
+      - name: Run Train
+        run: |
+          source ft_mlp_venv/bin/activate
+
+          python3 train.py \
+          --dataset_csv_path data/data_train.csv \
+          --hidden_features 50 30 \
+          --epochs 1000 \
+          --learning_rate 0.0001 \
+          --optimizer Adam \
+          --verbose true \
+          --plot false \
+          --metrics_interval 10 \
+          --save_dir data
+          
+          python3 train.py \
+          --dataset_csv_path data/data_train.csv \
+          --hidden_features 50 30 \
+          --epochs 1000 \
+          --learning_rate 0.0001 \
+          --optimizer Adam \
+          --verbose true \
+          --plot false \
+          --metrics_interval 10 \
+          --save_dir data
+
+      - name: Run Predict
+        run: |
+          source ft_mlp_venv/bin/activate
+
+          python3 predict.py \
+          --model_path ../data/model.pkl \
+          --dataset_csv_path ../data/data_test.csv
+
+          python3 predict.py \
+          --model_path ../data/model.pkl \
+          --dataset_csv_path ../data/data_test.npz
+
+      - name: Run make fclean
+        run: make fclean
+      - name: Verify cleanup
+        run: |
+          if [ -d "ft_mlp_venv" ]; then
+            echo "ft_mlp_venv directory still exists after fclean"
+            exit 1
+          fi
+
+  run-utest-on-macos:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Run make init
+        run: make init
+      - name: Activate venv and run make info
+        run: |
+          source ft_mlp_venv/bin/activate
+          make info
+
+      - name: Run Split
+        run: |
+          source ft_mlp_venv/bin/activate
+
+          python3 srcs/dataloader.py \
+          --dataset data/data.csv \
+          --train_size 0.8 \
+          --shuffle true \
+          --save_npz false \
+          --save_dir data
+
+          python3 srcs/dataloader.py \
+          --dataset data/data.csv \
+          --train_size 0.8 \
+          --shuffle true \
+          --save_npz true \
+          --save_dir data
+
+      - name: Run Train
+        run: |
+          source ft_mlp_venv/bin/activate
+
+          python3 srcs/train.py \
+          --dataset_csv_path data/data_train.csv \
+          --hidden_features 50 30 \
+          --epochs 1000 \
+          --learning_rate 0.0001 \
+          --optimizer Adam \
+          --verbose true \
+          --plot false \
+          --metrics_interval 10 \
+          --save_dir data
+          
+          python3 srcs/train.py \
+          --dataset_csv_path data/data_train.csv \
+          --hidden_features 50 30 \
+          --epochs 1000 \
+          --learning_rate 0.0001 \
+          --optimizer Adam \
+          --verbose true \
+          --plot false \
+          --metrics_interval 10 \
+          --save_dir data
+
+      - name: Run Predict
+        run: |
+          source ft_mlp_venv/bin/activate
+
+          python3 srcs/predict.py \
+          --model_path ../data/model.pkl \
+          --dataset_csv_path ../data/data_test.csv
+
+          python3 srcs/predict.py \
+          --model_path ../data/model.pkl \
+          --dataset_csv_path ../data/data_test.npz
+
+      - name: Run make fclean
+        run: make fclean
+      - name: Verify cleanup
+        run: |
+          if [ -d "ft_mlp_venv" ]; then
+            echo "ft_mlp_venv directory still exists after fclean"
+            exit 1
+          fi
