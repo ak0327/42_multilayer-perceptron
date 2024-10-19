@@ -74,7 +74,6 @@ notebook:
 
 .PHONY: fclean
 fclean:
-	deactivate
 	rm -rf $(VENV_DIR)
 
 .PHONY: t
