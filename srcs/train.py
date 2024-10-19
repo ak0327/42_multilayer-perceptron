@@ -210,7 +210,7 @@ def main(
         features = [WDBC_INPUT] + hidden_features + [WDBC_OUTPUT]
 
         model = create_model(
-            hidden_features=features,
+            features=features,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             optimp_str=optimp_str,
