@@ -1,6 +1,20 @@
 import copy
 import numpy as np
+import pandas as pd
 from srcs.modules.model import Sequential
+
+
+def normalize(df: pd.DataFrame, columns: list[str]):
+    df_norm = df.copy()
+    for col in columns:
+        min_val = df[col].min()
+        max_val = df[col].max()
+        range_val = max_val - min_val
+        if range_val == 0:
+            df_norm[col] = 1
+        else:
+            df_norm[col] = (df[col] - min_val) / range_val
+    return df_norm
 
 
 class EarlyStopping:

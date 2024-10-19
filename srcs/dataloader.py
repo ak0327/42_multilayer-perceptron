@@ -116,10 +116,11 @@ def get_wdbc(
         csv_path: str,
         train_size: float = 0.8,
         shuffle: bool = False,
+        apply_normalize: bool = True,
         random_state: int = 42
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     # X, y = load_wdbc_data(csv_path=csv_path)
-    X, y = load_csv(csv_path=csv_path)
+    X, y = load_csv(csv_path=csv_path, apply_normalize=apply_normalize)
     X_train, X_test, y_train, y_test = train_test_split(
         X=X,
         y=y,

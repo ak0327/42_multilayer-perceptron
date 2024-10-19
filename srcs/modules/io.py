@@ -9,6 +9,7 @@ from itertools import product
 from typing import Union
 
 from srcs.modules.model import Sequential
+from srcs.modules.tools import normalize
 
 
 def save_to_npz(X: np.ndarray, y: np.ndarray, dir: str, name: str):
@@ -62,7 +63,8 @@ def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
 
 def load_csv(
         csv_path: str,
-        np: bool = False
+        np: bool = False,
+        apply_normalize: bool = True
 ) -> Union[tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series],
            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     try:
@@ -75,7 +77,7 @@ def load_csv(
         if 'id' in df.columns or df.shape[1] == 32:
             # print(f"load_wdbc_data")
             # 元のデータ形式の場合
-            X, y = load_wdbc_data(csv_path)
+            X, y = load_wdbc_data(csv_path, apply_normalize=apply_normalize)
         else:
             # print(f"load saved data")
             # 保存したデータの場合
@@ -91,7 +93,10 @@ def load_csv(
         raise IOError(f"Failed to load {csv_path}: {e}")
 
 
-def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
+def load_wdbc_data(
+        csv_path: str,
+        apply_normalize: bool = True
+) -> tuple[pd.DataFrame, pd.Series]:
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
     df = pd.read_csv(csv_path, header=None)
@@ -129,6 +134,11 @@ def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
         columns.append(f"{feature}_{stat}")
 
     df.columns = columns
+
+    if apply_normalize:
+        feature_columns = [col for col in columns if col not in ['id', 'diagnosis']]
+        df = normalize(df, feature_columns)
+
     df = df.drop('id', axis=1)
 
     # ラベルを数値に変換（M -> 1, B -> 0）
