@@ -14,6 +14,7 @@ def run_dataloader():
         '--shuffle', 'true',
         '--save_npz', 'false',
         # '--save_npz', 'true',
+        '--save_dir', 'data',
     ]
     args = dataloader.parse_arguments()
     _, _, _, _ = dataloader.main(
@@ -21,6 +22,7 @@ def run_dataloader():
         train_size=args.train_size,
         shuffle=args.shuffle,
         save_npz=args.save_npz,
+        save_dir=args.save_dir,
         random_state=42
     )
 
@@ -36,6 +38,7 @@ def run_train():
         '--verbose', 'true',
         '--plot', 'true',
         '--metrics_interval', '100',
+        '--save_dir', 'data',
         # '--patience', '500',
     ]
     args = train.parse_arguments()
@@ -49,6 +52,7 @@ def run_train():
         plot=args.plot,
         metrics_interval=args.metrics_interval,
         patience=args.patience,
+        save_dir=args.save_dir,
     )
 
 

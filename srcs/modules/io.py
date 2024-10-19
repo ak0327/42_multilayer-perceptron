@@ -11,20 +11,16 @@ from typing import Union
 from srcs.modules.model import Sequential
 
 
-TRAIN_RESULT_PATH = "data/training_results.npz"
-MODEL_PATH = "data/model.pkl"
-
-
-def save_to_npz(X: np.ndarray, y: np.ndarray, name: str):
+def save_to_npz(X: np.ndarray, y: np.ndarray, dir: str, name: str):
     try:
-        path = f"data/{name}.npz"
+        path = f"{dir}/{name}.npz"
         np.savez(path, X=X, y=y)
         print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
         raise IOError(f"fail to saving {name} data: {e}")
 
 
-def load_npz(npz_path: str) -> tuple[np.ndarray, : np.ndarray]:
+def load_npz(npz_path: str) -> tuple[np.ndarray, np.ndarray]:
     try:
         if not os.path.exists(npz_path):
             raise FileNotFoundError(f"Data file not found: {npz_path}")
@@ -52,12 +48,12 @@ def load_npz(npz_path: str) -> tuple[np.ndarray, : np.ndarray]:
         raise
 
 
-def save_to_csv(X: np.ndarray, y: np.ndarray, name: str):
+def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
     try:
         df = pd.DataFrame(X)
         df['diagnosis'] = y
 
-        path = f"data/{name}.csv"
+        path = f"{dir}/{name}.csv"
         df.to_csv(path, index=False)
         print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
@@ -145,11 +141,12 @@ def save_training_result(
         train_losses: list[float],
         train_accs: list[float],
         valid_losses: list[float],
-        valid_accs: list[float]
+        valid_accs: list[float],
+        save_dir: str,
 ):
-    save_model(model, MODEL_PATH)
+    save_model(model, f"{save_dir}/model.pkl")
     np.savez(
-        TRAIN_RESULT_PATH,
+        save_dir,
         iterations=iterations,
         train_losses=train_losses,
         train_accs=train_accs,
@@ -158,8 +155,8 @@ def save_training_result(
     )
 
 
-def load_training_result():
-    data = np.load(TRAIN_RESULT_PATH)
+def load_training_result(save_dir):
+    data = np.load(f"{save_dir}/training_results.npz")
     iterations = data['iterations']
     train_losses = data['train_losses']
     train_accs = data['train_accs']
@@ -167,11 +164,11 @@ def load_training_result():
     valid_accs = data['valid_accs']
 
 
-def save_model(model, filename=MODEL_PATH):
-    with open(filename, 'wb') as f:
+def save_model(model, path):
+    with open(path, 'wb') as f:
         pickle.dump(model, f)
 
 
-def load_model(filename=MODEL_PATH):
-    with open(filename, 'rb') as f:
+def load_model(path):
+    with open(path, 'rb') as f:
         return pickle.load(f)

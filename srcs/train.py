@@ -188,6 +188,7 @@ def main(
         metrics_interval: int,
         patience: int | None,
         save: bool = True,
+        save_dir: str = "data",
 ):
     print(f"\n[Training]")
     try:
@@ -222,7 +223,8 @@ def main(
                 train_losses=train_losses,
                 train_accs=train_accs,
                 valid_losses=valid_losses,
-                valid_accs=valid_accs
+                valid_accs=valid_accs,
+                save_dir=save_dir
             )
         return model, iters, train_losses, train_accs, valid_losses, valid_accs
 
@@ -302,6 +304,12 @@ def parse_arguments():
         type=int_range(1, 10000),
         help="Ealry stopping patience in range[1, 10000]"
     )
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        required=True,
+        help="model save dir"
+    )
     return parser.parse_args()
 
 
@@ -317,4 +325,5 @@ if __name__ == "__main__":
         plot=args.plot,
         metrics_interval=args.metrics_interval,
         patience=args.patience,
+        save_dir=args.save_dir,
     )
