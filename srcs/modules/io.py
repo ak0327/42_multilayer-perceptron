@@ -100,6 +100,14 @@ def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
     #     raise ValueError(f"Invalid data shape. "
     #                      f"Expected {expected_shape}, but got {df.shape}")
 
+    has_diagnosis_column = False
+    for col in df.columns:
+        if df[col].isin(["M", "B"]).any():
+            has_diagnosis_column = col
+            break
+    if not has_diagnosis_column:
+        raise ValueError("'diagnosis' not found")
+
     columns = ['id', 'diagnosis']
     # 特徴量の名前リスト
     features = [
@@ -122,11 +130,6 @@ def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
 
     df.columns = columns
     df = df.drop('id', axis=1)
-
-    # print(f"load_wdbc_data after rename columns and drop id")
-    # print(f" data shape: {df.shape}")
-    # print(f" data columns: {df.columns}")
-    # print(f" data info: {df.info}")
 
     # ラベルを数値に変換（M -> 1, B -> 0）
     y = pd.to_numeric(df['diagnosis'].map({'M': 1, 'B': 0}), downcast='integer')
