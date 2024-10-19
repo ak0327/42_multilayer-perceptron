@@ -61,13 +61,13 @@ def run_train():
 def run_predict():
     sys.argv = [
         'predict.py',
-        '--model_path',         'data/model.pkl',
-        '--dataset_csv_path',   'data/data_test.csv',
+        '--model_path',     'data/model.pkl',
+        '--dataset_path',   'data/data_test.csv',
     ]
     args = predict.parse_arguments()
     predict.main(
         model_path=args.model_path,
-        dataset_csv_path=args.dataset_csv_path,
+        dataset_path=args.dataset_path,
     )
 
 

@@ -54,12 +54,12 @@ def _run_predict():
     sys.argv = [
         'predict.py',
         '--model_path', 'data/model.pkl',
-        '--dataset_csv_path', 'data/data_test.csv',
+        '--dataset_path', 'data/data_test.csv',
     ]
     args = predict.parse_arguments()
     accuracy = predict.main(
         model_path=args.model_path,
-        dataset_csv_path=args.dataset_csv_path,
+        dataset_path=args.dataset_path,
     )
     return accuracy
 

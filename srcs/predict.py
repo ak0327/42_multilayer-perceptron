@@ -16,6 +16,7 @@ from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import load_model, load_wdbc_data, load_npz, load_csv
 from srcs.modules.metrics import get_metrics
+from srcs.modules.parser import validate_extention
 
 
 def predict(
@@ -33,15 +34,17 @@ def predict(
 
 
 def main(
-        dataset_csv_path: str | None,
+        dataset_path: str,
         model_path: str
 ) -> float:
     print(f"\n[Prediction]")
     try:
-        if dataset_csv_path is None:
-            X_test, y_test = load_npz("data/data_test.npz")
+        if dataset_path.endswith(".npz"):
+            X_test, y_test = load_npz(dataset_path)
+        elif dataset_path.endswith(".csv"):
+            X_test, y_test = load_csv(dataset_path, np=True)
         else:
-            X_test, y_test = load_csv(dataset_csv_path, np=True)
+            raise ValueError(f"Invalid file path: Required npz or csv")
 
         model: Sequential = load_model(model_path)
         accuracy = predict(
@@ -77,10 +80,10 @@ def parse_arguments():
         help="Path to trained model"
     )
     parser.add_argument(
-        "--dataset_csv_path",
-        type=str,
-        help="Path to the predict WBDC CSV dataset, "
-             "if omitted use test.npz"
+        "--dataset_path",
+        type=validate_extention(["npz", "csv"]),
+        required=True,
+        help="Path to the predict WBDC CSV or NPZ dataset."
     )
     return parser.parse_args()
 
@@ -89,6 +92,5 @@ if __name__ == "__main__":
     args = parse_arguments()
     main(
         model_path=args.model_path,
-        dataset_csv_path=args.dataset_csv_path,
-        dataset_npz_path=args.dataset_npz_path,
+        dataset_path=args.dataset_path,
     )

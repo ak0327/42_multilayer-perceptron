@@ -21,6 +21,16 @@ def str_expected(expected_strs: list[str]):
     return _checker
 
 
+def validate_extention(expected_ext: list[str]):
+    extensions = [ext.lower() for ext in expected_ext]
+    def _checker(arg):
+        filename = arg.lower()
+        if any(filename.endswith(ext) for ext in extensions):
+            return arg
+        raise argparse.ArgumentTypeError(f"{arg} is not expected: {extensions}")
+    return _checker
+
+
 def int_range(min_val, max_val):
     def _checker(arg):
         try:
