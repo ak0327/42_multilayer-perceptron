@@ -1,9 +1,9 @@
-jupyterlab
+notebook
+jupyter
 matplotlib
 numpy
 pandas
 tqdm
-
 
 tensorflow
 keras
