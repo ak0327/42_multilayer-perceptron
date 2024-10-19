@@ -18,7 +18,7 @@ from srcs.modules.optimizer import (
 from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.dataloader import get_wdbc
-from srcs.train import train_model
+from srcs.train import train_model, create_model
 
 
 np.random.seed(34)
@@ -53,18 +53,10 @@ def test_wdbc():
 
     X_train, X_valid, t_train, t_valid = get_wdbc(csv_path="data/data.csv")
 
-    lr = 0.0005
-    optimizer = Adam(lr=lr)
-
-    net = Sequential(
-        layers=[
-            Dense(in_features=30, out_features=50, activation=ReLU, init_method=he_normal, seed=seed),
-            Dense(in_features=50, out_features=50, activation=ReLU, init_method=he_normal, seed=seed),
-            Dense(in_features=50, out_features=10, activation=Softmax, init_method=xavier_normal, seed=seed)
-        ],
-        criteria=CrossEntropyLoss,
-        optimizer=optimizer,
-        weight_decay=0.001,
+    net = create_model(
+        features=[30, 50, 50, 2],
+        learning_rate=0.001,
+        optimp_str="ADAM"
     )
 
     _, _, train_accs, _, valid_accs = train_model(
@@ -88,16 +80,20 @@ def test_mnist():
 
     X_train, X_valid, t_train, t_valid = _get_mnist()
 
-    lr = 0.001
-    optimizer = Adam(lr=lr)
-
-    net = Sequential(
-        layers=[
-            Dense(in_features=784, out_features=50, activation=ReLU, init_method=he_normal, seed=seed),
-            Dense(in_features=50, out_features=10, activation=Softmax, init_method=xavier_normal, seed=seed)
-        ],
-        criteria=CrossEntropyLoss,
-        optimizer=optimizer,
+    # lr = 0.001
+    # optimizer = Adam(lr=lr)
+    # net = Sequential(
+    #     layers=[
+    #         Dense(in_features=784, out_features=50, activation=ReLU, init_method=he_normal, seed=seed),
+    #         Dense(in_features=50, out_features=10, activation=Softmax, init_method=xavier_normal, seed=seed)
+    #     ],
+    #     criteria=CrossEntropyLoss,
+    #     optimizer=optimizer,
+    # )
+    net = create_model(
+        features=[784, 50, 10],
+        learning_rate=0.001,
+        optimp_str="ADAM"
     )
 
     _, _, train_accs, _, valid_accs = train_model(
