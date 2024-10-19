@@ -25,7 +25,7 @@ def _run_dataloader():
 def _run_train():
     sys.argv = [
         'train.py',
-        # '--dataset_csv_path', 'data/data_train.csv',
+        '--dataset_path', 'data/data_train.npz',
         '--hidden_features', '50', '30',
         '--epochs', '5000',
         '--learning_rate', '0.001',
@@ -36,7 +36,7 @@ def _run_train():
     ]
     args = train.parse_arguments()
     train.main(
-        dataset_csv_path=args.dataset_csv_path,
+        dataset_path=args.dataset_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         learning_rate=args.learning_rate,

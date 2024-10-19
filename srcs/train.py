@@ -18,7 +18,7 @@ from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import save_training_result, load_npz, load_csv
-from srcs.modules.parser import int_range, float_range, str2bool, str_expected
+from srcs.modules.parser import int_range, float_range, str2bool, str_expected, validate_extention
 from srcs.modules.metrics import get_metrics, accuracy_score
 from srcs.modules.tools import EarlyStopping
 
@@ -162,13 +162,13 @@ def create_model(
 
 
 def _get_train_data(
-        dataset_csv_path: str | None
+        dataset_path: str | None
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     train_size = 0.8
     shuffle = False
     random_state = 42
 
-    if dataset_csv_path is None:
+    if dataset_path.endswith(".npz"):
         X, y = load_npz("data/data_train.npz")
         # X_valid, y_valid = load_npz("data/data_test.npz")
         X_train, X_valid, y_train, y_valid = train_test_split(
@@ -179,18 +179,21 @@ def _get_train_data(
             random_state=random_state,
             stratify=y
         )
-    else:
+    elif dataset_path.endswith(".csv"):
         X_train, X_valid, y_train, y_valid = get_wdbc(
-            csv_path=dataset_csv_path,
+            csv_path=dataset_path,
             train_size=train_size,
             shuffle=shuffle,
             random_state=random_state,
         )
+    else:
+        raise ValueError(f"Invalid file path: Required npz or csv")
+
     return X_train, X_valid, y_train, y_valid
 
 
 def main(
-        dataset_csv_path: str | None,
+        dataset_path: str | None,
         hidden_features: list[int],
         epochs: int,
         learning_rate: float,
@@ -205,7 +208,7 @@ def main(
 ):
     print(f"\n[Training]")
     try:
-        X_train, X_valid, y_train, y_valid = _get_train_data(dataset_csv_path)
+        X_train, X_valid, y_train, y_valid = _get_train_data(dataset_path)
 
         WDBC_INPUT = 30
         WDBC_OUTPUT = 2
@@ -265,10 +268,10 @@ def parse_arguments():
         description="Process WDBC dataset for machine learning tasks"
     )
     parser.add_argument(
-        "--dataset_csv_path",
-        type=str,
-        default=None,
-        help="train csv path, if omitted load train.npz"
+        "--dataset_path",
+        type=validate_extention(["npz", "csv"]),
+        required=True,
+        help="Path to the train WBDC CSV or NPZ dataset."
     )
     parser.add_argument(
         "--hidden_features",
@@ -340,7 +343,7 @@ def parse_arguments():
 if __name__ == "__main__":
     args = parse_arguments()
     main(
-        dataset_csv_path=args.dataset_csv_path,
+        dataset_path=args.dataset_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         learning_rate=args.learning_rate,
