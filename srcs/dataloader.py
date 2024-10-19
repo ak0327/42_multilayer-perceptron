@@ -116,10 +116,11 @@ def get_wdbc(
         csv_path: str,
         train_size: float = 0.8,
         shuffle: bool = False,
+        apply_normalize: bool = True,
         random_state: int = 42
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     # X, y = load_wdbc_data(csv_path=csv_path)
-    X, y = load_csv(csv_path=csv_path)
+    X, y = load_csv(csv_path=csv_path, apply_normalize=apply_normalize)
     X_train, X_test, y_train, y_test = train_test_split(
         X=X,
         y=y,
@@ -140,6 +141,7 @@ def main(
         train_size: float,
         shuffle: bool,
         save_npz: bool,
+        save_dir: str,
         random_state: int
 ):
     print(f"\n[Loading]")
@@ -151,11 +153,11 @@ def main(
             random_state=random_state
         )
         if save_npz:
-            save_to_npz(X=X_train, y=y_train, name="data_train")
-            save_to_npz(X=X_test, y=y_test, name="data_test")
+            save_to_npz(X=X_train, y=y_train, dir=save_dir, name="data_train")
+            save_to_npz(X=X_test, y=y_test, dir=save_dir, name="data_test")
         else:
-            save_to_csv(X=X_train, y=y_train, name="data_train")
-            save_to_csv(X=X_test, y=y_test, name="data_test")
+            save_to_csv(X=X_train, y=y_train, dir=save_dir, name="data_train")
+            save_to_csv(X=X_test, y=y_test, dir=save_dir, name="data_test")
         return X_train, X_test, y_train, y_test
 
     except Exception as e:
@@ -198,7 +200,14 @@ def parse_arguments():
         "--save_npz",
         type=str2bool,
         default=True,
+        required=True,
         help="Save to train.npz and test.npz, othewise csv (true/false, t/f)"
+    )
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        required=True,
+        help="dataset save dir"
     )
     return parser.parse_args()
 
@@ -210,5 +219,6 @@ if __name__ == "__main__":
         train_size=args.train_size,
         shuffle=args.shuffle,
         save_npz=args.save_npz,
+        save_dir=args.save_dir,
         random_state=42
     )

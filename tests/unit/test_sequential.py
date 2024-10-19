@@ -11,6 +11,7 @@ from srcs.modules.optimizer import (
     SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam)
 from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
+from srcs.train import create_model
 
 from sklearn.model_selection import train_test_split
 from keras.datasets import mnist
@@ -89,16 +90,11 @@ def _test_gradient(
 def test_sequential_grad():
     x_train, x_valid, t_train, t_valid = get_mnist()
 
-    optimizers = [SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam]
-    lr = 0.01
-
+    optimizers = ["SGD", "MOMENTUM", "NESTEROV", "ADAGRAD", "RMSPROP", "ADAM"]
     for optimizer in optimizers:
-        net = Sequential(
-            layers=[
-                Dense(in_features=784, out_features=10, activation=ReLU, init_method=he_normal),
-                Dense(in_features=10, out_features=10, activation=Softmax, init_method=xavier_normal)
-            ],
-            criteria=CrossEntropyLoss,
-            optimizer=optimizer(lr=lr),
+        net = create_model(
+            features=[784, 10, 10],
+            learning_rate=0.01,
+            optimp_str=optimizer
         )
         _test_gradient(model=net, x_train=x_train, t_train=t_train, batch_size=3)

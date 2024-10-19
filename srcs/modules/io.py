@@ -9,22 +9,19 @@ from itertools import product
 from typing import Union
 
 from srcs.modules.model import Sequential
+from srcs.modules.tools import normalize
 
 
-TRAIN_RESULT_PATH = "data/training_results.npz"
-MODEL_PATH = "data/model.pkl"
-
-
-def save_to_npz(X: np.ndarray, y: np.ndarray, name: str):
+def save_to_npz(X: np.ndarray, y: np.ndarray, dir: str, name: str):
     try:
-        path = f"data/{name}.npz"
+        path = f"{dir}/{name}.npz"
         np.savez(path, X=X, y=y)
         print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
         raise IOError(f"fail to saving {name} data: {e}")
 
 
-def load_npz(npz_path: str) -> tuple[np.ndarray, : np.ndarray]:
+def load_npz(npz_path: str) -> tuple[np.ndarray, np.ndarray]:
     try:
         if not os.path.exists(npz_path):
             raise FileNotFoundError(f"Data file not found: {npz_path}")
@@ -52,12 +49,12 @@ def load_npz(npz_path: str) -> tuple[np.ndarray, : np.ndarray]:
         raise
 
 
-def save_to_csv(X: np.ndarray, y: np.ndarray, name: str):
+def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
     try:
         df = pd.DataFrame(X)
         df['diagnosis'] = y
 
-        path = f"data/{name}.csv"
+        path = f"{dir}/{name}.csv"
         df.to_csv(path, index=False)
         print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
@@ -66,7 +63,8 @@ def save_to_csv(X: np.ndarray, y: np.ndarray, name: str):
 
 def load_csv(
         csv_path: str,
-        np: bool = False
+        np: bool = False,
+        apply_normalize: bool = True
 ) -> Union[tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series],
            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     try:
@@ -79,7 +77,7 @@ def load_csv(
         if 'id' in df.columns or df.shape[1] == 32:
             # print(f"load_wdbc_data")
             # 元のデータ形式の場合
-            X, y = load_wdbc_data(csv_path)
+            X, y = load_wdbc_data(csv_path, apply_normalize=apply_normalize)
         else:
             # print(f"load saved data")
             # 保存したデータの場合
@@ -95,7 +93,10 @@ def load_csv(
         raise IOError(f"Failed to load {csv_path}: {e}")
 
 
-def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
+def load_wdbc_data(
+        csv_path: str,
+        apply_normalize: bool = True
+) -> tuple[pd.DataFrame, pd.Series]:
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
     df = pd.read_csv(csv_path, header=None)
@@ -103,6 +104,14 @@ def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
     # if df.shape[1] != expected_shape[1]:
     #     raise ValueError(f"Invalid data shape. "
     #                      f"Expected {expected_shape}, but got {df.shape}")
+
+    has_diagnosis_column = False
+    for col in df.columns:
+        if df[col].isin(["M", "B"]).any():
+            has_diagnosis_column = col
+            break
+    if not has_diagnosis_column:
+        raise ValueError("'diagnosis' not found")
 
     columns = ['id', 'diagnosis']
     # 特徴量の名前リスト
@@ -125,12 +134,12 @@ def load_wdbc_data(csv_path: str) -> tuple[pd.DataFrame, pd.Series]:
         columns.append(f"{feature}_{stat}")
 
     df.columns = columns
-    df = df.drop('id', axis=1)
 
-    # print(f"load_wdbc_data after rename columns and drop id")
-    # print(f" data shape: {df.shape}")
-    # print(f" data columns: {df.columns}")
-    # print(f" data info: {df.info}")
+    if apply_normalize:
+        feature_columns = [col for col in columns if col not in ['id', 'diagnosis']]
+        df = normalize(df, feature_columns)
+
+    df = df.drop('id', axis=1)
 
     # ラベルを数値に変換（M -> 1, B -> 0）
     y = pd.to_numeric(df['diagnosis'].map({'M': 1, 'B': 0}), downcast='integer')
@@ -145,11 +154,12 @@ def save_training_result(
         train_losses: list[float],
         train_accs: list[float],
         valid_losses: list[float],
-        valid_accs: list[float]
+        valid_accs: list[float],
+        save_dir: str,
 ):
-    save_model(model, MODEL_PATH)
+    save_model(model, f"{save_dir}/model.pkl")
     np.savez(
-        TRAIN_RESULT_PATH,
+        save_dir,
         iterations=iterations,
         train_losses=train_losses,
         train_accs=train_accs,
@@ -158,8 +168,8 @@ def save_training_result(
     )
 
 
-def load_training_result():
-    data = np.load(TRAIN_RESULT_PATH)
+def load_training_result(save_dir):
+    data = np.load(f"{save_dir}/training_results.npz")
     iterations = data['iterations']
     train_losses = data['train_losses']
     train_accs = data['train_accs']
@@ -167,11 +177,11 @@ def load_training_result():
     valid_accs = data['valid_accs']
 
 
-def save_model(model, filename=MODEL_PATH):
-    with open(filename, 'wb') as f:
+def save_model(model, path):
+    with open(path, 'wb') as f:
         pickle.dump(model, f)
 
 
-def load_model(filename=MODEL_PATH):
-    with open(filename, 'rb') as f:
+def load_model(path):
+    with open(path, 'rb') as f:
         return pickle.load(f)

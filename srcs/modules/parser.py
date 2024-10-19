@@ -11,6 +11,16 @@ def str2bool(s):
     raise argparse.ArgumentTypeError('Boolean value expected')
 
 
+def str_expected(expected_strs: list[str]):
+    lower_list = [s.upper() for s in expected_strs]
+    def _checker(arg):
+        s = arg.upper()
+        if s not in lower_list:
+            raise argparse.ArgumentTypeError(f"{arg} is not expected: {lower_list}")
+        return s
+    return _checker
+
+
 def int_range(min_val, max_val):
     def _checker(arg):
         try:

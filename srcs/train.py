@@ -11,12 +11,12 @@ from srcs.modules.functions import Softmax
 from srcs.modules.activation import ReLU, Sigmoid
 from srcs.modules.loss import CrossEntropyLoss
 from srcs.modules.init import he_normal, xavier_normal, normal
-from srcs.modules.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
+from srcs.modules.optimizer import Optimizer, SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
 from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
-from srcs.modules.io import save_training_result, save_model, load_npz, load_csv
-from srcs.modules.parser import int_range, float_range, str2bool
+from srcs.modules.io import save_training_result, load_npz, load_csv
+from srcs.modules.parser import int_range, float_range, str2bool, str_expected
 from srcs.modules.metrics import get_metrics, accuracy_score
 from srcs.modules.tools import EarlyStopping
 
@@ -112,18 +112,20 @@ def train_model(
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
 
-def _create_model(
-        hidden_features: list[int],
+def create_model(
+        features: list[int],
         learning_rate: float,
-        weight_decay: float,
+        weight_decay: float = 0.0,
+        optimp_str: str = "SGD",
 ):
-    _features = [30] + hidden_features + [2]
-    _last_layer_idx = len(_features) - 2
+    if len(features) < 3:
+        ValueError(f"features must larger than 3")
+    _last_layer_idx = len(features) - 2
 
     _layers = []
-    for i in range(len(_features) - 1):
-        _in_features = _features[i]
-        _out_features = _features[i + 1]
+    for i in range(len(features) - 1):
+        _in_features = features[i]
+        _out_features = features[i + 1]
         if i < _last_layer_idx:
             _activation = ReLU
             _init_method = he_normal
@@ -139,7 +141,15 @@ def _create_model(
             )
         )
 
-    _optimizer = Adam(lr=learning_rate)
+    optimizers = {
+        "SGD"       : SGD,
+        "MOMENTUM"  : Momentum,
+        "NESTEROV"  : Nesterov,
+        "ADAGRAD"   : AdaGrad,
+        "RMSPROP"   : RMSProp,
+        "ADAM"      : Adam,
+    }
+    _optimizer = optimizers[optimp_str](lr=learning_rate)
     _model = Sequential(
         layers=_layers,
         criteria=CrossEntropyLoss,
@@ -183,20 +193,27 @@ def main(
         epochs: int,
         learning_rate: float,
         weight_decay: float,
+        optimp_str: str,
         verbose: bool,
         plot: bool,
         metrics_interval: int,
         patience: int | None,
         save: bool = True,
+        save_dir: str = "data",
 ):
     print(f"\n[Training]")
     try:
         X_train, X_valid, y_train, y_valid = _get_train_data(dataset_csv_path)
 
-        model = _create_model(
-            hidden_features=hidden_features,
+        WDBC_INPUT = 30
+        WDBC_OUTPUT = 2
+        features = [WDBC_INPUT] + hidden_features + [WDBC_OUTPUT]
+
+        model = create_model(
+            features=features,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
+            optimp_str=optimp_str,
         )
         if verbose:
             print(f"\n{model.info}")
@@ -222,7 +239,8 @@ def main(
                 train_losses=train_losses,
                 train_accs=train_accs,
                 valid_losses=valid_losses,
-                valid_accs=valid_accs
+                valid_accs=valid_accs,
+                save_dir=save_dir
             )
         return model, iters, train_losses, train_accs, valid_losses, valid_accs
 
@@ -280,6 +298,12 @@ def parse_arguments():
         help="Weight decay (float in range [0.0, 1.0], default: 0.0)"
     )
     parser.add_argument(
+        "--optimizer",
+        type=str_expected(["SGD", "Momentum", "Nesterov", "AdaGrad", "RMSProp", "Adam"]),
+        default="SGD",
+        help="Optimizer ([SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam], default: SGD)"
+    )
+    parser.add_argument(
         "--verbose",
         type=str2bool,
         default=True,
@@ -302,6 +326,12 @@ def parse_arguments():
         type=int_range(1, 10000),
         help="Ealry stopping patience in range[1, 10000]"
     )
+    parser.add_argument(
+        "--save_dir",
+        type=str,
+        required=True,
+        help="model save dir"
+    )
     return parser.parse_args()
 
 
@@ -313,8 +343,10 @@ if __name__ == "__main__":
         epochs=args.epochs,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
+        optimp_str=args.optimizer,
         verbose=args.verbose,
         plot=args.plot,
         metrics_interval=args.metrics_interval,
         patience=args.patience,
+        save_dir=args.save_dir,
     )

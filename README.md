@@ -5,6 +5,22 @@ Re-implementation of a multilayer perceptron
 <br>
 
 ## 2. How to use
+### 2-1) Install vertual environment
+```shell
+$ make init
+$ source $(VENV_DIR)/bin/activate && make info
+Current Python version: Python 3.10.1
+Python executable: [...]/ft_mlp_venv/bin/python
+Active virtual environment: [...]/ft_mlp_venv
+```
+
+### 2-2) Run script
+```shell
+$ make run
+```
+
+### 2-3) More detail
+See `notebook/mlp.ipynb`
 
 
 <br>
