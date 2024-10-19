@@ -115,7 +115,8 @@ def train_model(
 def _create_model(
         hidden_features: list[int],
         learning_rate: float,
-        weight_decay: float,
+        weight_decay: float = 0.0,
+        optimp_str: str = "SGD",
 ):
     _features = [30] + hidden_features + [2]
     _last_layer_idx = len(_features) - 2
@@ -183,6 +184,7 @@ def main(
         epochs: int,
         learning_rate: float,
         weight_decay: float,
+        optimp_str: str,
         verbose: bool,
         plot: bool,
         metrics_interval: int,
@@ -198,6 +200,7 @@ def main(
             hidden_features=hidden_features,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
+            optimp_str=optimp_str,
         )
         if verbose:
             print(f"\n{model.info}")
@@ -282,6 +285,12 @@ def parse_arguments():
         help="Weight decay (float in range [0.0, 1.0], default: 0.0)"
     )
     parser.add_argument(
+        "--optimizer",
+        type=str_expected(["SGD", "Momentum", "Nesterov", "AdaGrad", "RMSProp", "Adam"]),
+        default="SGD",
+        help="Optimizer ([SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam], default: SGD)"
+    )
+    parser.add_argument(
         "--verbose",
         type=str2bool,
         default=True,
@@ -321,6 +330,7 @@ if __name__ == "__main__":
         epochs=args.epochs,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
+        optimp_str=args.optimizer,
         verbose=args.verbose,
         plot=args.plot,
         metrics_interval=args.metrics_interval,
