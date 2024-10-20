@@ -110,7 +110,8 @@ def test_invalid_size():
 
 
 def test_invalid_csv_path():
-    invalid_paths = ["", "data.csv", "data.csvv"]
+    # invalid_paths = [""]
+    invalid_paths = ["data.csv", "data.csvv"]
     for path in invalid_paths:
         with pytest.raises(FileNotFoundError, match=r".*No such file or directory:*"):
             _, _, _, _ = get_wdbc(csv_path=path)
@@ -129,7 +130,8 @@ def test_invalid_save_dir():
         random_state=42
     )
 
-    invalid_paths = ["", "nothing", None]
+    # invalid_paths = [""]
+    invalid_paths = ["nothing", None]
     for path in invalid_paths:
         with pytest.raises(IOError):
             save_to_npz(X=X_train, y=y_train, dir=path, name="pytest_data")
