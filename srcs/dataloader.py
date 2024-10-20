@@ -94,7 +94,7 @@ def train_test_split(
     n_total = len(X)
     n_train = int(n_total * train_size)
     n_test = n_total - n_train
-    print(f"train_size:{train_size}, n_train:{n_train}, n_test:{n_test}")
+    # print(f"train_size:{train_size}, n_train:{n_train}, n_test:{n_test}")
     if n_train == 0:
         raise ValueError(f"train_size={train_size} results in an empty training set")
     if n_test == 0:

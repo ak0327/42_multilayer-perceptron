@@ -13,6 +13,9 @@ from srcs.modules.tools import normalize
 
 
 def save_to_npz(X: np.ndarray, y: np.ndarray, dir: str, name: str):
+    if X.shape[0] != y.shape[0]:
+        raise ValueError(f"X and y must have the same number of samples, but got {X.shape[0]} and {y.shape[0]}.")
+
     try:
         path = f"{dir}/{name}.npz"
         np.savez(path, X=X, y=y)
@@ -50,6 +53,9 @@ def load_npz(npz_path: str) -> tuple[np.ndarray, np.ndarray]:
 
 
 def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
+    if X.shape[0] != y.shape[0]:
+        raise ValueError(f"X and y must have the same number of samples, but got {X.shape[0]} and {y.shape[0]}.")
+
     try:
         df = pd.DataFrame(X)
         df['diagnosis'] = y

@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from srcs.dataloader import get_wdbc
-from srcs.modules.io import load_wdbc_data
+from srcs.modules.io import load_wdbc_data, save_to_npz, save_to_csv
 
 
 def _evaluate_split(
@@ -119,3 +119,22 @@ def test_invalid_csv_path():
     for path in invalid_paths:
         with pytest.raises(OSError, match=r".*Invalid file path or buffer object type*"):
             _, _, _, _ = get_wdbc(csv_path=path)
+
+
+def test_invalid_save_dir():
+    X_train, X_test, y_train, y_test = get_wdbc(
+        csv_path="data/data.csv",
+        train_size=0.8,
+        shuffle=False,
+        random_state=42
+    )
+
+    invalid_paths = ["", "nothing", None]
+    for path in invalid_paths:
+        with pytest.raises(IOError):
+            save_to_npz(X=X_train, y=y_train, dir=path, name="pytest_data")
+
+    invalid_paths = ["data"]
+    for path in invalid_paths:
+        with pytest.raises(ValueError, match=r".*X and y must have the same number of samples"):
+            save_to_npz(X=X_train, y=y_test, dir=path, name="pytest_data")
