@@ -20,7 +20,7 @@ $ make run
 
 # run dataloader
 $ docker compose exec ft_mlp \
-	python3 srcs/dataloader.py \
+  python3 srcs/dataloader.py \
 	--dataset_path data/data.csv \
 	--train_size 0.8 \
 	--shuffle true \
@@ -29,7 +29,7 @@ $ docker compose exec ft_mlp \
 
 # run train
 $ docker compose exec ft_mlp \
-	python3 srcs/train.py \
+  python3 srcs/train.py \
 	--dataset_path data/data_train.csv \
 	--hidden_features "50 30" \
 	--epochs 1000 \
@@ -42,7 +42,7 @@ $ docker compose exec ft_mlp \
 	
 # run predict
 $ docker compose exec ft_mlp \
-	python3 srcs/predict.py \
+  python3 srcs/predict.py \
 	--model_path data/model.pkl \
 	--dataset_path data/data_test.csv
 ```
