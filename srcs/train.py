@@ -18,7 +18,7 @@ from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import save_training_result, load_npz, load_csv
-from srcs.modules.parser import int_range, float_range, str2bool, str_expected, validate_extention
+from srcs.modules.parser import int_range, float_range, str2bool, str_expected, validate_extention, int_list_type
 from srcs.modules.metrics import get_metrics, accuracy_score
 from srcs.modules.tools import EarlyStopping
 
@@ -275,8 +275,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--hidden_features",
-        type=int,
-        nargs='*',
+        type=int_list_type(min_elements=2, max_elements=5, min_value=2, max_value=200),
         default=[24, 24],
         help="Number of neurons in each hidden layer "
              "(2 to 5 values, e.g., "

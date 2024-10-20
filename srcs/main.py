@@ -32,7 +32,7 @@ def run_train():
         'train.py',
         '--dataset_path',   'data/data_train.csv',
         # '--dataset_path',   'data/data.csv',
-        '--hidden_features',    '50', '30',
+        '--hidden_features',    '50 30',
         '--epochs',             '1000',
         '--learning_rate',      '0.0001',
         '--optimizer',          'Adam',

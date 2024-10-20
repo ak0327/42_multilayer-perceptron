@@ -73,3 +73,27 @@ def float_range_exclusive(min_val, max_val):
                                              f" ({min_val}, {max_val})")
         return value
     return _checker
+
+
+def int_list_type(min_elements, max_elements, min_value, max_value):
+    def _checker(arg):
+        if isinstance(arg, str):
+            values = arg.split()
+        elif isinstance(arg, list):
+            values = arg
+        else:
+            raise argparse.ArgumentTypeError(f"Invalid input type for hidden_features")
+
+        try:
+            values = [int(v) for v in values]
+        except ValueError:
+            raise argparse.ArgumentTypeError(f"All elements of hidden_features must be integers")
+
+        if not (min_elements <= len(values) <= max_elements):
+            raise argparse.ArgumentTypeError(f"Must have {min_elements} to {max_elements} elements")
+
+        if any(value < min_value or max_value < value for value in values):
+            raise argparse.ArgumentTypeError(f"All values in hidden_features must be between {min_value} and {max_value}")
+
+        return values
+    return _checker

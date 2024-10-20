@@ -26,7 +26,7 @@ def _run_train():
     sys.argv = [
         'train.py',
         '--dataset_path',       'data/data_train.npz',
-        '--hidden_features',    '50', '30',
+        '--hidden_features',    '50 30',
         '--epochs',             '5000',
         '--learning_rate',      '0.001',
         '--optimizer',          'Adam',
