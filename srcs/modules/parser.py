@@ -1,4 +1,5 @@
 import argparse
+import numpy as np
 
 
 def str2bool(s):
@@ -50,6 +51,8 @@ def float_range(min_val, max_val):
             value = float(arg)
         except ValueError:
             raise argparse.ArgumentTypeError(f"{arg} is not a valid float")
+        if np.isnan(value):
+            raise argparse.ArgumentTypeError(f"{arg} is NaN")
         if value < min_val or max_val < value:
             raise argparse.ArgumentTypeError(f"{value} is not in range"
                                              f" [{min_val}, {max_val}]")
@@ -63,6 +66,8 @@ def float_range_exclusive(min_val, max_val):
             value = float(arg)
         except ValueError:
             raise argparse.ArgumentTypeError(f"{arg} is not a valid float")
+        if np.isnan(value):
+            raise argparse.ArgumentTypeError(f"{arg} is NaN")
         if value <= min_val or max_val <= value:
             raise argparse.ArgumentTypeError(f"{value} is not in range"
                                              f" ({min_val}, {max_val})")
