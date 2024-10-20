@@ -77,7 +77,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--model_path",
-        type=str,
+        type=validate_extention(["pkl"]),
         required=True,
         help="Path to trained model"
     )

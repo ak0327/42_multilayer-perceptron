@@ -166,3 +166,38 @@ class TestTrainArgument:
         sys.argv = dict_to_argv(self.filename, invalid_args)
         with pytest.raises(expected_error):
             train.parse_arguments()
+
+
+class TestPredictArgument:
+    @classmethod
+    def setup_class(cls):
+        cls.base_args = {
+            'model_path':       '../data/model.pkl',
+            'dataset_path':     '../data/data_test.csv',
+        }
+        cls.filename = 'predict.py'
+
+    def test_train_arguments(self):
+        sys.argv = dict_to_argv(self.filename, self.base_args)
+        args = predict.parse_arguments()
+        assert args.model_path == '../data/model.pkl'
+        assert args.dataset_path == '../data/data_test.csv'
+
+    @pytest.mark.parametrize("field, value, expected_error", [
+        ('model_path',      None,           SystemExit),
+        ('model_path',      '',             SystemExit),
+        ('model_path',      ' ',            SystemExit),
+        ('model_path',      'nothing',      SystemExit),
+        ('model_path',      'notpkl.npz',   SystemExit),
+
+        ('dataset_path',    None,           SystemExit),
+        ('dataset_path',    '',             SystemExit),
+        ('dataset_path',    ' ',            SystemExit),
+        ('dataset_path',    'nothing',      SystemExit),
+        ('dataset_path',    'notcsv.txt',   SystemExit), ])
+    def test_invalid_arguments(self, field, value, expected_error):
+        invalid_args = self.base_args.copy()
+        invalid_args[field] = value
+        sys.argv = dict_to_argv(self.filename, invalid_args)
+        with pytest.raises(expected_error):
+            predict.parse_arguments()
