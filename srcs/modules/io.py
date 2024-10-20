@@ -163,15 +163,20 @@ def save_training_result(
         valid_accs: list[float],
         save_dir: str,
 ):
-    save_model(model, f"{save_dir}/model.pkl")
+    model_save_path = f"{save_dir}/model.pkl"
+    save_model(model, model_save_path)
+    print(f"Model data saved to {os.path.abspath(model_save_path)}")
+
+    metrics_save_path = f"{save_dir}/metrics.npz"
     np.savez(
-        save_dir,
+        metrics_save_path,
         iterations=iterations,
         train_losses=train_losses,
         train_accs=train_accs,
         valid_losses=valid_losses,
         valid_accs=valid_accs
     )
+    print(f"Metrics saved to {os.path.abspath(metrics_save_path)}")
 
 
 def load_training_result(save_dir):
