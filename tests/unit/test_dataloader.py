@@ -107,3 +107,15 @@ def test_invalid_size():
                 csv_path="data/data.csv",
                 train_size=train_size,
             )
+
+
+def test_invalid_csv_path():
+    invalid_paths = ["", "data.csv", "data.csvv"]
+    for path in invalid_paths:
+        with pytest.raises(FileNotFoundError, match=r".*No such file or directory:*"):
+            _, _, _, _ = get_wdbc(csv_path=path)
+
+    invalid_paths = [None]
+    for path in invalid_paths:
+        with pytest.raises(OSError, match=r".*Invalid file path or buffer object type*"):
+            _, _, _, _ = get_wdbc(csv_path=path)

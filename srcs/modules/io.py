@@ -58,7 +58,7 @@ def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
         df.to_csv(path, index=False)
         print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
-        raise IOError(f"Failed to save {name} data: {e}")
+        raise IOError(f"Failed to save {name} data: {str(e)}")
 
 
 def load_csv(
@@ -89,8 +89,8 @@ def load_csv(
         if np and isinstance(y, pd.DataFrame):
             y = y.values
         return X, y
-    except ValueError:
-        raise IOError(f"Failed to load {csv_path}: {e}")
+    except ValueError as e:
+        raise IOError(f"Failed to load {csv_path}: {str(e)}")
 
 
 def load_wdbc_data(
