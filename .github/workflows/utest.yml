@@ -2,7 +2,7 @@ name: UNIT_TEST
 on: [push]
 jobs:
   run-utest-on-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3
@@ -10,24 +10,34 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Run make init
-        run: make init
-      - name: Activate venv and run make info
+
+      - name: Display system architecture
         run: |
-          source ft_mlp_venv/bin/activate
-          make info
-      - name: Run make t
+          echo "Operating System: $(uname -o)"
+          echo "Machine Hardware Name: $(uname -m)"
+          echo "Kernel Release: $(uname -r)"
+          echo "Processor Type: $(uname -p)"      
+
+      - name: Install Docker engine
         run: |
-          source ft_mlp_venv/bin/activate
-          make t
-      - name: Run make fclean
-        run: make fclean
-      - name: Verify cleanup
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+          docker --version
+
+      - name: Set up Docker Compose
         run: |
-          if [ -d "ft_mlp_venv" ]; then
-            echo "ft_mlp_venv directory still exists after fclean"
-            exit 1
-          fi
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Build
+        run: make
+
+      - name: Run make info
+        run: make info
+
+      - name: Run make test
+        run: make test
 
   run-utest-on-macos:
     runs-on: macos-latest
@@ -38,21 +48,18 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Run make init
-        run: make init
-      - name: Activate venv and run make info
+
+      - name: Display system architecture
         run: |
-          source ft_mlp_venv/bin/activate
-          make info
-      - name: Run make t
+          echo "Operating System: $(uname -o)"
+          echo "Machine Hardware Name: $(uname -m)"
+          echo "Kernel Release: $(uname -r)"
+          echo "Processor Type: $(uname -p)"      
+
+      - name: Install packages
         run: |
-          source ft_mlp_venv/bin/activate
-          make t
-      - name: Run make fclean
-        run: make fclean
-      - name: Verify cleanup
-        run: |
-          if [ -d "ft_mlp_venv" ]; then
-            echo "ft_mlp_venv directory still exists after fclean"
-            exit 1
-          fi
+          pip install --upgrade pip && \
+          pip install --no-cache-dir -r config/requirements.txt
+
+      - name: Run pytest
+        run: pytest -v

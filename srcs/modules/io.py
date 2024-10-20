@@ -13,6 +13,9 @@ from srcs.modules.tools import normalize
 
 
 def save_to_npz(X: np.ndarray, y: np.ndarray, dir: str, name: str):
+    if X.shape[0] != y.shape[0]:
+        raise ValueError(f"X and y must have the same number of samples, but got {X.shape[0]} and {y.shape[0]}.")
+
     try:
         path = f"{dir}/{name}.npz"
         np.savez(path, X=X, y=y)
@@ -50,6 +53,9 @@ def load_npz(npz_path: str) -> tuple[np.ndarray, np.ndarray]:
 
 
 def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
+    if X.shape[0] != y.shape[0]:
+        raise ValueError(f"X and y must have the same number of samples, but got {X.shape[0]} and {y.shape[0]}.")
+
     try:
         df = pd.DataFrame(X)
         df['diagnosis'] = y
@@ -58,7 +64,7 @@ def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
         df.to_csv(path, index=False)
         print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
-        raise IOError(f"Failed to save {name} data: {e}")
+        raise IOError(f"Failed to save {name} data: {str(e)}")
 
 
 def load_csv(
@@ -89,8 +95,8 @@ def load_csv(
         if np and isinstance(y, pd.DataFrame):
             y = y.values
         return X, y
-    except ValueError:
-        raise IOError(f"Failed to load {csv_path}: {e}")
+    except ValueError as e:
+        raise IOError(f"Failed to load {csv_path}: {str(e)}")
 
 
 def load_wdbc_data(
@@ -157,15 +163,20 @@ def save_training_result(
         valid_accs: list[float],
         save_dir: str,
 ):
-    save_model(model, f"{save_dir}/model.pkl")
+    model_save_path = f"{save_dir}/model.pkl"
+    save_model(model, model_save_path)
+    print(f"Model data saved to {os.path.abspath(model_save_path)}")
+
+    metrics_save_path = f"{save_dir}/metrics.npz"
     np.savez(
-        save_dir,
+        metrics_save_path,
         iterations=iterations,
         train_losses=train_losses,
         train_accs=train_accs,
         valid_losses=valid_losses,
         valid_accs=valid_accs
     )
+    print(f"Metrics saved to {os.path.abspath(metrics_save_path)}")
 
 
 def load_training_result(save_dir):

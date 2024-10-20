@@ -7,6 +7,7 @@
 !.github
 !.github/workflows
 !.github/workflows/utest.yml
+!.github/workflows/integration_test.yml
 
 !srcs
 !srcs/modules
@@ -23,6 +24,11 @@
 !data
 !data/data.csv
 
+!config
+!config/**
+
 !requirements.txt
 !pytest.ini
 !Makefile
+!Dockerfile
+!compose.yml

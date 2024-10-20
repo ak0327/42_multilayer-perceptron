@@ -1,0 +1,166 @@
+name: INTEGRATION_TEST
+on: [push]
+jobs:
+  run-integration-test-on-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Display system architecture
+        run: |
+          echo "Operating System: $(uname -o)"
+          echo "Machine Hardware Name: $(uname -m)"
+          echo "Kernel Release: $(uname -r)"
+          echo "Processor Type: $(uname -p)"      
+
+      - name: Install Docker engine
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+          docker --version
+
+      - name: Set up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Build
+        run: make
+
+      - name: Run make info
+        run: make info
+
+      - name: Run Split
+        run: |
+          docker compose exec ft_mlp \
+          python3 srcs/dataloader.py \
+          --dataset data/data.csv \
+          --train_size 0.8 \
+          --shuffle true \
+          --save_npz false \
+          --save_dir data
+
+          docker compose exec ft_mlp \
+          python3 srcs/dataloader.py \
+          --dataset data/data.csv \
+          --train_size 0.8 \
+          --shuffle true \
+          --save_npz true \
+          --save_dir data
+
+      - name: Run Train
+        run: |
+          docker compose exec ft_mlp \
+          python3 srcs/train.py \
+          --dataset_path data/data_train.csv \
+          --hidden_features "50 30" \
+          --epochs 1000 \
+          --learning_rate 0.0001 \
+          --optimizer Adam \
+          --verbose true \
+          --plot false \
+          --metrics_interval 10 \
+          --save_dir data
+          
+          docker compose exec ft_mlp \
+          python3 srcs/train.py \
+          --dataset_path data/data_train.csv \
+          --hidden_features "50 30" \
+          --epochs 1000 \
+          --learning_rate 0.0001 \
+          --optimizer Adam \
+          --verbose true \
+          --plot false \
+          --metrics_interval 10 \
+          --save_dir data
+
+      - name: Run Predict
+        run: |
+
+          docker compose exec ft_mlp \
+          python3 srcs/predict.py \
+          --model_path data/model.pkl \
+          --dataset_path data/data_test.csv
+
+          docker compose exec ft_mlp \
+          python3 srcs/predict.py \
+          --model_path data/model.pkl \
+          --dataset_path data/data_test.npz
+
+  run-integration-test-on-macos:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Display system architecture
+        run: |
+          echo "Operating System: $(uname -o)"
+          echo "Machine Hardware Name: $(uname -m)"
+          echo "Kernel Release: $(uname -r)"
+          echo "Processor Type: $(uname -p)"      
+
+      - name: Install packages
+        run: |
+          pip install --upgrade pip && \
+          pip install --no-cache-dir -r config/requirements.txt
+
+      - name: Run Split
+        run: |
+          python3 srcs/dataloader.py \
+          --dataset_path data/data.csv \
+          --train_size 0.8 \
+          --shuffle true \
+          --save_npz false \
+          --save_dir data
+
+          python3 srcs/dataloader.py \
+          --dataset data/data.csv \
+          --train_size 0.8 \
+          --shuffle true \
+          --save_npz true \
+          --save_dir data
+
+      - name: Run Train
+        run: |
+          python3 srcs/train.py \
+          --dataset_path data/data_train.csv \
+          --hidden_features "50 30" \
+          --epochs 1000 \
+          --learning_rate 0.0001 \
+          --optimizer Adam \
+          --verbose true \
+          --plot false \
+          --metrics_interval 10 \
+          --save_dir data
+          
+          python3 srcs/train.py \
+          --dataset_path data/data_train.csv \
+          --hidden_features "50 30" \
+          --epochs 1000 \
+          --learning_rate 0.0001 \
+          --optimizer Adam \
+          --verbose true \
+          --plot false \
+          --metrics_interval 10 \
+          --save_dir data
+
+      - name: Run Predict
+        run: |
+          python3 srcs/predict.py \
+          --model_path data/model.pkl \
+          --dataset_path data/data_test.csv
+
+          python3 srcs/predict.py \
+          --model_path data/model.pkl \
+          --dataset_path data/data_test.npz

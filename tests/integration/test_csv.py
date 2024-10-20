@@ -5,15 +5,15 @@ from srcs import dataloader, train, predict
 def _run_dataloader():
     sys.argv = [
         'dataloader.py',
-        '--dataset', 'data/data.csv',
-        '--train_size', '0.8',
-        '--shuffle', 'true',
-        '--save_npz', 'false',
-        '--save_dir', 'data',
+        '--dataset_path',   'data/data.csv',
+        '--train_size',     '0.8',
+        '--shuffle',        'true',
+        '--save_npz',       'false',
+        '--save_dir',       'data',
     ]
     args = dataloader.parse_arguments()
     _, _, _, _ = dataloader.main(
-        csv_path=args.dataset,
+        csv_path=args.dataset_path,
         train_size=args.train_size,
         shuffle=args.shuffle,
         save_npz=args.save_npz,
@@ -25,18 +25,19 @@ def _run_dataloader():
 def _run_train():
     sys.argv = [
         'train.py',
-        '--dataset_csv_path', 'data/data_train.csv',
-        '--hidden_features', '50', '30',
-        '--epochs', '5000',
-        '--learning_rate', '0.001',
-        '--verbose', 'false',
-        '--plot', 'false',
-        '--metrics_interval', '100',
-        '--save_dir', 'data',
+        '--dataset_path',       'data/data_train.csv',
+        '--hidden_features',    '50 30',
+        '--epochs',             '5000',
+        '--learning_rate',      '0.001',
+        '--optimizer',          'Adam',
+        '--verbose',            'false',
+        '--plot',               'false',
+        '--metrics_interval',   '100',
+        '--save_dir',           'data',
     ]
     args = train.parse_arguments()
     train.main(
-        dataset_csv_path=args.dataset_csv_path,
+        dataset_path=args.dataset_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         learning_rate=args.learning_rate,
@@ -53,13 +54,13 @@ def _run_train():
 def _run_predict():
     sys.argv = [
         'predict.py',
-        '--model_path', 'data/model.pkl',
-        '--dataset_csv_path', 'data/data_test.csv',
+        '--model_path',     'data/model.pkl',
+        '--dataset_path',   'data/data_test.csv',
     ]
     args = predict.parse_arguments()
     accuracy = predict.main(
         model_path=args.model_path,
-        dataset_csv_path=args.dataset_csv_path,
+        dataset_path=args.dataset_path,
     )
     return accuracy
 

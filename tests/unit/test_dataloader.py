@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from srcs.dataloader import get_wdbc
-from srcs.modules.io import load_wdbc_data
+from srcs.modules.io import load_wdbc_data, save_to_npz, save_to_csv
 
 
-def evaluate_split(
+def _evaluate_split(
         X: pd.DataFrame,
         y: pd.DataFrame,
         X_train: np.ndarray,
@@ -77,7 +78,7 @@ def test_dataloader_shuffle():
             shuffle=True,
             random_state=random_state
         )
-        evaluate_split(
+        _evaluate_split(
             X=X,
             y=y,
             X_train=X_train,
@@ -88,3 +89,54 @@ def test_dataloader_shuffle():
             shuffle=True,
             random_state=random_state
         )
+
+
+def test_invalid_size():
+    invalid_sizes = [-np.inf, -1.0, -0.1, 0.0, 1.0, 1.1, np.inf, np.nan]
+    for train_size in invalid_sizes:
+        with pytest.raises(ValueError, match=r".*should be 0.0 < train_size < 1.0"):
+            _, _, _, _ = get_wdbc(
+                csv_path="data/data.csv",
+                train_size=train_size,
+            )
+
+    invalid_sizes = [0.001]
+    for train_size in invalid_sizes:
+        with pytest.raises(ValueError, match=r".*results in an empty training set"):
+            _, _, _, _ = get_wdbc(
+                csv_path="data/data.csv",
+                train_size=train_size,
+            )
+
+
+def test_invalid_csv_path():
+    # invalid_paths = [""]
+    invalid_paths = ["data.csv", "data.csvv"]
+    for path in invalid_paths:
+        with pytest.raises(FileNotFoundError, match=r".*No such file or directory:*"):
+            _, _, _, _ = get_wdbc(csv_path=path)
+
+    invalid_paths = [None]
+    for path in invalid_paths:
+        with pytest.raises(OSError, match=r".*Invalid file path or buffer object type*"):
+            _, _, _, _ = get_wdbc(csv_path=path)
+
+
+def test_invalid_save_dir():
+    X_train, X_test, y_train, y_test = get_wdbc(
+        csv_path="data/data.csv",
+        train_size=0.8,
+        shuffle=False,
+        random_state=42
+    )
+
+    # invalid_paths = [""]
+    invalid_paths = ["nothing", None]
+    for path in invalid_paths:
+        with pytest.raises(IOError):
+            save_to_npz(X=X_train, y=y_train, dir=path, name="pytest_data")
+
+    invalid_paths = ["data"]
+    for path in invalid_paths:
+        with pytest.raises(ValueError, match=r".*X and y must have the same number of samples"):
+            save_to_npz(X=X_train, y=y_test, dir=path, name="pytest_data")

@@ -20,13 +20,11 @@ class Affine:
         return self.forward(x)
 
     def forward(self, x):
-        # テンソル対応
         self.x_shape = x.shape
         x = x.reshape(x.shape[0], -1)
         self.x = x
 
         out = np.dot(self.x, self.W) + self.b
-
         return out
 
     def backward(self, dout):
@@ -34,7 +32,7 @@ class Affine:
         self.dW = np.dot(self.x.T, dout)
         self.db = np.sum(dout, axis=0)
 
-        dx = dx.reshape(*self.x_shape)  # 入力データの形状に戻す（テンソル対応）
+        dx = dx.reshape(*self.x_shape)
         return dx
 
 
@@ -62,13 +60,11 @@ class Linear:
         return self.forward(x)
 
     def forward(self, x):
-        # テンソル対応
         self.x_shape = x.shape
         x = x.reshape(x.shape[0], -1)
         self.x = x
 
         out = np.dot(self.x, self.W) + self.b
-
         return out
 
     def backward(self, dout):
@@ -76,7 +72,7 @@ class Linear:
         self.dW = np.dot(self.x.T, dout)
         self.db = np.sum(dout, axis=0)
 
-        dx = dx.reshape(*self.x_shape)  # 入力データの形状に戻す（テンソル対応）
+        dx = dx.reshape(*self.x_shape)
         return dx
 
     def update_params(self, optimizer, layer_id):

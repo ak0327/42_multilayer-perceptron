@@ -1,0 +1,22 @@
+services:
+  ft_mlp:
+    build:
+      context: '.'
+      dockerfile: 'Dockerfile'
+    environment:
+      - JUPYTER_TOKEN=
+      - JUPYTER_PASSWORD=
+    volumes:
+      - type: bind
+        source: "."
+        target: "/app"
+    ports:
+      - 30000:8888
+    tty: true
+    working_dir: '/app'
+    networks:
+      - jupyter_network
+
+networks:
+  jupyter_network:
+    driver: bridge

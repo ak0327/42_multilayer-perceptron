@@ -7,21 +7,49 @@ Re-implementation of a multilayer perceptron
 ## 2. How to use
 ### 2-1) Install vertual environment
 ```shell
-$ make init
-$ source $(VENV_DIR)/bin/activate && make info
-Current Python version: Python 3.10.1
-Python executable: [...]/ft_mlp_venv/bin/python
-Active virtual environment: [...]/ft_mlp_venv
+$ make
+
+$ make info
+Python 3.10.15
 ```
 
 ### 2-2) Run script
 ```shell
+# run all
 $ make run
+
+# run dataloader
+$ docker compose exec ft_mlp \
+  python3 srcs/dataloader.py \
+	--dataset_path data/data.csv \
+	--train_size 0.8 \
+	--shuffle true \
+	--save_npz false \
+	--save_dir data
+
+# run train
+$ docker compose exec ft_mlp \
+  python3 srcs/train.py \
+	--dataset_path data/data_train.csv \
+	--hidden_features "50 30" \
+	--epochs 1000 \
+	--learning_rate 0.0001 \
+	--optimizer Adam \
+	--verbose true \
+	--plot true \
+	--metrics_interval 100 \
+	--save_dir data
+	
+# run predict
+$ docker compose exec ft_mlp \
+  python3 srcs/predict.py \
+	--model_path data/model.pkl \
+	--dataset_path data/data_test.csv
 ```
 
 ### 2-3) More detail
-See `notebook/mlp.ipynb`
-
+* See `notebook/mlp.ipynb`
+* Access `localhost:30000` on host machine after `make notebook`
 
 <br>
 

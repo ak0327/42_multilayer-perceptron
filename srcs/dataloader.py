@@ -1,6 +1,8 @@
 import os
 import sys
-sys.path.append(os.pardir)
+from pathlib import Path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 
 import argparse
@@ -9,7 +11,7 @@ import pandas as pd
 from typing import Union, overload
 
 from srcs.modules.io import save_to_npz, save_to_csv, load_wdbc_data, load_csv
-from srcs.modules.parser import str2bool, float_range_exclusive
+from srcs.modules.parser import str2bool, float_range_exclusive, validate_extention
 
 
 def _stratified_split(
@@ -86,13 +88,18 @@ def train_test_split(
 ) -> Union[tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series],
            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     if not (0.0 < train_size and train_size < 1.0):
-        raise ValueError(
-            f"ValueError: "
-            f"The train_size={train_size}, should be 0.0 < train_size < 1.0")
+        raise ValueError(f"train_size={train_size} should be 0.0 < train_size < 1.0")
     test_size = 1.0 - train_size
 
     n_total = len(X)
-    n_test = int(n_total * test_size)
+    n_train = int(n_total * train_size)
+    n_test = n_total - n_train
+    # print(f"train_size:{train_size}, n_train:{n_train}, n_test:{n_test}")
+    if n_train == 0:
+        raise ValueError(f"train_size={train_size} results in an empty training set")
+    if n_test == 0:
+        raise ValueError(f"train_size={train_size} results in an empty test set")
+
     rng = np.random.RandomState(random_state)
 
     if stratify is not None:
@@ -179,8 +186,8 @@ def parse_arguments():
         description="Process WDBC dataset for machine learning tasks"
     )
     parser.add_argument(
-        "--dataset",
-        type=str,
+        "--dataset_path",
+        type=validate_extention(["csv"]),
         required=True,
         help="Path to the WBDC CSV dataset"
     )
@@ -215,7 +222,7 @@ def parse_arguments():
 if __name__ == "__main__":
     args = parse_arguments()
     main(
-        csv_path=args.dataset,
+        csv_path=args.dataset_path,
         train_size=args.train_size,
         shuffle=args.shuffle,
         save_npz=args.save_npz,
