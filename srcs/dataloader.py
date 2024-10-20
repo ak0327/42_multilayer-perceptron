@@ -183,7 +183,7 @@ def main(
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="Process WDBC dataset for machine learning tasks"
+        description="Split WDBC dataset into train and test sets"
     )
     parser.add_argument(
         "--dataset_path",

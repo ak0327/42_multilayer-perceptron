@@ -73,7 +73,7 @@ def main(
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="Process WDBC dataset for machine learning tasks"
+        description="Predict with trained model"
     )
     parser.add_argument(
         "--model_path",
