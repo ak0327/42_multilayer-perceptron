@@ -88,13 +88,18 @@ def train_test_split(
 ) -> Union[tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series],
            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     if not (0.0 < train_size and train_size < 1.0):
-        raise ValueError(
-            f"ValueError: "
-            f"The train_size={train_size}, should be 0.0 < train_size < 1.0")
+        raise ValueError(f"train_size={train_size} should be 0.0 < train_size < 1.0")
     test_size = 1.0 - train_size
 
     n_total = len(X)
-    n_test = int(n_total * test_size)
+    n_train = int(n_total * train_size)
+    n_test = n_total - n_train
+    print(f"train_size:{train_size}, n_train:{n_train}, n_test:{n_test}")
+    if n_train == 0:
+        raise ValueError(f"train_size={train_size} results in an empty training set")
+    if n_test == 0:
+        raise ValueError(f"train_size={train_size} results in an empty test set")
+
     rng = np.random.RandomState(random_state)
 
     if stratify is not None:

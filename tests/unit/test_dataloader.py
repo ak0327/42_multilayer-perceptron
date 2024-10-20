@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from srcs.dataloader import get_wdbc
 from srcs.modules.io import load_wdbc_data
 
 
-def evaluate_split(
+def _evaluate_split(
         X: pd.DataFrame,
         y: pd.DataFrame,
         X_train: np.ndarray,
@@ -77,7 +78,7 @@ def test_dataloader_shuffle():
             shuffle=True,
             random_state=random_state
         )
-        evaluate_split(
+        _evaluate_split(
             X=X,
             y=y,
             X_train=X_train,
@@ -88,3 +89,21 @@ def test_dataloader_shuffle():
             shuffle=True,
             random_state=random_state
         )
+
+
+def test_invalid_size():
+    invalid_sizes = [-np.inf, -1.0, -0.1, 0.0, 1.0, 1.1, np.inf, np.nan]
+    for train_size in invalid_sizes:
+        with pytest.raises(ValueError, match=r".*should be 0.0 < train_size < 1.0"):
+            _, _, _, _ = get_wdbc(
+                csv_path="data/data.csv",
+                train_size=train_size,
+            )
+
+    invalid_sizes = [0.001]
+    for train_size in invalid_sizes:
+        with pytest.raises(ValueError, match=r".*results in an empty training set"):
+            _, _, _, _ = get_wdbc(
+                csv_path="data/data.csv",
+                train_size=train_size,
+            )
