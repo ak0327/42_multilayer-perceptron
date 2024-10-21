@@ -8,7 +8,7 @@ from matplotlib.animation import FuncAnimation
 
 
 class RealtimePlot:
-    def __init__(self, max_iter):
+    def __init__(self, max_iter, save_dir):
         self.max_iter = max_iter
         self.iterations = []
         self.train_losses = []
@@ -20,6 +20,7 @@ class RealtimePlot:
         plt.ion()  # インタラクティブモード
 
         self.dt = 0.00001
+        self.save_dir = save_dir
 
     def update(self, i, train_loss, train_acc, valid_loss, valid_acc):
         self.iterations.append(i)
@@ -52,6 +53,8 @@ class RealtimePlot:
     def plot(self):
         plt.ioff()
         plt.show()
+        self.fig.savefig(f"{self.save_dir}/training_curve.png")
+        print(f"\n Training curve graph save to {self.save_dir}/training_curve.png")
 
 
 def plot_multiple_models(max_itr, models_results, figsize=(10, 10)):

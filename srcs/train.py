@@ -39,8 +39,9 @@ def train_model(
         patience: int | None = None,
         name: str = "MNIST"
 ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
-    if verbose:
-        print(f" Training {name}...")
+    print(f" Training {name}...")
+    print(f"  X_train shape: {X_train.shape}")
+    print(f"  X_valid shape: {X_valid.shape}\n")
 
     # 結果の記録リスト
     iterations = []
