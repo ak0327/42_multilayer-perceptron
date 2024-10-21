@@ -1,4 +1,5 @@
 import argparse
+import os
 import numpy as np
 
 
@@ -97,3 +98,17 @@ def int_list_type(min_elements, max_elements, min_value, max_value):
 
         return values
     return _checker
+
+
+def valid_dir(s):
+    if s is None:
+        raise argparse.ArgumentTypeError(f"Must be not None")
+    if not isinstance(s, str):
+        raise argparse.ArgumentTypeError(f"Must be a string: {s}")
+    if not os.path.exists(s):
+        raise argparse.ArgumentTypeError(f"Directory not found: {s}")
+    if not os.path.isdir(s):
+        raise argparse.ArgumentTypeError(f"Not a directory: {s}")
+    if not os.access(s, os.W_OK):
+        raise argparse.ArgumentTypeError(f"Directory not writable: {s}")
+    return s

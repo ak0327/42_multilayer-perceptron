@@ -18,22 +18,22 @@ class TestDataloaderArgument:
     @classmethod
     def setup_class(cls):
         cls.base_args = {
-            'dataset_path': '../data/data.csv',
+            'dataset_path': 'data/data.csv',
             'train_size': '0.8',
             'shuffle': 'true',
             'save_npz': 'false',
-            'save_dir': '../data'
+            'save_dir': 'data'
         }
         cls.filename = 'dataloader.py'
 
     def test_dataloader_arguments(self):
         sys.argv = dict_to_argv(self.filename, self.base_args)
         args = dataloader.parse_arguments()
-        assert args.dataset_path == '../data/data.csv'
+        assert args.dataset_path == 'data/data.csv'
         assert args.train_size == 0.8
         assert args.shuffle
         assert not args.save_npz
-        assert args.save_dir == '../data'
+        assert args.save_dir == 'data'
 
     @pytest.mark.parametrize("field, value, expected_error", [
         ('dataset_path',  None,         SystemExit),
@@ -52,7 +52,8 @@ class TestDataloaderArgument:
 
         ('save_npz',    'yes',  SystemExit),
 
-        ('save_dir',    None,  SystemExit), ])
+        ('save_dir',    None,       SystemExit),
+        ('save_dir',    'nothing',  SystemExit), ])
     def test_invalid_arguments(self, field, value, expected_error):
         invalid_args = self.base_args.copy()
         invalid_args[field] = value
@@ -76,7 +77,7 @@ class TestTrainArgument:
     @classmethod
     def setup_class(cls):
         cls.base_args = {
-            'dataset_path':     '../data/data_train.csv',
+            'dataset_path':     'data/data_train.csv',
             'hidden_features':  '50 30',
             'epochs':           '2000',
             'learning_rate':    '0.0001',
@@ -86,14 +87,14 @@ class TestTrainArgument:
             'plot':             'false',
             'metrics_interval': '10',
             'patience':         '100',
-            'save_dir':         '../data',
+            'save_dir':         'data',
         }
         cls.filename = 'train.py'
 
     def test_train_arguments(self):
         sys.argv = dict_to_argv(self.filename, self.base_args)
         args = train.parse_arguments()
-        assert args.dataset_path == '../data/data_train.csv'
+        assert args.dataset_path == 'data/data_train.csv'
         assert args.hidden_features == [50, 30]
         assert args.epochs == 2000
         assert args.learning_rate == 0.0001
@@ -103,7 +104,7 @@ class TestTrainArgument:
         assert not args.plot
         assert args.metrics_interval == 10
         assert args.patience == 100
-        assert args.save_dir == '../data'
+        assert args.save_dir == 'data'
 
     @pytest.mark.parametrize("field, value, expected_error", [
         ('dataset_path',    None,           SystemExit),
@@ -159,7 +160,8 @@ class TestTrainArgument:
         ('metrics_interval',   'nan',   SystemExit),
         ('metrics_interval',   'inf',   SystemExit),
 
-        ('save_dir',    None,  SystemExit), ])
+        ('save_dir',    None,       SystemExit),
+        ('save_dir',    'nothing',  SystemExit), ])
     def test_invalid_arguments(self, field, value, expected_error):
         invalid_args = self.base_args.copy()
         invalid_args[field] = value
@@ -172,16 +174,16 @@ class TestPredictArgument:
     @classmethod
     def setup_class(cls):
         cls.base_args = {
-            'model_path':       '../data/model.pkl',
-            'dataset_path':     '../data/data_test.csv',
+            'model_path':       'data/model.pkl',
+            'dataset_path':     'data/data_test.csv',
         }
         cls.filename = 'predict.py'
 
     def test_train_arguments(self):
         sys.argv = dict_to_argv(self.filename, self.base_args)
         args = predict.parse_arguments()
-        assert args.model_path == '../data/model.pkl'
-        assert args.dataset_path == '../data/data_test.csv'
+        assert args.model_path == 'data/model.pkl'
+        assert args.dataset_path == 'data/data_test.csv'
 
     @pytest.mark.parametrize("field, value, expected_error", [
         ('model_path',      None,           SystemExit),

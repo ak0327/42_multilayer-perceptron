@@ -18,7 +18,15 @@ from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
 from srcs.modules.io import save_training_result, load_npz, load_csv
-from srcs.modules.parser import int_range, float_range, str2bool, str_expected, validate_extention, int_list_type
+from srcs.modules.parser import (
+    int_range,
+    float_range,
+    str2bool,
+    str_expected,
+    validate_extention,
+    int_list_type,
+    valid_dir,
+)
 from srcs.modules.metrics import get_metrics, accuracy_score
 from srcs.modules.tools import EarlyStopping
 
@@ -336,7 +344,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--save_dir",
-        type=str,
+        type=valid_dir,
         required=True,
         help="model save dir"
     )

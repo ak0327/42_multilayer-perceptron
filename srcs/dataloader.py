@@ -11,7 +11,12 @@ import pandas as pd
 from typing import Union, overload
 
 from srcs.modules.io import save_to_npz, save_to_csv, load_wdbc_data, load_csv
-from srcs.modules.parser import str2bool, float_range_exclusive, validate_extention
+from srcs.modules.parser import (
+    str2bool,
+    float_range_exclusive,
+    validate_extention,
+    valid_dir,
+)
 
 
 def _stratified_split(
@@ -215,7 +220,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--save_dir",
-        type=str,
+        type=valid_dir,
         required=True,
         help="dataset save dir"
     )
