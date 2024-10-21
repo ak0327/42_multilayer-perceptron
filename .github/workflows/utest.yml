@@ -62,4 +62,4 @@ jobs:
           pip install --no-cache-dir -r config/requirements.txt
 
       - name: Run pytest
-        run: pytest -v
+        run: pytest -v -c config/pytest.ini

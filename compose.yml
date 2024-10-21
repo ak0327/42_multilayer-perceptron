@@ -2,7 +2,7 @@ services:
   ft_mlp:
     build:
       context: '.'
-      dockerfile: 'Dockerfile'
+      dockerfile: 'config/Dockerfile'
     environment:
       - JUPYTER_TOKEN=
       - JUPYTER_PASSWORD=

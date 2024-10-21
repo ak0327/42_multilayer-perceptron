@@ -8,7 +8,7 @@ Re-implementation of a multilayer perceptron
 <hr>
 
 # 2. How to use
-## 2-1) Install vertual environment
+## 2-1) Set up execution environment with Docker Compose
 ```shell
 $ make
 

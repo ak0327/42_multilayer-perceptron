@@ -58,7 +58,7 @@ predict:
 
 .PHONY: test
 test:
-	docker compose exec ft_mlp pytest -v
+	docker compose exec ft_mlp pytest -v -c config/pytest.ini
 
 .PHONY: clean
 clean:
