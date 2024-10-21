@@ -126,19 +126,19 @@ class Sequential:
         """
         no = 0
         SP = " "
-        info = "MODEL:\n"
-        info += f"{SP * 2}Sequential(\n"
+        info =  f"{SP * 1}MODEL:\n"
+        info += f"{SP * 3}Sequential(\n"
         for layer in self.layers:
             linear, activation = layer.info()
-            info += f"{SP * 4}({no}): {linear}\n"
+            info += f"{SP * 5}({no}): {linear}\n"
             no += 1
             if activation is None:
                 continue
-            info += f"{SP * 4}({no}): {activation}\n"
+            info += f"{SP * 5}({no}): {activation}\n"
             no += 1
-        info += f"{SP * 2})\n"
-        info += f"OPTIMIZER: {self.optimizer.info}\n"
-        info += f"CRITERIA : {self.criteria.info}\n"
+        info += f"{SP * 3})\n"
+        info += f"{SP * 1}OPTIMIZER: {self.optimizer.info}\n"
+        info += f"{SP * 1}CRITERIA : {self.criteria.info}\n"
         self.sequential_info = info
 
     def __call__(self, x):

@@ -151,14 +151,17 @@ def main(
         save_dir: str,
         random_state: int
 ):
-    print(f"\n[Loading]")
+    print(f"\n[Dataloader]")
     try:
+        print(f" Dataset: {csv_path}")
+        print(f"  Splitting...")
         X_train, X_test, y_train, y_test = get_wdbc(
             csv_path=csv_path,
             train_size=train_size,
             shuffle=shuffle,
             random_state=random_state
         )
+        print(f"  Split dataset SUCCESS\n")
         if save_npz:
             save_to_npz(X=X_train, y=y_train, dir=save_dir, name="data_train")
             save_to_npz(X=X_test, y=y_test, dir=save_dir, name="data_test")

@@ -19,7 +19,7 @@ def save_to_npz(X: np.ndarray, y: np.ndarray, dir: str, name: str):
     try:
         path = f"{dir}/{name}.npz"
         np.savez(path, X=X, y=y)
-        print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
+        print(f" {name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
         raise IOError(f"fail to saving {name} data: {e}")
 
@@ -62,7 +62,7 @@ def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
 
         path = f"{dir}/{name}.csv"
         df.to_csv(path, index=False)
-        print(f"{name.capitalize()} data saved to {os.path.abspath(path)}")
+        print(f" {name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
         raise IOError(f"Failed to save {name} data: {str(e)}")
 
@@ -165,7 +165,7 @@ def save_training_result(
 ):
     model_save_path = f"{save_dir}/model.pkl"
     save_model(model, model_save_path)
-    print(f"Model data saved to {os.path.abspath(model_save_path)}")
+    print(f" Model data saved to {os.path.abspath(model_save_path)}")
 
     metrics_save_path = f"{save_dir}/metrics.npz"
     np.savez(
@@ -176,7 +176,7 @@ def save_training_result(
         valid_losses=valid_losses,
         valid_accs=valid_accs
     )
-    print(f"Metrics saved to {os.path.abspath(metrics_save_path)}")
+    print(f" Metrics saved to {os.path.abspath(metrics_save_path)}")
 
 
 def load_training_result(save_dir):

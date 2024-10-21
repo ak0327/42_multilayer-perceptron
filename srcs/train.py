@@ -85,7 +85,7 @@ def train_model(
             valid_accs.append(valid_acc)
 
             if verbose:
-                print(f' Epoch:{epoch:>4}/{iters_num}, '
+                print(f'  Epoch:{epoch:>4}/{iters_num}, '
                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
                       f'Valid [Loss:{valid_loss:.4f}, Acc:{valid_acc:.4f}]')
             if plot:
@@ -107,9 +107,10 @@ def train_model(
     y_valid = model.forward(X_valid)
     valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
 
-    print(f"\nMetrics: \n"
-          f" Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
-          f" Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]")
+    print(f"\n"
+          f" Metrics: \n"
+          f"  Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+          f"  Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
 
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
@@ -167,7 +168,6 @@ def _get_train_data(
     train_size = 0.8
     shuffle = False
     random_state = 42
-
     if dataset_path.endswith(".npz"):
         X, y = load_npz("data/data_train.npz")
         # X_valid, y_valid = load_npz("data/data_test.npz")
@@ -206,8 +206,9 @@ def main(
         save: bool = True,
         save_dir: str = "data",
 ):
-    print(f"\n[Training]")
+    print(f"\n[Train]")
     try:
+        print(f" Dataset: {dataset_path}")
         X_train, X_valid, y_train, y_valid = _get_train_data(dataset_path)
 
         WDBC_INPUT = 30

@@ -31,7 +31,7 @@ def predict(
     y_pred = model.forward(X_test)
 
     accuracy, precision, recall, f1_score = get_metrics(y=y_pred, t=t_test)
-    print(f" Pred  [Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}]")
+    print(f"  Pred [Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}]")
     return accuracy
 
 
@@ -39,8 +39,9 @@ def main(
         dataset_path: str,
         model_path: str
 ) -> float:
-    print(f"\n[Prediction]")
+    print(f"\n[Predict]")
     try:
+        print(f" Dataset: {dataset_path}\n")
         if dataset_path.endswith(".npz"):
             X_test, y_test = load_npz(dataset_path)
         elif dataset_path.endswith(".csv"):
