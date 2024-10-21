@@ -37,6 +37,7 @@ def train_model(
         verbose: bool = True,
         plot: bool = True,
         patience: int | None = None,
+        save_dir: str = "data",
         name: str = "MNIST"
 ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
     print(f" Training {name}...")
@@ -53,7 +54,7 @@ def train_model(
     train_size = X_train.shape[0]
 
     if plot:
-        plotter = RealtimePlot(iters_num)
+        plotter = RealtimePlot(iters_num, save_dir)
 
     if patience is not None:
         early_stopping = EarlyStopping(patience=patience, verbose=False)
@@ -236,6 +237,7 @@ def main(
             verbose=verbose,
             plot=plot,
             patience=patience,
+            save_dir=save_dir,
             name="WDBC"
         )
 
