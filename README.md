@@ -44,6 +44,10 @@ options:
 
 #### Run
 ```shell
+$ make dataloader
+
+or
+
 $ docker compose exec ft_mlp \
   python3 srcs/dataloader.py \
 	--dataset_path data/data.csv \
@@ -85,6 +89,10 @@ options:
 
 #### Run
 ```shell
+$ make train
+
+or
+
 $ docker compose exec ft_mlp \
   python3 srcs/train.py \
 	--dataset_path data/data_train.csv \
@@ -115,6 +123,10 @@ options:
 
 #### Run
 ```shell
+$ make predict
+
+or
+
 $ docker compose exec ft_mlp \
   python3 srcs/predict.py \
 	--model_path data/model.pkl \
