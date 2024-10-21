@@ -3,6 +3,7 @@ FROM python:3.10-slim
 RUN apt-get update
 
 WORKDIR /app
+
 COPY config/requirements.txt /app/requirements.txt
 
 RUN pip install --upgrade pip && \
