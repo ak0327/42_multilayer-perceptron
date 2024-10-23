@@ -16,7 +16,7 @@ def run_dataloader():
     sys.argv = [
         'dataloader.py',
         '--dataset_path',   'data/data.csv',
-        '--test_size',      '0.25',
+        '--test_size',      '0.3',
         '--shuffle',        'true',
         '--save_dir',       'data',
     ]

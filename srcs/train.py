@@ -179,7 +179,7 @@ def _get_train_data(
         apply_normalize=True,
     )
 
-    test_size = 0.2
+    test_size = 0.3
     shuffle = False
     random_state = 42
     X_train, X_valid, y_train, y_valid = train_test_split(

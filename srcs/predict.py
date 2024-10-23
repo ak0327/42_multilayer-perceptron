@@ -32,8 +32,9 @@ def predict(
     loss = model.loss(y_pred, t_test)
 
     accuracy, precision, recall, f1_score = get_metrics(y=y_pred, t=t_test)
-    print(f"  Predict:\n"
-          f"   loss: {loss:.4f} [Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}]")
+    print(f"  Result:\n"
+          f"   - Loss: {loss:.4f}\n"
+          f"   - Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}")
     return accuracy
 
 
