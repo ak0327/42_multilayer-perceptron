@@ -84,9 +84,9 @@ def parse_arguments():
     )
     parser.add_argument(
         "--dataset_path",
-        type=validate_extention(["npz", "csv"]),
+        type=validate_extention(["csv"]),
         required=True,
-        help="Path to the predict WBDC CSV or NPZ dataset."
+        help="Path to the predict WBDC CSV dataset."
     )
     return parser.parse_args()
 

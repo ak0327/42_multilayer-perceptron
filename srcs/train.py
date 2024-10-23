@@ -99,17 +99,6 @@ def train_model(
                     epoch, train_loss, train_acc, valid_loss, valid_acc
                 )
 
-        # if epoch % 1000 == 0:
-        #     y_train = model.forward(X_train)
-        #     train_acc, train_prec, train_recall, train_f1 = get_metrics(y_train, t_train)
-        #     y_valid = model.forward(X_valid)
-        #     valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
-        #
-        #     print(f"\n"
-        #           f" Metrics: \n"
-        #           f"  Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
-        #           f"  Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
-
         if patience is not None:
             early_stopping(valid_loss, model)
             if early_stopping.early_stop:
@@ -126,8 +115,8 @@ def train_model(
 
     print(f"\n"
           f" Metrics: \n"
-          f"  Train loss:{train_losses[-1]:.4f} [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
-          f"  Valid loss:{valid_losses[-1]:.4f} [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
+          f"  Train - loss:{train_losses[-1]:.4f} [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+          f"  Valid - loss:{valid_losses[-1]:.4f} [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
 
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
@@ -180,7 +169,8 @@ def create_model(
 
 
 def _get_train_data(
-        dataset_path: str | None
+        dataset_path: str | None,
+
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     X, y = get_ndarray(
         wdbc_csv_path=dataset_path,
@@ -282,9 +272,9 @@ def parse_arguments():
     )
     parser.add_argument(
         "--dataset_path",
-        type=validate_extention(["npz", "csv"]),
+        type=validate_extention(["csv"]),
         required=True,
-        help="Path to the train WBDC CSV or NPZ dataset."
+        help="Path to the train WBDC CSV dataset."
     )
     parser.add_argument(
         "--hidden_features",

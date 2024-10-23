@@ -73,8 +73,6 @@ def train_test_split(
         raise ValueError(f"test_size={test_size} should be 0.0 < test_size < 1.0")
     train_size = 1.0 - test_size
 
-    print(f"type(X): {type(X)}")
-
     n_total = len(X)
     n_test = int(n_total * test_size)
     n_train = n_total - n_test
