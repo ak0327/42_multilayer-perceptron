@@ -27,7 +27,7 @@ $ make run
 ### ii) Dataloader
 #### Usage
 ```shell
-usage: dataloader.py [-h] --dataset_path DATASET_PATH [--train_size TRAIN_SIZE] [--shuffle SHUFFLE] --save_npz SAVE_NPZ --save_dir SAVE_DIR
+usage: dataloader.py [-h] --dataset_path DATASET_PATH [--test_size TEST_SIZE] [--shuffle SHUFFLE] --save_dir SAVE_DIR
 
 Split WDBC dataset into train and test sets
 
@@ -35,10 +35,9 @@ options:
   -h, --help            show this help message and exit
   --dataset_path DATASET_PATH
                         Path to the WBDC CSV dataset
-  --train_size TRAIN_SIZE
+  --test_size TEST_SIZE
                         Percentage of training division (float in (0.0, 1.0))
   --shuffle SHUFFLE     Whether to shuffle the data before splitting (true/false, t/f)
-  --save_npz SAVE_NPZ   Save to train.npz and test.npz, othewise csv (true/false, t/f)
   --save_dir SAVE_DIR   dataset save dir
 ```
 
@@ -51,9 +50,8 @@ or
 $ docker compose exec ft_mlp \
   python3 srcs/dataloader.py \
 	--dataset_path data/data.csv \
-	--train_size 0.8 \
+	--test_size 0.2 \
 	--shuffle true \
-	--save_npz false \
 	--save_dir data
 ```
 
@@ -61,8 +59,8 @@ $ docker compose exec ft_mlp \
 #### Usage
 ```shell
 usage: train.py [-h] --dataset_path DATASET_PATH [--hidden_features HIDDEN_FEATURES] [--epochs EPOCHS] [--learning_rate LEARNING_RATE]
-                [--weight_decay WEIGHT_DECAY] [--optimizer OPTIMIZER] [--verbose VERBOSE] [--plot PLOT] [--metrics_interval METRICS_INTERVAL]
-                [--patience PATIENCE] --save_dir SAVE_DIR
+                [--weight_decay WEIGHT_DECAY] [--optimizer OPTIMIZER] [--verbose VERBOSE] [--plot PLOT]
+                [--metrics_interval METRICS_INTERVAL] [--patience PATIENCE] --save_dir SAVE_DIR
 
 Train on WDBC dataset with MLP
 
@@ -71,7 +69,8 @@ options:
   --dataset_path DATASET_PATH
                         Path to the train WBDC CSV or NPZ dataset.
   --hidden_features HIDDEN_FEATURES
-                        Number of neurons in each hidden layer (2 to 5 values, e.g., --hidden_features 24 42 or --hidden_features 24 42 24 42 24)
+                        Number of neurons in each hidden layer in range [2, 500](2 to 5 values, e.g., --hidden_features 24 42 or
+                        --hidden_features 24 42 24 42 24)
   --epochs EPOCHS       Number of training epochs (integer in range [1, 100000], default: 5000)
   --learning_rate LEARNING_RATE
                         Learning rate for training (float in range [0.0001, 1.0], default: 0.01)
@@ -96,9 +95,9 @@ or
 $ docker compose exec ft_mlp \
   python3 srcs/train.py \
 	--dataset_path data/data_train.csv \
-	--hidden_features "50 30" \
-	--epochs 1000 \
-	--learning_rate 0.0001 \
+	--hidden_features "10 2" \
+	--epochs 4000 \
+	--learning_rate 1e-4 \
 	--optimizer Adam \
 	--verbose true \
 	--plot true \
@@ -118,7 +117,7 @@ options:
   --model_path MODEL_PATH
                         Path to trained model
   --dataset_path DATASET_PATH
-                        Path to the predict WBDC CSV or NPZ dataset.
+                        Path to the predict WBDC CSV dataset.
 ```
 
 #### Run
