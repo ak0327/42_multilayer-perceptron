@@ -10,13 +10,13 @@ import numpy as np
 from srcs.dataloader import train_test_split
 from srcs.modules.functions import Softmax
 from srcs.modules.activation import ReLU, Sigmoid
-from srcs.modules.loss import CrossEntropyLoss
+from srcs.modules.loss import CrossEntropyLoss, BinaryCrossEntropyLoss
 from srcs.modules.init import he_normal, xavier_normal, normal
 from srcs.modules.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
 from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
-from srcs.modules.io import load_model, load_wdbc_data, load_npz, load_csv
+from srcs.modules.io import load_model, load_wdbc_data, load_npz, get_ndarray
 from srcs.modules.metrics import get_metrics
 from srcs.modules.parser import validate_extention
 
@@ -29,9 +29,17 @@ def predict(
 ) -> float:
     print(f" Predicting {name}...")
     y_pred = model.forward(X_test)
+    loss = model.loss(y_pred, t_test)
+    print(f"model.loss: {loss:.4f}")
+
+    # bce = BinaryCrossEntropyLoss()
+    # loss = bce(y_pred, t_test)
+    # print(f"BinaryCrossEntropyLoss: {loss:.4f}")
 
     accuracy, precision, recall, f1_score = get_metrics(y=y_pred, t=t_test)
-    print(f"  Pred [Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}]")
+    print(f"  Predict:\n"
+          # f"   BinaryCrossEntropyError: {loss:.4f}\n"
+          f"   Metrics [Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}]")
     return accuracy
 
 
@@ -42,12 +50,10 @@ def main(
     print(f"\n[Predict]")
     try:
         print(f" Dataset: {dataset_path}\n")
-        if dataset_path.endswith(".npz"):
-            X_test, y_test = load_npz(dataset_path)
-        elif dataset_path.endswith(".csv"):
-            X_test, y_test = load_csv(dataset_path, np=True)
-        else:
-            raise ValueError(f"Invalid file path: Required npz or csv")
+        X_test, y_test = get_ndarray(
+            wdbc_csv_path=dataset_path,
+            apply_normalize=True,
+        )
 
         model: Sequential = load_model(model_path)
         accuracy = predict(

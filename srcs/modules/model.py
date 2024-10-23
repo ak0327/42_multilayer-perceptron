@@ -3,7 +3,7 @@ from srcs.modules.functions import (
     Softmax, SoftmaxWithCrossEntropyLoss, numerical_gradient
 )
 from srcs.modules.activation import ReLU
-from srcs.modules.loss import CrossEntropyLoss
+from srcs.modules.loss import CrossEntropyLoss, BinaryCrossEntropyLoss
 from srcs.modules.optimizer import Optimizer
 from srcs.modules.init import he_normal
 from srcs.modules.layer import Affine, Dense, Linear
@@ -102,7 +102,7 @@ class Sequential:
         # 最終層の活性化関数がsoftmax, 損失関数がCrossEntropyLossの場合
         # 数値的安定化のため、損失関数をSoftmaxWithCrossEntropyLossに差し替える
         if (isinstance(self.layers[-1].activation, Softmax)
-                and isinstance(self.criteria, CrossEntropyLoss)):
+                and (isinstance(self.criteria, CrossEntropyLoss) or isinstance(self.criteria, BinaryCrossEntropyLoss))):
             self.layers[-1].activation = None
             self.criteria = SoftmaxWithCrossEntropyLoss()
 
@@ -152,10 +152,10 @@ class Sequential:
     def loss(self, y, t):
         loss = self.criteria(y, t)
 
-        l2_reg = 0
-        for layer in self.layers:
-            l2_reg += (layer.W ** 2).sum()
-        loss += 0.5 * self.weight_decay * l2_reg
+        # l2_reg = 0
+        # for layer in self.layers:
+        #     l2_reg += (layer.W ** 2).sum()
+        # loss += 0.5 * self.weight_decay * l2_reg
         return loss
 
     def accuracy(self, y, t):
@@ -166,11 +166,11 @@ class Sequential:
         for layer in reversed(self.layers):
             dout = layer.backward(dout)
 
-        # L2正則化に基づく勾配を追加で計算して、パラメータに反映
-        for layer in self.layers:
-            if self.weight_decay > 0:
-                dW = layer.dW + self.weight_decay * layer.W  # L2正則化の勾配を追加
-                layer.set_dW(dW)
+        # # L2正則化に基づく勾配を追加で計算して、パラメータに反映
+        # for layer in self.layers:
+        #     if self.weight_decay > 0:
+        #         dW = layer.dW + self.weight_decay * layer.W  # L2正則化の勾配を追加
+        #         layer.set_dW(dW)
 
         grads = self.grads
         return grads

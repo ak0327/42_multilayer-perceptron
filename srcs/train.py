@@ -11,13 +11,13 @@ import numpy as np
 from srcs.dataloader import train_test_split, get_wdbc
 from srcs.modules.functions import Softmax
 from srcs.modules.activation import ReLU, Sigmoid
-from srcs.modules.loss import CrossEntropyLoss
+from srcs.modules.loss import CrossEntropyLoss, BinaryCrossEntropyLoss
 from srcs.modules.init import he_normal, xavier_normal, normal
 from srcs.modules.optimizer import Optimizer, SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
 from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
-from srcs.modules.io import save_training_result, load_npz, load_csv
+from srcs.modules.io import save_training_result, load_npz, get_ndarray
 from srcs.modules.parser import (
     int_range,
     float_range,
@@ -31,7 +31,96 @@ from srcs.modules.metrics import get_metrics, accuracy_score
 from srcs.modules.tools import EarlyStopping
 
 
-np.random.seed(42)
+# def train_model(
+#         model,
+#         X_train: np.ndarray,
+#         t_train: np.ndarray,
+#         X_valid: np.ndarray,
+#         t_valid: np.ndarray,
+#         iters_num: int = 5000,
+#         metrics_interval: int = 1,
+#         verbose: bool = True,
+#         plot: bool = True,
+#         patience: int | None = None,
+#         save_dir: str = "data",
+#         name: str = "MNIST"
+# ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
+#     print(f" Training {name}...")
+#     print(f"  X_train shape: {X_train.shape}")
+#     print(f"  X_valid shape: {X_valid.shape}\n")
+#
+#     # 結果の記録リスト
+#     iterations = []
+#     train_losses = []
+#     train_accs = []
+#     valid_losses = []
+#     valid_accs = []
+#
+#     train_size = X_train.shape[0]
+#
+#     if plot:
+#         plotter = RealtimePlot(iters_num, save_dir)
+#
+#     if patience is not None:
+#         early_stopping = EarlyStopping(patience=patience, verbose=False)
+#
+#     batch_size = 100
+#     train_size = X_train.shape[0]  # 訓練データのサイズ
+#     iter_per_epoch = max(int(train_size / batch_size), 1)    # 1エポック当たりの繰り返し数
+#
+#     for epoch in range(iters_num):
+#         rng = np.random.default_rng(seed=42)
+#         batch_mask = rng.choice(train_size, batch_size, replace=False)
+#         X_batch = X_train[batch_mask]
+#         t_batch = t_train[batch_mask]
+#
+#         y_batch = model.forward(X_batch)
+#         train_loss = model.loss(y_batch, t_batch)
+#         model.backward()
+#         model.update_params()
+#
+#         if epoch % metrics_interval == 0 or epoch + 1 == iters_num:
+#             y_train = model.forward(X_train)
+#             train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
+#             y_valid = model.forward(X_valid)
+#             valid_loss = model.loss(y_valid, t_valid)
+#             valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
+#
+#             iterations.append(epoch)
+#             train_losses.append(train_loss)
+#             train_accs.append(train_acc)
+#             valid_losses.append(valid_loss)
+#             valid_accs.append(valid_acc)
+#
+#             if verbose:
+#                 print(f'  Epoch:{epoch:>4}/{iters_num}, '
+#                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
+#                       f'Valid [Loss:{valid_loss:.4f}, Acc:{valid_acc:.4f}]')
+#             if plot:
+#                 plotter.update(
+#                     epoch, train_loss, train_acc, valid_loss, valid_acc
+#                 )
+#
+#         if patience is not None:
+#             early_stopping(valid_loss, model)
+#             if early_stopping.early_stop:
+#                 model = early_stopping.best_model
+#                 break
+#
+#     if plot:
+#         plotter.plot()
+#
+#     y_train = model.forward(X_train)
+#     train_acc, train_prec, train_recall, train_f1 = get_metrics(y_train, t_train)
+#     y_valid = model.forward(X_valid)
+#     valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
+#
+#     print(f"\n"
+#           f" Metrics: \n"
+#           f"  Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+#           f"  Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
+#
+#     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
 
 def train_model(
@@ -52,7 +141,6 @@ def train_model(
     print(f"  X_train shape: {X_train.shape}")
     print(f"  X_valid shape: {X_valid.shape}\n")
 
-    # 結果の記録リスト
     iterations = []
     train_losses = []
     train_accs = []
@@ -103,6 +191,17 @@ def train_model(
                     epoch, train_loss, train_acc, valid_loss, valid_acc
                 )
 
+        # if epoch % 1000 == 0:
+        #     y_train = model.forward(X_train)
+        #     train_acc, train_prec, train_recall, train_f1 = get_metrics(y_train, t_train)
+        #     y_valid = model.forward(X_valid)
+        #     valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
+        #
+        #     print(f"\n"
+        #           f" Metrics: \n"
+        #           f"  Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+        #           f"  Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
+
         if patience is not None:
             early_stopping(valid_loss, model)
             if early_stopping.early_stop:
@@ -119,8 +218,8 @@ def train_model(
 
     print(f"\n"
           f" Metrics: \n"
-          f"  Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
-          f"  Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
+          f"  Train loss:{train_losses[-1]:.4f} [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+          f"  Valid loss:{valid_losses[-1]:.4f} [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
 
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
@@ -165,7 +264,8 @@ def create_model(
     _optimizer = optimizers[optimp_str](lr=learning_rate)
     _model = Sequential(
         layers=_layers,
-        criteria=CrossEntropyLoss,
+        # criteria=CrossEntropyLoss,
+        criteria=BinaryCrossEntropyLoss,
         optimizer=_optimizer,
         weight_decay=weight_decay,
     )
@@ -175,30 +275,24 @@ def create_model(
 def _get_train_data(
         dataset_path: str | None
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    train_size = 0.8
+    X, y = get_ndarray(
+        wdbc_csv_path=dataset_path,
+        y_onehot=True,
+        drop_id=True,
+        apply_normalize=True,
+    )
+
+    test_size = 0.2
     shuffle = False
     random_state = 42
-    if dataset_path.endswith(".npz"):
-        X, y = load_npz("data/data_train.npz")
-        # X_valid, y_valid = load_npz("data/data_test.npz")
-        X_train, X_valid, y_train, y_valid = train_test_split(
-            X=X,
-            y=y,
-            train_size=train_size,
-            shuffle=shuffle,
-            random_state=random_state,
-            stratify=y
-        )
-    elif dataset_path.endswith(".csv"):
-        X_train, X_valid, y_train, y_valid = get_wdbc(
-            csv_path=dataset_path,
-            train_size=train_size,
-            shuffle=shuffle,
-            random_state=random_state,
-        )
-    else:
-        raise ValueError(f"Invalid file path: Required npz or csv")
-
+    X_train, X_valid, y_train, y_valid = train_test_split(
+        X=X,
+        y=y,
+        test_size=test_size,
+        shuffle=shuffle,
+        random_state=random_state,
+        stratify=True,
+    )
     return X_train, X_valid, y_train, y_valid
 
 
@@ -287,7 +381,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--hidden_features",
-        type=int_list_type(min_elements=2, max_elements=5, min_value=2, max_value=200),
+        type=int_list_type(min_elements=2, max_elements=5, min_value=2, max_value=500),
         default=[24, 24],
         help="Number of neurons in each hidden layer "
              "(2 to 5 values, e.g., "
@@ -302,7 +396,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--learning_rate",
-        type=float_range(0.0001, 1.0),
+        type=float_range(1e-6, 1.0),
         default=0.01,
         help="Learning rate for training "
              "(float in range [0.0001, 1.0], default: 0.01)"

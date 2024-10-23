@@ -5,15 +5,24 @@ from srcs.modules.model import Sequential
 
 
 def normalize(df: pd.DataFrame, columns: list[str]):
+    # df_norm = df.copy()
+    # for col in columns:
+    #     min_val = df[col].min()
+    #     max_val = df[col].max()
+    #     range_val = max_val - min_val
+    #     if range_val == 0:
+    #         df_norm[col] = 1
+    #     else:
+    #         df_norm[col] = (df[col] - min_val) / range_val
+
     df_norm = df.copy()
     for col in columns:
-        min_val = df[col].min()
-        max_val = df[col].max()
-        range_val = max_val - min_val
-        if range_val == 0:
-            df_norm[col] = 1
+        mean_val = df[col].mean()
+        std_val = df[col].std()
+        if std_val == 0:
+            df_norm[col] = 0  # 標準偏差が0の場合、全て同じ値なので0に
         else:
-            df_norm[col] = (df[col] - min_val) / range_val
+            df_norm[col] = (df[col] - mean_val) / std_val
     return df_norm
 
 
