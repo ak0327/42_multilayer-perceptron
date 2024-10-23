@@ -38,8 +38,8 @@ def run_train():
         '--epochs',             '4000',
         '--learning_rate',      '1e-4',
         '--optimizer',          'Adam',
-        '--verbose',            'false',
-        '--plot',               'false',
+        '--verbose',            'true',
+        '--plot',               'true',
         '--metrics_interval',   '100',
         '--save_dir',           'data',
     ]
