@@ -90,7 +90,7 @@ def normalize_data(csv_path: str):
         raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
     df = pd.read_csv(csv_path, header=None)
     columns = ['id', 'diagnosis']
-    # 特徴量の名前リスト
+    # 特徴量
     features = [
         'radius',
         'texture',
@@ -103,7 +103,7 @@ def normalize_data(csv_path: str):
         'symmetry',
         'fractal_dimension'
     ]
-    # 統計量の名前リスト
+    # 統計量
     stats = ['mean', 'stderr', 'worst']
 
     for feature, stat in product(features, stats):
@@ -142,7 +142,7 @@ def load_wdbc_data(
         drop_id: bool,
         apply_normalize: bool = True,
 ) -> tuple[pd.DataFrame, pd.Series]:
-    if not os.path.exists(csv_path):
+    if csv_path is None or not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
     df = pd.read_csv(csv_path, header=None)
 
@@ -159,10 +159,9 @@ def load_wdbc_data(
         y = pd.to_numeric(y.map({'M': 1, 'B': 0}), downcast='integer')
 
     X = df.drop(diagnosis_idx, axis=1)
-    # print(f"After drop diagnosis shape: {X.shape}")
 
     columns = ['id']
-    # 特徴量の名前リスト
+    # 特徴量
     features = [
         'radius',
         'texture',
@@ -175,7 +174,7 @@ def load_wdbc_data(
         'symmetry',
         'fractal_dimension'
     ]
-    # 統計量の名前リスト
+    # 統計量
     stats = ['mean', 'stderr', 'worst']
 
     for feature, stat in product(features, stats):
@@ -189,14 +188,6 @@ def load_wdbc_data(
 
     if drop_id:
         X = X.drop('id', axis=1)
-
-    # y = X["diagnosis"]
-    # if y_onehot:
-    #     y = pd.to_numeric(X['diagnosis'].map({'M': 1, 'B': 0}), downcast='integer')
-
-    # print(f"X columns: {X.columns}")
-    # print(f"X dtypes:\n{X.dtypes}")
-    # print(f"X head:\n{X.head()}")
 
     return X.astype(np.float64), y
 

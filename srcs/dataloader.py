@@ -19,6 +19,7 @@ from srcs.modules.parser import (
 )
 from srcs.evaluation import evaluate_class_distribution
 
+
 def _stratified_split(
         y: pd.Series,
         test_size: float,
@@ -78,7 +79,6 @@ def train_test_split(
     n_total = len(X)
     n_test = int(n_total * test_size)
     n_train = n_total - n_test
-    # print(f"train_size:{train_size}, n_train:{n_train}, n_test:{n_test}")
     if n_train == 0:
         raise ValueError(f"train_size={train_size} results in an empty training set")
     if n_test == 0:

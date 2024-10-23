@@ -3,86 +3,11 @@ from srcs.modules.functions import (
     Softmax, SoftmaxWithCrossEntropyLoss, numerical_gradient
 )
 from srcs.modules.activation import ReLU
-from srcs.modules.loss import CrossEntropyLoss, BinaryCrossEntropyLoss
+from srcs.modules.loss import CrossEntropyLoss
 from srcs.modules.optimizer import Optimizer
 from srcs.modules.init import he_normal
 from srcs.modules.layer import Affine, Dense, Linear
 from srcs.modules.metrics import accuracy_score
-
-
-class TwoLayerNet:
-    def __init__(
-            self,
-            in_features: int,
-            hid_features: int,
-            out_features: int,
-            optimizer: Optimizer,
-            weight_init_std: float = 0.01,
-    ):
-        self.params = {
-            'W1' : weight_init_std * np.random.randn(in_features, hid_features),
-            'b1' : np.zeros(hid_features),
-            'W2' : weight_init_std * np.random.randn(hid_features, out_features),
-            'b2' : np.zeros(out_features),
-        }
-        self.layers = {
-            'Affine1' : Affine(W=self.params['W1'], b=self.params['b1']),
-            'Relu1'   : ReLU(),
-            'Affine2' : Affine(W=self.params['W2'], b=self.params['b2']),
-        }
-        self.last_layer = SoftmaxWithCrossEntropyLoss()
-
-        self.optimizer = optimizer
-
-    def predict(self, x):
-        for layer in self.layers.values():
-            x = layer(x)
-        return x
-
-    def loss(self, x, t):
-        y = self.predict(x)
-        loss = self.last_layer(y, t)
-        return loss
-
-    def accuracy(self, x, t):
-        y = self.predict(x)
-        y = np.argmax(y, axis=1)
-
-        if t.ndim != 1:
-            t = np.argmax(t, axis=1)
-
-        accuracy = np.sum(y == t) / float(x.shape[0])
-        return accuracy
-
-    def backward(self, x, t):
-        self.loss(x, t)
-
-        dout = 1
-        dout = self.last_layer.backward(dout)
-        for layer in reversed(list(self.layers.values())):
-            dout = layer.backward(dout)
-
-        grads = {
-            'W1' : self.layers['Affine1'].dW,
-            'b1' : self.layers['Affine1'].db,
-            'W2' : self.layers['Affine2'].dW,
-            'b2' : self.layers['Affine2'].db,
-        }
-        return grads
-
-    def numerical_grad(self, x, t):
-        loss_W = lambda W: self.loss(x, t)
-
-        grads = {
-            'W1' : numerical_gradient(loss_W, self.params['W1']),
-            'b1' : numerical_gradient(loss_W, self.params['b1']),
-            'W2' : numerical_gradient(loss_W, self.params['W2']),
-            'b2' : numerical_gradient(loss_W, self.params['b2']),
-        }
-        return grads
-
-    def update_params(self, grads):
-        self.optimizer.update(self.params, grads)
 
 
 class Sequential:
@@ -102,7 +27,7 @@ class Sequential:
         # 最終層の活性化関数がsoftmax, 損失関数がCrossEntropyLossの場合
         # 数値的安定化のため、損失関数をSoftmaxWithCrossEntropyLossに差し替える
         if (isinstance(self.layers[-1].activation, Softmax)
-                and (isinstance(self.criteria, CrossEntropyLoss) or isinstance(self.criteria, BinaryCrossEntropyLoss))):
+                and (isinstance(self.criteria, CrossEntropyLoss))):
             self.layers[-1].activation = None
             self.criteria = SoftmaxWithCrossEntropyLoss()
 
@@ -152,10 +77,10 @@ class Sequential:
     def loss(self, y, t):
         loss = self.criteria(y, t)
 
-        # l2_reg = 0
-        # for layer in self.layers:
-        #     l2_reg += (layer.W ** 2).sum()
-        # loss += 0.5 * self.weight_decay * l2_reg
+        l2_reg = 0
+        for layer in self.layers:
+            l2_reg += (layer.W ** 2).sum()
+        loss += 0.5 * self.weight_decay * l2_reg
         return loss
 
     def accuracy(self, y, t):
@@ -166,11 +91,11 @@ class Sequential:
         for layer in reversed(self.layers):
             dout = layer.backward(dout)
 
-        # # L2正則化に基づく勾配を追加で計算して、パラメータに反映
-        # for layer in self.layers:
-        #     if self.weight_decay > 0:
-        #         dW = layer.dW + self.weight_decay * layer.W  # L2正則化の勾配を追加
-        #         layer.set_dW(dW)
+        # L2正則化に基づく勾配を追加で計算して、パラメータに反映
+        for layer in self.layers:
+            if self.weight_decay > 0:
+                dW = layer.dW + self.weight_decay * layer.W  # L2正則化の勾配を追加
+                layer.set_dW(dW)
 
         grads = self.grads
         return grads

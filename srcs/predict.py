@@ -10,7 +10,7 @@ import numpy as np
 from srcs.dataloader import train_test_split
 from srcs.modules.functions import Softmax
 from srcs.modules.activation import ReLU, Sigmoid
-from srcs.modules.loss import CrossEntropyLoss, BinaryCrossEntropyLoss
+from srcs.modules.loss import CrossEntropyLoss
 from srcs.modules.init import he_normal, xavier_normal, normal
 from srcs.modules.optimizer import SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
 from srcs.modules.layer import Dense
@@ -30,16 +30,10 @@ def predict(
     print(f" Predicting {name}...")
     y_pred = model.forward(X_test)
     loss = model.loss(y_pred, t_test)
-    print(f"model.loss: {loss:.4f}")
-
-    # bce = BinaryCrossEntropyLoss()
-    # loss = bce(y_pred, t_test)
-    # print(f"BinaryCrossEntropyLoss: {loss:.4f}")
 
     accuracy, precision, recall, f1_score = get_metrics(y=y_pred, t=t_test)
     print(f"  Predict:\n"
-          # f"   BinaryCrossEntropyError: {loss:.4f}\n"
-          f"   Metrics [Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}]")
+          f"   loss: {loss:.4f} [Accuracy:{accuracy:.4f}, Precision:{precision:.4f}, Recall:{recall:.4f}, F1:{f1_score:.4f}]")
     return accuracy
 
 

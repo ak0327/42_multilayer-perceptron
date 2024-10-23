@@ -11,7 +11,7 @@ import numpy as np
 from srcs.dataloader import train_test_split, get_wdbc
 from srcs.modules.functions import Softmax
 from srcs.modules.activation import ReLU, Sigmoid
-from srcs.modules.loss import CrossEntropyLoss, BinaryCrossEntropyLoss
+from srcs.modules.loss import CrossEntropyLoss
 from srcs.modules.init import he_normal, xavier_normal, normal
 from srcs.modules.optimizer import Optimizer, SGD, Momentum, Nesterov, AdaGrad, RMSProp, Adam
 from srcs.modules.layer import Dense
@@ -29,98 +29,6 @@ from srcs.modules.parser import (
 )
 from srcs.modules.metrics import get_metrics, accuracy_score
 from srcs.modules.tools import EarlyStopping
-
-
-# def train_model(
-#         model,
-#         X_train: np.ndarray,
-#         t_train: np.ndarray,
-#         X_valid: np.ndarray,
-#         t_valid: np.ndarray,
-#         iters_num: int = 5000,
-#         metrics_interval: int = 1,
-#         verbose: bool = True,
-#         plot: bool = True,
-#         patience: int | None = None,
-#         save_dir: str = "data",
-#         name: str = "MNIST"
-# ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
-#     print(f" Training {name}...")
-#     print(f"  X_train shape: {X_train.shape}")
-#     print(f"  X_valid shape: {X_valid.shape}\n")
-#
-#     # 結果の記録リスト
-#     iterations = []
-#     train_losses = []
-#     train_accs = []
-#     valid_losses = []
-#     valid_accs = []
-#
-#     train_size = X_train.shape[0]
-#
-#     if plot:
-#         plotter = RealtimePlot(iters_num, save_dir)
-#
-#     if patience is not None:
-#         early_stopping = EarlyStopping(patience=patience, verbose=False)
-#
-#     batch_size = 100
-#     train_size = X_train.shape[0]  # 訓練データのサイズ
-#     iter_per_epoch = max(int(train_size / batch_size), 1)    # 1エポック当たりの繰り返し数
-#
-#     for epoch in range(iters_num):
-#         rng = np.random.default_rng(seed=42)
-#         batch_mask = rng.choice(train_size, batch_size, replace=False)
-#         X_batch = X_train[batch_mask]
-#         t_batch = t_train[batch_mask]
-#
-#         y_batch = model.forward(X_batch)
-#         train_loss = model.loss(y_batch, t_batch)
-#         model.backward()
-#         model.update_params()
-#
-#         if epoch % metrics_interval == 0 or epoch + 1 == iters_num:
-#             y_train = model.forward(X_train)
-#             train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
-#             y_valid = model.forward(X_valid)
-#             valid_loss = model.loss(y_valid, t_valid)
-#             valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
-#
-#             iterations.append(epoch)
-#             train_losses.append(train_loss)
-#             train_accs.append(train_acc)
-#             valid_losses.append(valid_loss)
-#             valid_accs.append(valid_acc)
-#
-#             if verbose:
-#                 print(f'  Epoch:{epoch:>4}/{iters_num}, '
-#                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
-#                       f'Valid [Loss:{valid_loss:.4f}, Acc:{valid_acc:.4f}]')
-#             if plot:
-#                 plotter.update(
-#                     epoch, train_loss, train_acc, valid_loss, valid_acc
-#                 )
-#
-#         if patience is not None:
-#             early_stopping(valid_loss, model)
-#             if early_stopping.early_stop:
-#                 model = early_stopping.best_model
-#                 break
-#
-#     if plot:
-#         plotter.plot()
-#
-#     y_train = model.forward(X_train)
-#     train_acc, train_prec, train_recall, train_f1 = get_metrics(y_train, t_train)
-#     y_valid = model.forward(X_valid)
-#     valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
-#
-#     print(f"\n"
-#           f" Metrics: \n"
-#           f"  Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
-#           f"  Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
-#
-#     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
 
 def train_model(
@@ -264,8 +172,7 @@ def create_model(
     _optimizer = optimizers[optimp_str](lr=learning_rate)
     _model = Sequential(
         layers=_layers,
-        # criteria=CrossEntropyLoss,
-        criteria=BinaryCrossEntropyLoss,
+        criteria=CrossEntropyLoss,
         optimizer=_optimizer,
         weight_decay=weight_decay,
     )
@@ -383,7 +290,7 @@ def parse_arguments():
         "--hidden_features",
         type=int_list_type(min_elements=2, max_elements=5, min_value=2, max_value=500),
         default=[24, 24],
-        help="Number of neurons in each hidden layer "
+        help="Number of neurons in each hidden layer in range [2, 500]"
              "(2 to 5 values, e.g., "
              "--hidden_features 24 42 or --hidden_features 24 42 24 42 24)"
     )

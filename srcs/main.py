@@ -3,9 +3,13 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-import argparse
-from srcs import dataloader, train, predict, evaluation
-from srcs.modules.io import normalize_data
+from srcs import dataloader, train, predict
+import random
+import numpy as np
+
+
+random.seed(42)
+np.random.seed(42)
 
 
 def run_dataloader():
@@ -26,48 +30,22 @@ def run_dataloader():
     )
 
 
-def run_train(dataset_path):
+def run_train():
     sys.argv = [
         'train.py',
-        '--dataset_path',   'data/data_train.csv',
-        # '--dataset_path',   'data/data_normalized_train.csv',
-        # '--hidden_features',    '50 30 20 5',
-        # '--hidden_features',    '50 30 10',
-        # '--hidden_features',    '20 10 5',
-        # '--hidden_features',    '100 15',
-        # '--hidden_features',    '15 2',
+        '--dataset_path',       'data/data_train.csv',
         '--hidden_features',    '10 2',
-        # '--hidden_features',    '50 10 5 3',
-        # '--hidden_features',    '200 50',
-        # '--hidden_features',    '300 200 50',
-        # '--hidden_features',    '50 5',
-        '--epochs',             '5000',
+        '--epochs',             '4000',
         '--learning_rate',      '1e-4',
         '--optimizer',          'Adam',
-        # '--optimizer',          'SGD',
-
-        # '--hidden_features',    '20 10 5',
-        # '--epochs',             '5000',
-        # '--learning_rate',      '1e-4',
-        # '--optimizer',          'Adam',
-
-
-        # '--weight_decay',       '1e-6',
-        # '--hidden_features',    '20 10 5',
-        # '--epochs',             '5000',
-        # '--learning_rate',      '1e-3',
-        # '--optimizer',          'Nesterov',
-
         '--verbose',            'false',
         '--plot',               'false',
         '--metrics_interval',   '100',
         '--save_dir',           'data',
-        # '--patience',           '100',
-        # '--patience',           '50',
     ]
     args = train.parse_arguments()
     train.main(
-        dataset_path=dataset_path,
+        dataset_path=args.dataset_path,
         # dataset_path=args.dataset_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
@@ -82,54 +60,24 @@ def run_train(dataset_path):
     )
 
 
-def run_predict(dataset_path):
+def run_predict():
     sys.argv = [
         'predict.py',
         '--model_path',     'data/model.pkl',
         '--dataset_path',   'data/data_test.csv',
-        # '--dataset_path',   'data/data_train.csv',
-        # '--dataset_path',   'data/data_normalized_test.csv',
     ]
     args = predict.parse_arguments()
     predict.main(
         model_path=args.model_path,
-        # dataset_path=args.dataset_path,
-        dataset_path=dataset_path,
+        dataset_path=args.dataset_path,
     )
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="main"
-    )
-    parser.add_argument(
-        "--eval",
-        type=str,
-        help="eval"
-    )
-    args = parser.parse_args()
     try:
-        if args.eval is None:
-            print("train mode")
-            run_dataloader()
-            train_dataset = 'data/data_train.csv'
-            test_dataset = 'data/data_test.csv'
-
-        elif args.eval == "n":
-            print("eval mode normalize")
-            normalize_data("data/data.csv")
-            evaluation.splitDataset("data/data_normalized.csv", cut=0.25, label=False, shuffle=True)
-            train_dataset = 'data/data_normalized_train.csv'
-            test_dataset = 'data/data_normalized_test.csv'
-
-        else:
-            print("eval mode")
-            evaluation.splitDataset("data/data.csv", cut=0.25, label=False, shuffle=True)
-            train_dataset = 'data/data_train.csv'
-            test_dataset = 'data/data_test.csv'
-
-        run_train(train_dataset)
-        run_predict(test_dataset)
+        run_dataloader()
+        run_train()
+        run_predict()
 
     except Exception as e:
         print(f"fatal error: {str(e)}")
