@@ -19,9 +19,8 @@ class TestDataloaderArgument:
     def setup_class(cls):
         cls.base_args = {
             'dataset_path': 'data/data.csv',
-            'train_size': '0.8',
+            'test_size': '0.2',
             'shuffle': 'true',
-            'save_npz': 'false',
             'save_dir': 'data'
         }
         cls.filename = 'dataloader.py'
@@ -30,9 +29,8 @@ class TestDataloaderArgument:
         sys.argv = dict_to_argv(self.filename, self.base_args)
         args = dataloader.parse_arguments()
         assert args.dataset_path == 'data/data.csv'
-        assert args.train_size == 0.8
+        assert args.test_size == 0.2
         assert args.shuffle
-        assert not args.save_npz
         assert args.save_dir == 'data'
 
     @pytest.mark.parametrize("field, value, expected_error", [
@@ -41,16 +39,14 @@ class TestDataloaderArgument:
         ('dataset_path', 'nothing',     SystemExit),
         ('dataset_path', 'notcsv.npz',  SystemExit),
 
-        ('train_size',  '',     SystemExit),
-        ('train_size',  '0',    SystemExit),
-        ('train_size',  '-0.1', SystemExit),
-        ('train_size',  '1.2',  SystemExit),
-        ('train_size',  'inf',  SystemExit),
-        ('train_size',  'nan',  SystemExit),
+        ('test_size',  '',     SystemExit),
+        ('test_size',  '0',    SystemExit),
+        ('test_size',  '-0.1', SystemExit),
+        ('test_size',  '1.2',  SystemExit),
+        ('test_size',  'inf',  SystemExit),
+        ('test_size',  'nan',  SystemExit),
 
         ('shuffle',     '',     SystemExit),
-
-        ('save_npz',    'yes',  SystemExit),
 
         ('save_dir',    None,       SystemExit),
         ('save_dir',    'nothing',  SystemExit), ])
@@ -62,9 +58,8 @@ class TestDataloaderArgument:
             dataloader.parse_arguments()
 
     @pytest.mark.parametrize("field, value, expected", [
-        ('train_size', '0.5', 0.5),
-        ('shuffle', 'false', False),
-        ('save_npz', 'true', True), ])
+        ('test_size', '0.5', 0.5),
+        ('shuffle', 'false', False), ])
     def test_valid_argument_variations(self, field, value, expected):
         valid_args = self.base_args.copy()
         valid_args[field] = value
@@ -121,7 +116,7 @@ class TestTrainArgument:
         ('hidden_features', '0 50 50',          SystemExit),
         ('hidden_features', '-1 50 50',         SystemExit),
         ('hidden_features', '10.0 20.0 30.0',   SystemExit),
-        ('hidden_features', '201 10 10',        SystemExit),
+        ('hidden_features', '501 10 10',        SystemExit),
         ('hidden_features', 'abc',              SystemExit),
         ('hidden_features', '10 20 30 40 50a',  SystemExit),
         ('hidden_features', '10 20 30 40 nan',  SystemExit),

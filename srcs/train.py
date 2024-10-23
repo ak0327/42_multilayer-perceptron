@@ -17,7 +17,7 @@ from srcs.modules.optimizer import Optimizer, SGD, Momentum, Nesterov, AdaGrad, 
 from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.modules.plot import RealtimePlot
-from srcs.modules.io import save_training_result, load_npz, load_csv
+from srcs.modules.io import save_training_result, load_npz, get_ndarray
 from srcs.modules.parser import (
     int_range,
     float_range,
@@ -29,9 +29,6 @@ from srcs.modules.parser import (
 )
 from srcs.modules.metrics import get_metrics, accuracy_score
 from srcs.modules.tools import EarlyStopping
-
-
-np.random.seed(42)
 
 
 def train_model(
@@ -52,7 +49,6 @@ def train_model(
     print(f"  X_train shape: {X_train.shape}")
     print(f"  X_valid shape: {X_valid.shape}\n")
 
-    # 結果の記録リスト
     iterations = []
     train_losses = []
     train_accs = []
@@ -119,8 +115,8 @@ def train_model(
 
     print(f"\n"
           f" Metrics: \n"
-          f"  Train [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
-          f"  Valid [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
+          f"  Train - loss:{train_losses[-1]:.4f} [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+          f"  Valid - loss:{valid_losses[-1]:.4f} [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
 
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
@@ -173,32 +169,27 @@ def create_model(
 
 
 def _get_train_data(
-        dataset_path: str | None
+        dataset_path: str | None,
+
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    train_size = 0.8
+    X, y = get_ndarray(
+        wdbc_csv_path=dataset_path,
+        y_onehot=True,
+        drop_id=True,
+        apply_normalize=True,
+    )
+
+    test_size = 0.3
     shuffle = False
     random_state = 42
-    if dataset_path.endswith(".npz"):
-        X, y = load_npz("data/data_train.npz")
-        # X_valid, y_valid = load_npz("data/data_test.npz")
-        X_train, X_valid, y_train, y_valid = train_test_split(
-            X=X,
-            y=y,
-            train_size=train_size,
-            shuffle=shuffle,
-            random_state=random_state,
-            stratify=y
-        )
-    elif dataset_path.endswith(".csv"):
-        X_train, X_valid, y_train, y_valid = get_wdbc(
-            csv_path=dataset_path,
-            train_size=train_size,
-            shuffle=shuffle,
-            random_state=random_state,
-        )
-    else:
-        raise ValueError(f"Invalid file path: Required npz or csv")
-
+    X_train, X_valid, y_train, y_valid = train_test_split(
+        X=X,
+        y=y,
+        test_size=test_size,
+        shuffle=shuffle,
+        random_state=random_state,
+        stratify=True,
+    )
     return X_train, X_valid, y_train, y_valid
 
 
@@ -281,15 +272,15 @@ def parse_arguments():
     )
     parser.add_argument(
         "--dataset_path",
-        type=validate_extention(["npz", "csv"]),
+        type=validate_extention(["csv"]),
         required=True,
-        help="Path to the train WBDC CSV or NPZ dataset."
+        help="Path to the train WBDC CSV dataset."
     )
     parser.add_argument(
         "--hidden_features",
-        type=int_list_type(min_elements=2, max_elements=5, min_value=2, max_value=200),
+        type=int_list_type(min_elements=2, max_elements=5, min_value=2, max_value=500),
         default=[24, 24],
-        help="Number of neurons in each hidden layer "
+        help="Number of neurons in each hidden layer in range [2, 500]"
              "(2 to 5 values, e.g., "
              "--hidden_features 24 42 or --hidden_features 24 42 24 42 24)"
     )
@@ -302,7 +293,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--learning_rate",
-        type=float_range(0.0001, 1.0),
+        type=float_range(1e-6, 1.0),
         default=0.01,
         help="Learning rate for training "
              "(float in range [0.0001, 1.0], default: 0.01)"

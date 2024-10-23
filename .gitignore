@@ -27,10 +27,10 @@
 !data/data.csv
 
 !config
-!config/**
 
 !requirements.txt
 !pytest.ini
 !Makefile
 !Dockerfile
 !compose.yml
+jupyter_notebook_config.py

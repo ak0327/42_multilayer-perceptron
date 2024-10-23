@@ -61,66 +61,36 @@ def save_to_csv(X: np.ndarray, y: np.ndarray, dir: str, name: str):
         df['diagnosis'] = y
 
         path = f"{dir}/{name}.csv"
-        df.to_csv(path, index=False)
+        df.to_csv(path, index=False, header=False)
         print(f" {name.capitalize()} data saved to {os.path.abspath(path)}")
     except IOError as e:
         raise IOError(f"Failed to save {name} data: {str(e)}")
 
 
-def load_csv(
-        csv_path: str,
-        np: bool = False,
-        apply_normalize: bool = True
-) -> Union[tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series],
-           tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
-    try:
-        df = pd.read_csv(csv_path, header=0)
-        # print(f"Load successd: {csv_path}")
-        # print(f" data shape: {df.shape}")
-        # print(f" data columns: {df.columns}")
-        # print(f" data info: {df.info}")
+def get_ndarray(
+        wdbc_csv_path: str,
+        y_onehot: bool = True,
+        drop_id: bool = True,
+        apply_normalize: bool = False
+) -> tuple[np.ndarray, np.ndarray]:
+    X, y = load_wdbc_data(
+        wdbc_csv_path,
+        y_onehot=y_onehot,
+        drop_id=drop_id,
+        apply_normalize=apply_normalize
+    )
 
-        if 'id' in df.columns or df.shape[1] == 32:
-            # print(f"load_wdbc_data")
-            # 元のデータ形式の場合
-            X, y = load_wdbc_data(csv_path, apply_normalize=apply_normalize)
-        else:
-            # print(f"load saved data")
-            # 保存したデータの場合
-            y = df['diagnosis']
-            X = df.drop('diagnosis', axis=1)
-
-        if np and isinstance(X, pd.DataFrame):
-            X = X.values
-        if np and isinstance(y, pd.DataFrame):
-            y = y.values
-        return X, y
-    except ValueError as e:
-        raise IOError(f"Failed to load {csv_path}: {str(e)}")
+    X = X.to_numpy()
+    y = y.to_numpy()
+    return X, y
 
 
-def load_wdbc_data(
-        csv_path: str,
-        apply_normalize: bool = True
-) -> tuple[pd.DataFrame, pd.Series]:
+def normalize_data(csv_path: str):
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
     df = pd.read_csv(csv_path, header=None)
-    # expected_shape = (569, 32)
-    # if df.shape[1] != expected_shape[1]:
-    #     raise ValueError(f"Invalid data shape. "
-    #                      f"Expected {expected_shape}, but got {df.shape}")
-
-    has_diagnosis_column = False
-    for col in df.columns:
-        if df[col].isin(["M", "B"]).any():
-            has_diagnosis_column = col
-            break
-    if not has_diagnosis_column:
-        raise ValueError("'diagnosis' not found")
-
     columns = ['id', 'diagnosis']
-    # 特徴量の名前リスト
+    # 特徴量
     features = [
         'radius',
         'texture',
@@ -133,7 +103,7 @@ def load_wdbc_data(
         'symmetry',
         'fractal_dimension'
     ]
-    # 統計量の名前リスト
+    # 統計量
     stats = ['mean', 'stderr', 'worst']
 
     for feature, stat in product(features, stats):
@@ -141,17 +111,85 @@ def load_wdbc_data(
 
     df.columns = columns
 
+    feature_columns = [col for col in columns if col not in ['id', 'diagnosis']]
+    df = normalize(df, feature_columns)
+
+    output_path = csv_path.rsplit('.', 1)[0] + '_normalized.csv'
+    df.to_csv(output_path, index=False, header=False, float_format='%.10f')
+
+
+def split_csv(csv_path, train_size: float, shuffle: bool, stratify: bool):
+    X, y = load_wdbc_data(csv_path=csv_path, y_onehot=False, drop_id=False)
+
+    _stratify = None
+    if stratify:
+        _stratify = y
+
+    X_train, X_test, y_train, y_test = dataloader.train_test_split(
+        X=X,
+        y=y,
+        train_size=train_size,
+        shuffle=shuffle,
+        stratify=_stratify,
+    )
+    save_to_csv(X=X_train, y=y_train, dir="../data", name="data_raw_train")
+    save_to_csv(X=X_test, y=y_test, dir="../data", name="data_raw_test")
+
+
+def load_wdbc_data(
+        csv_path: str,
+        y_onehot: bool,
+        drop_id: bool,
+        apply_normalize: bool = True,
+) -> tuple[pd.DataFrame, pd.Series]:
+    if csv_path is None or not os.path.exists(csv_path):
+        raise FileNotFoundError(f"CSV file not found at path: {csv_path}")
+    df = pd.read_csv(csv_path, header=None)
+
+    diagnosis_idx = None
+    for i, col in enumerate(df.columns):
+        if df[col].isin(["M", "B"]).any():
+            diagnosis_idx = i
+            break
+    if diagnosis_idx is None:
+        raise ValueError("'diagnosis' not found")
+
+    y = df[diagnosis_idx].rename('diagnosis')
+    if y_onehot:
+        y = pd.to_numeric(y.map({'M': 1, 'B': 0}), downcast='integer')
+
+    X = df.drop(diagnosis_idx, axis=1)
+
+    columns = ['id']
+    # 特徴量
+    features = [
+        'radius',
+        'texture',
+        'perimeter',
+        'area',
+        'smoothness',
+        'compactness',
+        'concavity',
+        'concavePoints',
+        'symmetry',
+        'fractal_dimension'
+    ]
+    # 統計量
+    stats = ['mean', 'stderr', 'worst']
+
+    for feature, stat in product(features, stats):
+        columns.append(f"{feature}_{stat}")
+
+    X.columns = columns
+
     if apply_normalize:
-        feature_columns = [col for col in columns if col not in ['id', 'diagnosis']]
-        df = normalize(df, feature_columns)
+        feature_columns = [col for col in columns if col not in ['id']]
+        X = normalize(X, feature_columns)
 
-    df = df.drop('id', axis=1)
+    if drop_id:
+        X = X.drop('id', axis=1)
 
-    # ラベルを数値に変換（M -> 1, B -> 0）
-    y = pd.to_numeric(df['diagnosis'].map({'M': 1, 'B': 0}), downcast='integer')
-
-    X = df.drop('diagnosis', axis=1)
-    return X, y
+    return X.astype(np.float64), y
 
 
 def save_training_result(

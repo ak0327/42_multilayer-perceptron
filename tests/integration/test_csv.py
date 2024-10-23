@@ -6,17 +6,15 @@ def _run_dataloader():
     sys.argv = [
         'dataloader.py',
         '--dataset_path',   'data/data.csv',
-        '--train_size',     '0.8',
+        '--test_size',      '0.2',
         '--shuffle',        'true',
-        '--save_npz',       'false',
         '--save_dir',       'data',
     ]
     args = dataloader.parse_arguments()
     _, _, _, _ = dataloader.main(
         csv_path=args.dataset_path,
-        train_size=args.train_size,
+        test_size=args.test_size,
         shuffle=args.shuffle,
-        save_npz=args.save_npz,
         save_dir=args.save_dir,
         random_state=42
     )
