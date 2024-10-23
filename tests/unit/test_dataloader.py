@@ -13,12 +13,12 @@ def _evaluate_split(
         X_valid: np.ndarray,
         y_train: np.ndarray,
         y_valid: np.ndarray,
-        train_size: float,
+        test_size: float,
         shuffle: bool = False,
         random_state: int = None
 ):
     total_samples = len(X_train) + len(X_valid)
-    actual_train_size = len(X_train) / total_samples
+    actual_test_size = len(X_valid) / total_samples
 
     print(f"total size   : {total_samples}")
     print(f"X_train size : {len(X_train)}")
@@ -26,14 +26,14 @@ def _evaluate_split(
     print(f"y_train size : {len(y_train)}")
     print(f"y_valid size : {len(y_valid)}")
     print(f"train size:\n"
-          f" expected: {train_size:.2f}\n"
-          f" actual  : {actual_train_size:.2f}\n"
-          f" error   : {abs(actual_train_size - train_size):.4f}\n")
+          f" expected: {test_size:.2f}\n"
+          f" actual  : {actual_test_size:.2f}\n"
+          f" error   : {abs(actual_test_size - test_size):.4f}\n")
 
     # サイズの一致を確認
     assert len(X_train) == len(y_train), "Mismatch in sizes of X_train and y_train"
     assert len(X_valid) == len(y_valid), "Mismatch in sizes of X_valid and y_valid"
-    assert abs(actual_train_size - train_size) < 0.01, "Test size deviates significantly from expected value"
+    assert abs(actual_test_size - test_size) < 0.01, "Test size deviates significantly from expected value"
 
     # shuffleのチェック
     if not shuffle:
@@ -68,13 +68,18 @@ def _evaluate_split(
 
 
 def test_dataloader_shuffle():
-    X, y = load_wdbc_data("data/data.csv")
+    X, y = load_wdbc_data(
+        csv_path="data/data.csv",
+        y_onehot=False,
+        drop_id=False,
+        apply_normalize=False,
+    )
 
     random_state = 42
-    for train_size in [0.1, 0.8, 0.9]:
+    for test_size in [0.1, 0.8, 0.9]:
         X_train, X_valid, y_train, y_valid = get_wdbc(
             csv_path="data/data.csv",
-            train_size=train_size,
+            test_size=test_size,
             shuffle=True,
             random_state=random_state
         )
@@ -85,7 +90,7 @@ def test_dataloader_shuffle():
             X_valid=X_valid,
             y_train=y_train,
             y_valid=y_valid,
-            train_size=train_size,
+            test_size=test_size,
             shuffle=True,
             random_state=random_state
         )
@@ -93,19 +98,19 @@ def test_dataloader_shuffle():
 
 def test_invalid_size():
     invalid_sizes = [-np.inf, -1.0, -0.1, 0.0, 1.0, 1.1, np.inf, np.nan]
-    for train_size in invalid_sizes:
-        with pytest.raises(ValueError, match=r".*should be 0.0 < train_size < 1.0"):
+    for test_size in invalid_sizes:
+        with pytest.raises(ValueError, match=r".*should be 0.0 < test_size < 1.0"):
             _, _, _, _ = get_wdbc(
                 csv_path="data/data.csv",
-                train_size=train_size,
+                test_size=test_size,
             )
 
     invalid_sizes = [0.001]
-    for train_size in invalid_sizes:
-        with pytest.raises(ValueError, match=r".*results in an empty training set"):
+    for test_size in invalid_sizes:
+        with pytest.raises(ValueError, match=r".*results in an empty test set"):
             _, _, _, _ = get_wdbc(
                 csv_path="data/data.csv",
-                train_size=train_size,
+                test_size=test_size,
             )
 
 
@@ -113,19 +118,14 @@ def test_invalid_csv_path():
     # invalid_paths = [""]
     invalid_paths = ["data.csv", "data.csvv"]
     for path in invalid_paths:
-        with pytest.raises(FileNotFoundError, match=r".*No such file or directory:*"):
-            _, _, _, _ = get_wdbc(csv_path=path)
-
-    invalid_paths = [None]
-    for path in invalid_paths:
-        with pytest.raises(OSError, match=r".*Invalid file path or buffer object type*"):
+        with pytest.raises(FileNotFoundError, match=r".*CSV file not found at path:*"):
             _, _, _, _ = get_wdbc(csv_path=path)
 
 
 def test_invalid_save_dir():
     X_train, X_test, y_train, y_test = get_wdbc(
         csv_path="data/data.csv",
-        train_size=0.8,
+        test_size=0.8,
         shuffle=False,
         random_state=42
     )

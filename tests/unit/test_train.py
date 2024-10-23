@@ -18,7 +18,7 @@ from srcs.modules.optimizer import (
 from srcs.modules.layer import Dense
 from srcs.modules.model import Sequential
 from srcs.dataloader import get_wdbc
-from srcs.train import train_model, create_model
+from srcs.train import train_model, create_model, _get_train_data
 
 
 np.random.seed(34)
@@ -51,7 +51,7 @@ def _get_mnist():
 def test_wdbc():
     seed = 42
 
-    X_train, X_valid, t_train, t_valid = get_wdbc(csv_path="data/data.csv")
+    X_train, X_valid, t_train, t_valid = _get_train_data(dataset_path="data/data.csv")
 
     net = create_model(
         features=[30, 50, 50, 2],

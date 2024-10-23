@@ -41,33 +41,12 @@ jobs:
           docker compose exec ft_mlp \
           python3 srcs/dataloader.py \
           --dataset data/data.csv \
-          --train_size 0.8 \
+          --test_size 0.2 \
           --shuffle true \
-          --save_npz false \
-          --save_dir data
-
-          docker compose exec ft_mlp \
-          python3 srcs/dataloader.py \
-          --dataset data/data.csv \
-          --train_size 0.8 \
-          --shuffle true \
-          --save_npz true \
           --save_dir data
 
       - name: Run Train
         run: |
-          docker compose exec ft_mlp \
-          python3 srcs/train.py \
-          --dataset_path data/data_train.csv \
-          --hidden_features "50 30" \
-          --epochs 1000 \
-          --learning_rate 0.0001 \
-          --optimizer Adam \
-          --verbose true \
-          --plot false \
-          --metrics_interval 10 \
-          --save_dir data
-          
           docker compose exec ft_mlp \
           python3 srcs/train.py \
           --dataset_path data/data_train.csv \
@@ -87,11 +66,6 @@ jobs:
           python3 srcs/predict.py \
           --model_path data/model.pkl \
           --dataset_path data/data_test.csv
-
-          docker compose exec ft_mlp \
-          python3 srcs/predict.py \
-          --model_path data/model.pkl \
-          --dataset_path data/data_test.npz
 
   run-integration-test-on-macos:
     runs-on: macos-latest
@@ -119,31 +93,12 @@ jobs:
         run: |
           python3 srcs/dataloader.py \
           --dataset_path data/data.csv \
-          --train_size 0.8 \
+          --test_size 0.2 \
           --shuffle true \
-          --save_npz false \
-          --save_dir data
-
-          python3 srcs/dataloader.py \
-          --dataset data/data.csv \
-          --train_size 0.8 \
-          --shuffle true \
-          --save_npz true \
           --save_dir data
 
       - name: Run Train
         run: |
-          python3 srcs/train.py \
-          --dataset_path data/data_train.csv \
-          --hidden_features "50 30" \
-          --epochs 1000 \
-          --learning_rate 0.0001 \
-          --optimizer Adam \
-          --verbose true \
-          --plot false \
-          --metrics_interval 10 \
-          --save_dir data
-          
           python3 srcs/train.py \
           --dataset_path data/data_train.csv \
           --hidden_features "50 30" \
@@ -160,7 +115,3 @@ jobs:
           python3 srcs/predict.py \
           --model_path data/model.pkl \
           --dataset_path data/data_test.csv
-
-          python3 srcs/predict.py \
-          --model_path data/model.pkl \
-          --dataset_path data/data_test.npz

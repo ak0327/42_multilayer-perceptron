@@ -17,7 +17,6 @@ from srcs.modules.parser import (
     validate_extention,
     valid_dir,
 )
-from srcs.evaluation import evaluate_class_distribution
 
 
 def _stratified_split(
