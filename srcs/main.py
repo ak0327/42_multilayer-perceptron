@@ -46,7 +46,6 @@ def run_train():
     args = train.parse_arguments()
     train.main(
         dataset_path=args.dataset_path,
-        # dataset_path=args.dataset_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         learning_rate=args.learning_rate,

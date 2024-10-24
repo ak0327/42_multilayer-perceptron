@@ -45,9 +45,10 @@ def train_model(
         save_dir: str = "data",
         name: str = "MNIST"
 ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
-    print(f" Training {name}...")
-    print(f"  X_train shape: {X_train.shape}")
-    print(f"  X_valid shape: {X_valid.shape}\n")
+    if verbose:
+        print(f" Training {name}...")
+        print(f"  X_train shape: {X_train.shape}")
+        print(f"  X_valid shape: {X_valid.shape}\n")
 
     iterations = []
     train_losses = []
@@ -113,10 +114,11 @@ def train_model(
     y_valid = model.forward(X_valid)
     valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
 
-    print(f"\n"
-          f" Metrics: \n"
-          f"  Train - loss:{train_losses[-1]:.4f} [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
-          f"  Valid - loss:{valid_losses[-1]:.4f} [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
+    if verbose:
+        print(f"\n"
+              f" Metrics: \n"
+              f"  Train - loss:{train_losses[-1]:.4f} [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+              f"  Valid - loss:{valid_losses[-1]:.4f} [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
 
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 

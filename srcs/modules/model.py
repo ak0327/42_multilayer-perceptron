@@ -6,7 +6,7 @@ from srcs.modules.activation import ReLU
 from srcs.modules.loss import CrossEntropyLoss
 from srcs.modules.optimizer import Optimizer
 from srcs.modules.init import he_normal
-from srcs.modules.layer import Affine, Dense, Linear
+from srcs.modules.layer import Dense, Linear
 from srcs.modules.metrics import accuracy_score
 
 
