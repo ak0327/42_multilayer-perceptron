@@ -2,38 +2,7 @@ import numpy as np
 from srcs.modules.functions import Softmax, numerical_gradient
 from srcs.modules.activation import ReLU
 from srcs.modules.optimizer import Optimizer
-from srcs.modules.init import he_normal
-
-
-class Affine:
-    def __init__(self, W, b):
-        self.W: np.ndarray = W
-        self.b: np.ndarray = b
-
-        self.x: Optional[np.ndarray] = None
-        self.x_shape = None
-
-        self.dW: Optional[np.ndarray] = None
-        self.db: Optional[np.ndarray] = None
-
-    def __call__(self, x):
-        return self.forward(x)
-
-    def forward(self, x):
-        self.x_shape = x.shape
-        x = x.reshape(x.shape[0], -1)
-        self.x = x
-
-        out = np.dot(self.x, self.W) + self.b
-        return out
-
-    def backward(self, dout):
-        dx = np.dot(dout, self.W.T)
-        self.dW = np.dot(self.x.T, dout)
-        self.db = np.sum(dout, axis=0)
-
-        dx = dx.reshape(*self.x_shape)
-        return dx
+from srcs.modules.init import he_normal, normal
 
 
 class Linear:
@@ -41,13 +10,18 @@ class Linear:
             self,
             in_features: int,
             out_features: int,
-            init_method: callable = he_normal,
+            init_method: callable,
             seed: int = 42,
+            init_std: float | None = None,
     ):
         self.in_features = in_features
         self.out_features = out_features
 
-        self.W: np.ndarray = init_method(in_features=in_features, out_features=out_features, seed=seed)
+        if init_method == normal:
+            self.W: np.ndarray = init_method(in_features=in_features, out_features=out_features, std=init_std, seed=seed)
+        else:
+            self.W: np.ndarray = init_method(in_features=in_features, out_features=out_features, seed=seed)
+
         self.b: np.ndarray = np.zeros(out_features)
 
         self.x: Optional[np.ndarray] = None
@@ -106,7 +80,8 @@ class Dense:
             in_features: int,
             out_features: int,
             activation: callable,
-            init_method: callable = he_normal,
+            init_method: callable,
+            init_std: float | None = None,
             seed: int = 42,
     ):
         self.linear = Linear(

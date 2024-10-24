@@ -126,6 +126,9 @@ def create_model(
         learning_rate: float,
         weight_decay: float = 0.0,
         optimp_str: str = "SGD",
+        seed: float = 42,
+        hidden_init_method: callable = he_normal,
+        init_std: float | None = None,
 ):
     if len(features) < 3:
         raise ValueError(f"features must larger than 3")
@@ -137,7 +140,7 @@ def create_model(
         _out_features = features[i + 1]
         if i < _last_layer_idx:
             _activation = ReLU
-            _init_method = he_normal
+            _init_method = hidden_init_method
         else:
             _activation = Softmax
             _init_method = xavier_normal
@@ -146,7 +149,9 @@ def create_model(
                 in_features=_in_features,
                 out_features=_out_features,
                 activation=_activation,
-                init_method=_init_method
+                init_method=_init_method,
+                init_std=init_std,
+                seed=seed,
             )
         )
 
@@ -215,12 +220,17 @@ def main(
         WDBC_INPUT = 30
         WDBC_OUTPUT = 2
         features = [WDBC_INPUT] + hidden_features + [WDBC_OUTPUT]
+        hidden_init = normal
+        init_std = None
 
         model = create_model(
             features=features,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             optimp_str=optimp_str,
+            seed=None,
+            hidden_init_method=normal,
+            init_std=init_std,
         )
         if verbose:
             print(f"\n{model.info}")
