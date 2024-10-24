@@ -78,19 +78,20 @@ def train_model(
         # 重みパラメーター更新
         model.update_params()
 
+        # メトリクスを計算・格納
+        train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
+
+        y_valid = model.forward(X_valid)
+        valid_loss = model.loss(y_valid, t_valid)
+        valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
+
+        iterations.append(epoch)
+        train_losses.append(train_loss)
+        train_accs.append(train_acc)
+        valid_losses.append(valid_loss)
+        valid_accs.append(valid_acc)
+
         if epoch % metrics_interval == 0 or epoch + 1 == iters_num:
-            # メトリクスを計算　格納
-            train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
-            y_valid = model.forward(X_valid)
-            valid_loss = model.loss(y_valid, t_valid)
-            valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
-
-            iterations.append(epoch)
-            train_losses.append(train_loss)
-            train_accs.append(train_acc)
-            valid_losses.append(valid_loss)
-            valid_accs.append(valid_acc)
-
             if verbose:
                 print(f'  Epoch:{epoch:>4}/{iters_num}, '
                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
