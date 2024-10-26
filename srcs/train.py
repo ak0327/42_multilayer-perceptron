@@ -130,7 +130,7 @@ def create_model(
         weight_decay: float = 0.0,
         optimp_str: str = "SGD",
         seed: float = 42,
-        hidden_init_method: callable = he_normal,
+        hidden_init_method: callable = normal,
         init_std: float | None = None,
 ):
     if len(features) < 3:
@@ -224,7 +224,7 @@ def main(
         WDBC_OUTPUT = 2
         features = [WDBC_INPUT] + hidden_features + [WDBC_OUTPUT]
         hidden_init = normal
-        init_std = None
+        init_std = 0.01
 
         model = create_model(
             features=features,
@@ -232,7 +232,7 @@ def main(
             weight_decay=weight_decay,
             optimp_str=optimp_str,
             seed=None,
-            hidden_init_method=normal,
+            hidden_init_method=hidden_init,
             init_std=init_std,
         )
         if verbose:

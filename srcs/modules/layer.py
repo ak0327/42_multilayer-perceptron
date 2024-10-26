@@ -88,6 +88,7 @@ class Dense:
             in_features=in_features,
             out_features=out_features,
             init_method=init_method,
+            init_std=init_std,
             seed=seed
         )
 
