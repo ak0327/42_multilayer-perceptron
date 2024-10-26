@@ -34,14 +34,15 @@ def run_train():
     sys.argv = [
         'train.py',
         '--dataset_path',       'data/data_train.csv',
-        '--hidden_features',    '10 2',
-        '--epochs',             '4000',
+        '--hidden_features',    '29 23',
+        '--epochs',             '2000',
         '--learning_rate',      '1e-4',
         '--optimizer',          'Adam',
         '--verbose',            'true',
         '--plot',               'true',
         '--metrics_interval',   '100',
         '--save_dir',           'data',
+        '--patience',           '250',
     ]
     args = train.parse_arguments()
     train.main(
