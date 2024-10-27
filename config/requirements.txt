@@ -5,8 +5,9 @@ numpy
 pandas
 tqdm
 
-tensorflow
-keras
-pytest
-scikit-learn
-torch
+## For Test ################
+# tensorflow
+# keras
+# pytest
+# scikit-learn
+# torch
