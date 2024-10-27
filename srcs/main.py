@@ -8,8 +8,8 @@ import random
 import numpy as np
 
 
-random.seed(42)
-np.random.seed(42)
+# random.seed(42)
+# np.random.seed(42)
 
 
 def run_dataloader():
@@ -17,7 +17,7 @@ def run_dataloader():
         'dataloader.py',
         '--dataset_path',   'data/data.csv',
         '--test_size',      '0.3',
-        '--shuffle',        'true',
+        '--shuffle',        'false',
         '--save_dir',       'data',
     ]
     args = dataloader.parse_arguments()
@@ -34,19 +34,19 @@ def run_train():
     sys.argv = [
         'train.py',
         '--dataset_path',       'data/data_train.csv',
-        '--hidden_features',    '10 2',
-        '--epochs',             '4000',
+        '--hidden_features',    '29 23',
+        '--epochs',             '2000',
         '--learning_rate',      '1e-4',
         '--optimizer',          'Adam',
         '--verbose',            'true',
         '--plot',               'true',
         '--metrics_interval',   '100',
         '--save_dir',           'data',
+        '--patience',           '250',
     ]
     args = train.parse_arguments()
     train.main(
         dataset_path=args.dataset_path,
-        # dataset_path=args.dataset_path,
         hidden_features=args.hidden_features,
         epochs=args.epochs,
         learning_rate=args.learning_rate,

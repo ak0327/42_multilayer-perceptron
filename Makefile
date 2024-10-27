@@ -64,5 +64,5 @@ clean:
 	docker compose down --rmi all
 
 .PHONY: fclean
-fclean:
+fclean: clean
 	docker system prune -a

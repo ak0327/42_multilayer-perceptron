@@ -13,10 +13,8 @@ def he_normal(in_features: int, out_features: int, seed: int = None) -> np.ndarr
     if in_features == 0:
         raise ValueError("Input dimension cannot be zero.")
 
-    if seed is not None:
-        np.random.seed(seed)
-
-    return np.random.randn(in_features, out_features) * np.sqrt(2.0 / in_features)
+    rng = np.random.RandomState(seed)
+    return rng.randn(in_features, out_features) * np.sqrt(2.0 / in_features)
 
 
 def xavier_normal(in_features: int, out_features: int, seed: int = None) -> np.ndarray:
@@ -31,10 +29,8 @@ def xavier_normal(in_features: int, out_features: int, seed: int = None) -> np.n
     if in_features == 0:
         raise ValueError("Input dimension cannot be zero.")
 
-    if seed is not None:
-        np.random.seed(seed)
-
-    return np.random.randn(in_features, out_features) * np.sqrt(1.0 / in_features)
+    rng = np.random.RandomState(seed)
+    return rng.randn(in_features, out_features) * np.sqrt(1.0 / in_features)
 
 
 def normal(in_features: int, out_features: int, std: float = 0.01, seed: int = None) -> np.ndarray:
@@ -46,12 +42,12 @@ def normal(in_features: int, out_features: int, std: float = 0.01, seed: int = N
     :param std: Standard deviation of the normal distribution. Default is 0.01.
     :returns: Initialized weights.
     """
+    if std is None:
+        std = 0.01
     if in_features == 0:
         raise ValueError("Input dimension cannot be zero.")
     if std < 0:
         raise ValueError("Standard deviation must be non-negative.")
 
-    if seed is not None:
-        np.random.seed(seed)
-
-    return np.random.randn(in_features, out_features) * std
+    rng = np.random.RandomState(seed)
+    return rng.randn(in_features, out_features) * std

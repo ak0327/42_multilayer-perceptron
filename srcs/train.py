@@ -45,9 +45,10 @@ def train_model(
         save_dir: str = "data",
         name: str = "MNIST"
 ) -> tuple[list[int], list[float], list[float], list[float], list[float]]:
-    print(f" Training {name}...")
-    print(f"  X_train shape: {X_train.shape}")
-    print(f"  X_valid shape: {X_valid.shape}\n")
+    if verbose:
+        print(f" Training {name}...")
+        print(f"  X_train shape: {X_train.shape}")
+        print(f"  X_valid shape: {X_valid.shape}\n")
 
     iterations = []
     train_losses = []
@@ -77,19 +78,20 @@ def train_model(
         # 重みパラメーター更新
         model.update_params()
 
+        # メトリクスを計算・格納
+        train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
+
+        y_valid = model.forward(X_valid)
+        valid_loss = model.loss(y_valid, t_valid)
+        valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
+
+        iterations.append(epoch)
+        train_losses.append(train_loss)
+        train_accs.append(train_acc)
+        valid_losses.append(valid_loss)
+        valid_accs.append(valid_acc)
+
         if epoch % metrics_interval == 0 or epoch + 1 == iters_num:
-            # メトリクスを計算　格納
-            train_acc = accuracy_score(y_true=t_train, y_pred=y_train)
-            y_valid = model.forward(X_valid)
-            valid_loss = model.loss(y_valid, t_valid)
-            valid_acc = accuracy_score(y_true=t_valid, y_pred=y_valid)
-
-            iterations.append(epoch)
-            train_losses.append(train_loss)
-            train_accs.append(train_acc)
-            valid_losses.append(valid_loss)
-            valid_accs.append(valid_acc)
-
             if verbose:
                 print(f'  Epoch:{epoch:>4}/{iters_num}, '
                       f'Train [Loss:{train_loss:.4f}, Acc:{train_acc:.4f}], '
@@ -113,10 +115,11 @@ def train_model(
     y_valid = model.forward(X_valid)
     valid_acc, valid_prec, valid_recall, valid_f1 = get_metrics(y_valid, t_valid)
 
-    print(f"\n"
-          f" Metrics: \n"
-          f"  Train - loss:{train_losses[-1]:.4f} [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
-          f"  Valid - loss:{valid_losses[-1]:.4f} [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
+    if verbose:
+        print(f"\n"
+              f" Metrics: \n"
+              f"  Train - loss:{train_losses[-1]:.4f} [Accuracy:{train_acc:.4f}, Precision:{train_prec:.4f}, Recall:{train_recall:.4f}, F1:{train_f1:.4f}]\n"
+              f"  Valid - loss:{valid_losses[-1]:.4f} [Accuracy:{valid_acc:.4f}, Precision:{valid_prec:.4f}, Recall:{valid_recall:.4f}, F1:{valid_f1:.4f}]\n")
 
     return iterations, train_losses, train_accs, valid_losses, valid_accs
 
@@ -126,6 +129,9 @@ def create_model(
         learning_rate: float,
         weight_decay: float = 0.0,
         optimp_str: str = "SGD",
+        seed: float = 42,
+        hidden_init_method: callable = normal,
+        init_std: float | None = None,
 ):
     if len(features) < 3:
         raise ValueError(f"features must larger than 3")
@@ -137,7 +143,7 @@ def create_model(
         _out_features = features[i + 1]
         if i < _last_layer_idx:
             _activation = ReLU
-            _init_method = he_normal
+            _init_method = hidden_init_method
         else:
             _activation = Softmax
             _init_method = xavier_normal
@@ -146,7 +152,9 @@ def create_model(
                 in_features=_in_features,
                 out_features=_out_features,
                 activation=_activation,
-                init_method=_init_method
+                init_method=_init_method,
+                init_std=init_std,
+                seed=seed,
             )
         )
 
@@ -215,12 +223,17 @@ def main(
         WDBC_INPUT = 30
         WDBC_OUTPUT = 2
         features = [WDBC_INPUT] + hidden_features + [WDBC_OUTPUT]
+        hidden_init = normal
+        init_std = 0.01
 
         model = create_model(
             features=features,
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             optimp_str=optimp_str,
+            seed=None,
+            hidden_init_method=hidden_init,
+            init_std=init_std,
         )
         if verbose:
             print(f"\n{model.info}")
