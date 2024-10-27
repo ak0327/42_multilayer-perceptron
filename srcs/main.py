@@ -8,8 +8,8 @@ import random
 import numpy as np
 
 
-random.seed(42)
-np.random.seed(42)
+# random.seed(42)
+# np.random.seed(42)
 
 
 def run_dataloader():
@@ -17,7 +17,7 @@ def run_dataloader():
         'dataloader.py',
         '--dataset_path',   'data/data.csv',
         '--test_size',      '0.3',
-        '--shuffle',        'true',
+        '--shuffle',        'false',
         '--save_dir',       'data',
     ]
     args = dataloader.parse_arguments()

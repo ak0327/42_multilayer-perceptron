@@ -103,6 +103,19 @@ $ docker compose exec ft_mlp \
 	--plot true \
 	--metrics_interval 100 \
 	--save_dir data
+
+$ docker compose exec ft_mlp \
+  python3 srcs/train.py \
+	--dataset_path data/data_train.csv \
+	--hidden_features "29 23" \
+	--epochs 2000 \
+	--learning_rate 1e-4 \
+	--optimizer Adam \
+	--verbose true \
+	--plot true \
+	--metrics_interval 100 \
+	--patience 250 \
+	--save_dir data
 ```
 
 ### iv) Predict
