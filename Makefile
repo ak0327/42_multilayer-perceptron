@@ -30,7 +30,7 @@ dataloader:
 	docker compose exec ft_mlp \
 	python3 srcs/dataloader.py \
 	--dataset_path data/data.csv \
-	--test_size 0.2 \
+	--test_size 0.3 \
 	--shuffle true \
 	--save_dir data
 
@@ -39,13 +39,14 @@ train:
 	docker compose exec ft_mlp \
 	python3 srcs/train.py \
 	--dataset_path data/data_train.csv \
-	--hidden_features "10 2" \
-	--epochs 4000 \
+	--hidden_features "29 23" \
+	--epochs 2000 \
 	--learning_rate 1e-4 \
 	--optimizer Adam \
 	--verbose true \
-	--plot false \
+	--plot true \
 	--metrics_interval 100 \
+	--patience 250 \
 	--save_dir data
 
 .PHONY: predict
