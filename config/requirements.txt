@@ -6,8 +6,8 @@ pandas
 tqdm
 
 ## For Test ################
-# tensorflow
-# keras
-# pytest
-# scikit-learn
-# torch
+tensorflow
+keras
+pytest
+scikit-learn
+torch
