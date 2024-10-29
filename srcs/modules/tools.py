@@ -31,7 +31,7 @@ class EarlyStopping:
         self.patience = max(0, patience)
         self.verbose = verbose
         self.counter = 0
-        self.prev_loss = np.Inf
+        self.prev_loss = np.inf
         self.early_stop = False
         self.best_model = None
 
