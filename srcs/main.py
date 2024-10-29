@@ -7,8 +7,10 @@ from srcs import dataloader, train, predict
 import random
 import numpy as np
 
-
+## For review ---------
+# from evaluation import splitDataset
 # random.seed(42)
+## --------------------
 # np.random.seed(42)
 
 
@@ -76,6 +78,9 @@ def run_predict():
 def main():
     try:
         run_dataloader()
+        # filepath = './data/data.csv'
+        # splitDataset(filepath, cut=0.25, label=False, shuffle=True)
+
         run_train()
         run_predict()
 
