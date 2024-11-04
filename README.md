@@ -53,6 +53,22 @@ $ docker compose exec ft_mlp \
 	--test_size 0.2 \
 	--shuffle true \
 	--save_dir data
+
+# [Dataloader]
+#  Dataset: data/data.csv
+#   Splitting...
+#
+# train set:
+#   B: 250 (62.7%)
+#   M: 149 (37.3%)
+# 
+# test set:
+#   B: 107 (62.9%)
+#   M: 63 (37.1%)
+#   Split dataset SUCCESS
+# 
+#  Data_train data saved to /app/data/data_train.csv
+#  Data_test data saved to /app/data/data_test.csv
 ```
 
 ### iii) Train
@@ -95,18 +111,6 @@ or
 $ docker compose exec ft_mlp \
   python3 srcs/train.py \
 	--dataset_path data/data_train.csv \
-	--hidden_features "10 2" \
-	--epochs 4000 \
-	--learning_rate 1e-4 \
-	--optimizer Adam \
-	--verbose true \
-	--plot true \
-	--metrics_interval 100 \
-	--save_dir data
-
-$ docker compose exec ft_mlp \
-  python3 srcs/train.py \
-	--dataset_path data/data_train.csv \
 	--hidden_features "29 23" \
 	--epochs 2000 \
 	--learning_rate 1e-4 \
@@ -116,6 +120,49 @@ $ docker compose exec ft_mlp \
 	--metrics_interval 100 \
 	--patience 250 \
 	--save_dir data
+
+# [Train]
+#  Dataset: data/data_train.csv
+# 
+#  MODEL:
+#    Sequential(
+#      (0): Linear(in_features=30, out_features=29)
+#      (1): ReLU()
+#      (2): Linear(in_features=29, out_features=23)
+#      (3): ReLU()
+#      (4): Linear(in_features=23, out_features=2)
+#      (5): Softmax()
+#    )
+#  OPTIMIZER: Adam(lr=0.0001, beta1=0.9, beta2=0.999)
+#  CRITERIA : CrossEntropyLoss()
+# 
+#  Training WDBC...
+#   X_train shape: (280, 30)
+#   X_valid shape: (119, 30)
+# 
+#   Epoch:   0/2000, Train [Loss:0.6926, Acc:0.7500], Valid [Loss:0.6926, Acc:0.8487]
+#   Epoch: 100/2000, Train [Loss:0.6142, Acc:0.9571], Valid [Loss:0.6232, Acc:0.8908]
+#   Epoch: 200/2000, Train [Loss:0.4226, Acc:0.9571], Valid [Loss:0.4561, Acc:0.8908]
+#   Epoch: 300/2000, Train [Loss:0.2618, Acc:0.9607], Valid [Loss:0.3108, Acc:0.9076]
+#   Epoch: 400/2000, Train [Loss:0.1740, Acc:0.9750], Valid [Loss:0.2276, Acc:0.9328]
+#   Epoch: 500/2000, Train [Loss:0.1240, Acc:0.9786], Valid [Loss:0.1806, Acc:0.9580]
+#   Epoch: 600/2000, Train [Loss:0.0940, Acc:0.9821], Valid [Loss:0.1567, Acc:0.9580]
+#   Epoch: 700/2000, Train [Loss:0.0743, Acc:0.9893], Valid [Loss:0.1430, Acc:0.9580]
+#   Epoch: 800/2000, Train [Loss:0.0599, Acc:0.9929], Valid [Loss:0.1347, Acc:0.9748]
+#   Epoch: 900/2000, Train [Loss:0.0490, Acc:0.9929], Valid [Loss:0.1309, Acc:0.9664]
+#   Epoch:1000/2000, Train [Loss:0.0407, Acc:0.9929], Valid [Loss:0.1300, Acc:0.9664]
+#   Epoch:1100/2000, Train [Loss:0.0343, Acc:0.9964], Valid [Loss:0.1307, Acc:0.9664]
+#   Epoch:1200/2000, Train [Loss:0.0291, Acc:0.9964], Valid [Loss:0.1333, Acc:0.9580]
+#   Early Stopping
+# 
+#  Training curve graph save to data/training_curve.png
+# 
+#  Metrics: 
+#   Train - loss:0.0268 [Accuracy:0.9929, Precision:1.0000, Recall:0.9810, F1:0.9904]
+#   Valid - loss:0.1352 [Accuracy:0.9664, Precision:0.9762, Recall:0.9318, F1:0.9535]
+# 
+#  Model data saved to /app/data/model.pkl
+#  Metrics saved to /app/data/metrics.npz
 ```
 
 ### iv) Predict
@@ -143,6 +190,14 @@ $ docker compose exec ft_mlp \
   python3 srcs/predict.py \
 	--model_path data/model.pkl \
 	--dataset_path data/data_test.csv
+	
+# [Predict]
+#  Dataset: data/data_test.csv
+# 
+#  Predicting WDBC...
+#   Result:
+#    - Loss: 0.1179
+#    - Accuracy:0.9588, Precision:0.9375, Recall:0.9524, F1:0.9449
 ```
 
 
