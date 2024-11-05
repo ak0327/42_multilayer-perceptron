@@ -202,7 +202,7 @@ $ docker compose exec ft_mlp \
 
 
 ## 2-3) Detailed Information
-* For more details, please refer to [./notebook/mlp.ipynb](./notebook/review.ipynb)
+* For more details, please refer to [./notebook/review.ipynb](./notebook/review.ipynb)
 * To view in Jupyter Notebook:
   * Run `make notebook`
   * Access `localhost:30000` in your browser on the host machine
