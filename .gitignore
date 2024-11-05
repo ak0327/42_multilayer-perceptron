@@ -1,37 +1,36 @@
 *
 
-!.gitignore
-!.gitkeep
-!.gitattributes
-!README.md
-
 !.github
 !.github/workflows
 !.github/workflows/utest.yml
 !.github/workflows/integration_test.yml
 
-!srcs
-!srcs/modules
-!srcs/**/**.py
+!config
+!config/Dockerfile
+!config/jupyter_notebook_config.py
+!config/requirements.txt
+!config/pytest.ini
 
 !notebook
 !notebook/**.ipynb
 !notebook/img
 !notebook/img/**.png
 
+!srcs
+!srcs/modules
+!srcs/**/**.py
+
+!data
+!data/data.csv
+
 !tests
 !tests/unit
 !tests/integration
 !tests/**/**.py
 
-!data
-!data/data.csv
-
-!config
-
-!requirements.txt
-!pytest.ini
-!Makefile
-!Dockerfile
+!.gitattributes
+!.gitignore
+!.gitkeep
 !compose.yml
-jupyter_notebook_config.py
+!Makefile
+!README.md
