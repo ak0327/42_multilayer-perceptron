@@ -7,11 +7,17 @@ Re-implementation of a multilayer perceptron
 
 <hr>
 
-# 2. How to use
+# 2. Getting started
 ## 2-1) Set up execution environment with Docker Compose
 ```shell
+# Clone
+$ git clone git@github.com:ak0327/42_multilayer-perceptron.git
+$ cd 42_multilayer-perceptron
+
+# Set up execution environment
 $ make
 
+# Check Python version
 $ make info
 Python 3.10.15
 ```
